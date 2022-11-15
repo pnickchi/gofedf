@@ -15,8 +15,11 @@ Releases](https://img.shields.io/github/downloads/jafarilab/PEIMAN2/total.svg?st
 
 <!-- badges: end -->
 
-- Authors:  
-  Richard Lockhart, Payman Nickchi (<pnickchi@sfu.ca>)
+Authors:
+
+- [Payman Nickchi](https://github.com/pnickchi), <pnickchi@sfu.ca>
+  (Maintainer)
+- [Richard Lockhart](http://www.sfu.ca/~lockhart/), <lockhart@sfu.ca>
 
 The GoFTest package provides tools to apply goodness of fit tests based
 on empirical distribution function theory. The software provides

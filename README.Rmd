@@ -18,9 +18,12 @@ knitr::opts_chunk$set(echo = TRUE)
 <!-- badges: end -->
 
 
-- Authors:   
-Richard Lockhart, Payman Nickchi (pnickchi@sfu.ca)
+Authors:
 
+*   [Payman Nickchi](https://github.com/pnickchi),
+    <pnickchi@sfu.ca> (Maintainer)
+*   [Richard Lockhart](http://www.sfu.ca/~lockhart/),
+    <lockhart@sfu.ca>
 
 
 The GoFTest package provides tools to apply goodness of fit tests based on empirical distribution function theory. The software provides functions and routines to test the hypothesis that a sample follows a distribution by calculating Cramer-von Mises or Anderson-Darling statistic and computing the approximate pvalue by Imhof method.
