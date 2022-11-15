@@ -1,0 +1,24 @@
+Package: GoFTest
+Title: Goodness of Fit Tests Based on Empirical Distribution Functions
+Version: 0.1.0
+Authors@R: c(
+ person("Richard", "Lockart", role = c("aut"), email = "lockhart@sfu.ca"),
+ person("Payman", "Nickchi", role = c("aut","cre"), email = "pnickchi@sfu.ca")
+ ) 
+Description: Functions to run goodness of fit test based on empirical distribution functions for univariate normal, univariate gamma distributions, test the normality of residuals in a linear model, and check if error terms follows a Gamma distribution in a generalized linear model.
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.1
+Depends: R (>= 2.10)
+Imports: 
+    stats,
+    CompQuadForm,
+    MASS,
+    glm2
+NeedsCompilation: no
+Author: Richard Lockhart [aut], Payman Nickchi [aut, cre]
+Maintainer: Payman Nickchi <pnickchi@sfu.ca>
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
