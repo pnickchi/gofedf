@@ -15,21 +15,26 @@ Releases](https://img.shields.io/github/downloads/jafarilab/PEIMAN2/total.svg?st
 
 <!-- badges: end -->
 
+- Authors:  
+  Richard Lockhart, Payman Nickchi (<pnickchi@sfu.ca>)
+
 The GoFTest package provides tools to apply goodness of fit tests based
 on empirical distribution function theory. The software provides
 functions and routines to test the hypothesis that a sample follows a
 distribution by calculating Cramer-von Mises or Anderson-Darling
 statistic and computing the approximate pvalue by Imhof method.
 
-The package can be used to test the following:
+The package can be used to apply goodness of fit test in any of the
+following cases:
 
-1)  Goodness of fit test to check if the residuals of a generalized
-    linear model follows Gamma distribution.
-2)  Goodness of fit test to check if the residuals of a linear model
-    follows Normal distribution.
-3)  Apply goodness of fit test for bivariate Normal, Gamma, Exponential.
-4)  Apply goodness of fit test for distributions that are not inclueded
-    in R (distributions defined by
+1)  Check if the residuals of a generalized linear model (with any link)
+    follows the Gamma distribution.
+2)  Check if the residuals of a linear model follows Normal
+    distribution.
+3)  Check if a bivariate continuous set of data follows any specific
+    distribution that is defined by user.
+4)  Apply goodness of fit test for bivariate Normal, Gamma, and
+    Exponential distributions.
 
 ## Installation
 
@@ -48,5 +53,3 @@ devtools::install_github('pnickchi/GoFTest')
 ```
 
 ## Example
-
-To be completed soon.
