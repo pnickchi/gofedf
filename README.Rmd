@@ -55,6 +55,11 @@ devtools::install_github('pnickchi/GoFTest')
 ### Bivariate Normal distribution
 In this example, we show how to apply goodness of fit test over a vector of data and check if the data follows a normal distribution.
 
+```{r, echo = FALSE}
+library(GoFTest)
+```
+
+
 ```{r}
 # Reproducible example
 set.seed(1)

@@ -53,3 +53,120 @@ devtools::install_github('pnickchi/GoFTest')
 ```
 
 ## Example
+
+### Bivariate Normal distribution
+
+In this example, we show how to apply goodness of fit test over a vector
+of data and check if the data follows a normal distribution.
+
+``` r
+# Reproducible example
+set.seed(1)
+
+# Randomly generate some data
+n <- 50
+sim_data <- rnorm(n)
+
+# Test if the data follows a normal distribution, calculate Cramer-von Mises statistic and approximate pvalue
+testNormal(x = sim_data, method = 'cvm')
+```
+
+    ## $Statistic
+    ## [1] 0.06711927
+    ## 
+    ## $pvalue
+    ## [1] 0.2622589
+
+``` r
+# Test if the data follows a normal distribution, calculate Anderson-Darling statistic and approximate pvalue
+testNormal(x = sim_data, method = 'ad')
+```
+
+    ## $Statistic
+    ## [1] 0.4788945
+    ## 
+    ## $pvalue
+    ## [1] 0.1274992
+
+### Bivariate Gamma distribution
+
+In this example, we show how to apply goodness of fit test over a vector
+of data and check if the data follows a Gamma distribution.
+
+``` r
+# Reproducible example
+set.seed(2)
+
+# Randomly generate some data
+n <- 50
+sim_data <- rgamma(n, shape = 3)
+
+# Test if the data follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate pvalue
+testGamma(x = sim_data, method = 'cvm')
+```
+
+    ## $Statistic
+    ## [1] 0.0916967
+    ## 
+    ## $pvalue
+    ## [1] 0.1676796
+
+### Linear model with normal residuals
+
+``` r
+# Reproducible example
+set.seed(3)
+
+# Create a set of explanatory variables and response according to a linear model
+n <- 50
+p <- 5
+X <- matrix( runif(n*p), nrow = n, ncol = p)
+e <- runif(n)
+b <- runif(p)
+y <- X %*% b + e
+
+# Test if the residuals of the model follows a Normal distribution, calculate Cramer-von Mises statistic and approximate pvalue
+testLMNormal(x = X, y)
+```
+
+    ## $Statistic
+    ## [1] 0.07322979
+    ## 
+    ## $pvalue
+    ## [1] 0.1542016
+
+``` r
+# Or alternatively just pass 'myfit' object directly instead of X and y:
+# myfit <- lm(y ~ X - 1, x = TRUE, y = TRUE)
+# testLMNormal(fit = myfit)
+```
+
+### Generalized linear model with Gamma residuals
+
+``` r
+# Reproducible example
+set.seed(4)
+
+
+# Create a set of explanatory variables and response according to a generalized linear model with log link
+n <- 50
+p <- 2
+X <- matrix( rnorm(n*p, mean = 10, sd = 0.1), nrow = n, ncol = p)
+b <- runif(p)
+e <- rgamma(n, shape = 3)
+y <- exp(X %*% b) * e
+
+# Test if the residuals of the model follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate pvalue
+testGLMGamma(x=X, y, l = 'log', method = 'cvm')
+```
+
+    ## $Statistic
+    ## [1] 0.02131014
+    ## 
+    ## $pvalue
+    ## [1] 0.9278594
+    ## 
+    ## $converged
+    ## [1] TRUE
+
+### User defined distributions
