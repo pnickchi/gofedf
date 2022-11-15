@@ -79,4 +79,6 @@ testNormal = function(x, ngrid = length(x), gridpit = FALSE, hessian = FALSE, me
 
   return(res)
 
+  # test
+
 }
