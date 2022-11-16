@@ -203,6 +203,7 @@ The package requires 3 elements to apply GoF for your model:
     ![\theta](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Ctheta "\theta").
 
 ``` r
+set.seed(123)
 n <- 50
 x <- rexp(n)
 
@@ -214,10 +215,10 @@ testYourModel(x, score = score.matrix, Fx = pit, mle = mle.theta)
 ```
 
     ## $Statistic
-    ## [1] 0.1542658
+    ## [1] 0.08503541
     ## 
     ## $pvalue
-    ## [1] 0.1158437
+    ## [1] 0.4519658
 
 ``` r
 # Case two: Two functions are provided to calculate score and pit.
@@ -226,7 +227,7 @@ testYourModel(x, score = expScore, Fx = expFx, mle = mle.theta)
 ```
 
     ## $Statistic
-    ## [1] 0.1542658
+    ## [1] 0.08503541
     ## 
     ## $pvalue
-    ## [1] 0.1158437
+    ## [1] 0.4519658

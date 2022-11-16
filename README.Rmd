@@ -153,6 +153,7 @@ For example, imagine you have a sample of size $n$ such as $x_{1},x_{2},...,x_{n
 3) Maximum likelihood estimate of $\theta$. 
 
 ```{r}
+set.seed(123)
 n <- 50
 x <- rexp(n)
 
