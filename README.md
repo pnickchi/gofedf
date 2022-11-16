@@ -178,8 +178,15 @@ One of the most important features of the package is to allow users to
 apply the goodness of fit test based on empirical distribution functions
 for a user defined distribution. This is helpful when the functions and
 procedures for a distribution is not included in any R packages. For
-example, imagine you have a sample of size n from a model with p unknown
-parameters. The package requires 3 elements to apply GoF for your model:
+example, imagine you have a sample of size
+![n](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;n "n")
+such as
+![x\_{1},x\_{2},...,x\_{n}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;x_%7B1%7D%2Cx_%7B2%7D%2C...%2Cx_%7Bn%7D "x_{1},x_{2},...,x_{n}")
+from a model with
+![p](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;p "p")
+unknown parameters such as
+![\theta](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Ctheta "\theta").
+The package requires 3 elements to apply GoF for your model:
 
 1)  A function to calculate score values for each observation and
     returns a (n x p) matrix. Each rows calculates the score for each
@@ -187,4 +194,39 @@ parameters. The package requires 3 elements to apply GoF for your model:
     matrix which is also acceptable.
 
 2)  A function to calculate probability inverse transformation of data.
-    This is usually a function that returns a vector of n elements.
+    This is usually a function that returns a vector with n elements
+    where each element is
+    ![F^{-1}(x\_{i})](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;F%5E%7B-1%7D%28x_%7Bi%7D%29 "F^{-1}(x_{i})").
+    You can alternatively pass a vector of values as well.
+
+3)  Maximum likelihood estimate of
+    ![\theta](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Ctheta "\theta").
+
+``` r
+n <- 50
+x <- rexp(n)
+
+# Case one: score matrix and pit values are provided.
+mle.theta     <- expMLE(x)
+score.matrix  <- expScore(x, theta = mle.theta)
+pit           <- expFx(x, theta = mle.theta)
+testYourModel(x, score = score.matrix, Fx = pit, mle = mle.theta)
+```
+
+    ## $Statistic
+    ## [1] 0.1542658
+    ## 
+    ## $pvalue
+    ## [1] 0.1158437
+
+``` r
+# Case two: Two functions are provided to calculate score and pit.
+mle.theta     <- expMLE(x)
+testYourModel(x, score = expScore, Fx = expFx, mle = mle.theta)
+```
+
+    ## $Statistic
+    ## [1] 0.1542658
+    ## 
+    ## $pvalue
+    ## [1] 0.1158437
