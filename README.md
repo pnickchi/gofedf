@@ -182,9 +182,9 @@ example, imagine you have a sample of size n from a model with p unknown
 parameters. The package requires 3 elements to apply GoF for your model:
 
 1)  A function to calculate score values for each observation and
-    returns a nxp matrix. Each rows calculates the score for each
+    returns a (n x p) matrix. Each rows calculates the score for each
     observation. Alternatively you might have the score values as a
-    matrix.
+    matrix which is also acceptable.
 
 2)  A function to calculate probability inverse transformation of data.
     This is usually a function that returns a vector of n elements.

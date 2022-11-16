@@ -144,9 +144,28 @@ testGLMGamma(x=X, y, l = 'log', method = 'cvm')
 ### User defined distributions
 
 One of the most important features of the package is to allow users to apply the goodness of fit test based on empirical distribution functions for a user defined distribution. This is helpful when the functions and procedures for a distribution is not included in any R packages. 
-For example, imagine you have a sample of size n from a model with p unknown parameters. The package requires 3 elements to apply GoF for your model:
+For example, imagine you have a sample of size $n$ such as $x_{1},x_{2},...,x_{n}$ from a model with $p$ unknown parameters such as $\theta$. The package requires 3 elements to apply GoF for your model:
 
-1) A function to calculate score values for each observation and returns a nxp matrix. Each rows calculates the score for each observation. Alternatively you might have the score values as a matrix.    
+1) A function to calculate score values for each observation and returns a (n x p) matrix. Each rows calculates the score for each observation. Alternatively you might have the score values as a matrix which is also acceptable.     
 
-2) A function to calculate probability inverse transformation of data. This is usually a function that returns a vector of n elements. 
+2) A function to calculate probability inverse transformation of data. This is usually a function that returns a vector with n elements where each element is $F^{-1}(x_{i})$. You can alternatively pass a vector of values as well.
+
+3) Maximum likelihood estimate of $\theta$. 
+
+```{r}
+n <- 50
+x <- rexp(n)
+
+# Case one: score matrix and pit values are provided.
+mle.theta     <- expMLE(x)
+score.matrix  <- expScore(x, theta = mle.theta)
+pit           <- expFx(x, theta = mle.theta)
+testYourModel(x, score = score.matrix, Fx = pit, mle = mle.theta)
+
+
+# Case two: Two functions are provided to calculate score and pit.
+mle.theta     <- expMLE(x)
+testYourModel(x, score = expScore, Fx = expFx, mle = mle.theta)
+```
+
 
