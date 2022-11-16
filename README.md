@@ -1,6 +1,6 @@
 README
 ================
-2022-11-14
+2022-11-15
 
 # GoFTest
 
@@ -173,3 +173,18 @@ testGLMGamma(x=X, y, l = 'log', method = 'cvm')
     ## [1] TRUE
 
 ### User defined distributions
+
+One of the most important features of the package is to allow users to
+apply the goodness of fit test based on empirical distribution functions
+for a user defined distribution. This is helpful when the functions and
+procedures for a distribution is not included in any R packages. For
+example, imagine you have a sample of size n from a model with p unknown
+parameters. The package requires 3 elements to apply GoF for your model:
+
+1)  A function to calculate score values for each observation and
+    returns a nxp matrix. Each rows calculates the score for each
+    observation. Alternatively you might have the score values as a
+    matrix.
+
+2)  A function to calculate probability inverse transformation of data.
+    This is usually a function that returns a vector of n elements.
