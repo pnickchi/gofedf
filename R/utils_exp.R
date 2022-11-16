@@ -8,7 +8,7 @@
 #'
 expFx = function(x, theta){
 
-  if( x > 0){
+  if( all(x > 0) ){
     res <- 1 - exp(-theta*x)
   }else{
     res <- 0
