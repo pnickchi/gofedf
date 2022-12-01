@@ -6,12 +6,9 @@ README
 
 <!-- badges: start -->
 
-[![CRAN
-status](https://www.r-pkg.org/badges/version/PEIMAN2)](https://cran.r-project.org/package=PEIMAN2)
-[![GitHub
-Release](https://img.shields.io/github/release/jafarilab/PEIMAN2?style=flat)](https://github.com/jafarilab/PEIMAN2/releases)
-[![Github All
-Releases](https://img.shields.io/github/downloads/jafarilab/PEIMAN2/total.svg?style=flat)](https://github.com/jafarilab/PEIMAN2)
+[![CRANstatus](https://www.r-pkg.org/badges/version/GoFTest)](https://cran.r-project.org/package=GoFTest)
+[![GitHubRelease](https://img.shields.io/github/release/GoFTest/GoFTest?style=flat)](https://github.com/GoFTest/PEIMAN2/releases)
+[![Github All Releases](https://img.shields.io/github/downloads/GoFTest/PEIMAN2/total.svg?style=flat)](https://github.com/GoFTest/PEIMAN2)
 
 <!-- badges: end -->
 
