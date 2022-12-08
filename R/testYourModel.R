@@ -14,8 +14,9 @@
 #' A user provided function to calculate probability inverse transform of vector data, x. The first argument must be
 #' vector of data values, x. The second argument must be a vector of unknown parameters. The number of parameters in this function
 #' must match the number of parameters in score function (score_fn). See details for more examples.
-#' @param mle A vector of mle estimate (s) of the unknown parameter(s) in the model. The lenght of this vector must be the same as the number of
-#' columns of matrix returned by score.
+#' @param mle Either null (if there is no parameter in the model) or a vector of mle estimate (s) of the unknown
+#' parameter(s) in the model. The lenght of this vector must be the same as the number of columns of matrix
+#' returned by score.
 #' @param ngrid The number of equally spaced points to discritize the (0,1) interval to estimate the covariance of the stochastic process.
 #' @param gridpit A Boolean indicator. If TRUE, ngrid is ignored and (0,1) interval is divided based on probability inverse transformed
 #'  values. If FALSE (default value), (0,1) is divided into ngrid equally spaced points to estimate process.
@@ -74,8 +75,12 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
     stop('The numbers of data must be greater than or equal 2.')
   }
 
-  if( any( c(!is.numeric(mle), !is.vector(mle)) ) ){
-    stop('mle must be a numeric vector')
+  if( !is.null(mle) ){
+
+    if( any( c(!is.numeric(mle), !is.vector(mle)) ) ){
+      stop('mle must be a numeric vector')
+    }
+
   }
 
   check <- is.function(score) | is.matrix(score)
@@ -130,7 +135,7 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
       pit <- Fx
     }
 
-    if( length(Fx) != nrow(score_matrix) ){
+    if( length(pit) != nrow(score_matrix) ){
       stop('number of rows in score matrix does not match the length of elements in pit vector.')
     }
 

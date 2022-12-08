@@ -29,8 +29,9 @@ A user provided function to calculate probability inverse transform of vector da
 vector of data values, x. The second argument must be a vector of unknown parameters. The number of parameters in this function
 must match the number of parameters in score function (score_fn). See details for more examples.}
 
-\item{mle}{A vector of mle estimate (s) of the unknown parameter(s) in the model. The lenght of this vector must be the same as the number of
-columns of matrix returned by score.}
+\item{mle}{Either null (if there is no parameter in the model) or a vector of mle estimate (s) of the unknown
+parameter(s) in the model. The lenght of this vector must be the same as the number of columns of matrix
+returned by score.}
 
 \item{ngrid}{The number of equally spaced points to discritize the (0,1) interval to estimate the covariance of the stochastic process.}
 
