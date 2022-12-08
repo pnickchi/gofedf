@@ -23,12 +23,11 @@
 #' @param precision The theory behind GoF based on empirical distribution function (edf) works well if the mle is indeed the root of
 #' derivative of log likelihood. The user provided score function is evaluated at mle to verify its closeness to zero.
 #' Precision is used to check how close score function is to zero. The default value of precision is 1e-6.
-#' @param method a character string to indicate which statistics to calculate.
-#' The possible values are 'cvm' for Cramer-von Mises and 'ad' for Anderson-Darling.
-#' The default value is 'cvm'.
+#' @param method a character to indicate which statistics to calculate.
+#' The possible values are 'cvm' for Cramer-von Mises, 'ad' for Anderson-Darling, and 'both' for both methods. The default value is 'cvm'.
 #' @return A list of two.
-#' - Statistic: The Cramer-von-Mises statistic.
-#' - pvalue: The approximated pvalue for the GoF test based on EDF.
+#' - Statistic: The Cramer-von-Mises statistic (and Anderson_Darling if method = 'both').
+#' - pvalue: The approximate pvalue of the test. If method = 'both', two pvalues are returned.
 #' @export
 #'
 #' @import stats
@@ -41,14 +40,14 @@
 #' sim_data <- rexp(n, rate = 2)
 #' # Estimate mle of scale parameter
 #' theta    <- expMLE(x = sim_data)
-#' testYourModel(x = sim_data, score = expScore, Fx = expFx, mle = theta)
+#' testYourModel(x = sim_data, score = expScore, Fx = expFx, mle = theta, method = 'both')
 #' # Example 2
 #' # Generate some random data from Exponential dist
 #' n <- 50
 #' sim_data <- runif(n)
 #' # Estimate mle of scale parameter
 #' theta    <- expMLE(x = sim_data)
-#' testYourModel(x = sim_data, score = expScore, Fx = expFx, mle = theta)
+#' testYourModel(x = sim_data, score = expScore, Fx = expFx, mle = theta, method = 'cvm')
 #' # Example 3
 #' # Generate some random data from Normal dist
 #' n <- 50
@@ -152,21 +151,64 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
       ev    <- getEigenValues_manualGrid(S = score_matrix, FI = fisher, pit = pit, M = ngrid, me = method)
     }
 
-    # Calculate Cramer-von-Mises or Anderson-Darling statistics
-    if( method == 'cvm'){
+
+    # Calculate Cramer-von-Mises, Anderson-Darling statistics or both
+
+    if ( method == 'cvm') {
+
+      # Calculate Cramer-von-Mises statistic
       U2        <- getCvMStatistic(pit)
       names(U2) <- 'Cramer-von-Mises Statistic'
-    }else{
-      U2      <- getADStatistic(pit)
-      names(U2) <- 'Anderson-Darling Statistic'
+
+      # Calculate pvalue
+      pvalue  <- getpvalue(u = U2, eigen = ev)
+
+      # Prepare a list to return statistic and pvalue
+      res     <- list(Statistic = U2, pvalue = pvalue)
+
+      return(res)
+
+    } else if ( method == 'ad') {
+
+      # Calculate Anderson-Darling statistic
+      ad      <- getADStatistic(pit)
+      names(ad) <- 'Anderson-Darling Statistic'
+
+      # Calculate pvalue
+      pvalue  <- getpvalue(u = ad, eigen = ev)
+
+      # Prepare a list to return statistic and pvalue
+      res     <- list(Statistic = ad, pvalue = pvalue)
+
+      return(res)
+
+    } else {
+
+      # Calculate both cvm and ad statisitcs
+
+      # 1. Do cvm calculation
+      cvm        <- getCvMStatistic(pit)
+      names(U2) <- 'Cramer-von-Mises Statistic'
+
+      # Calculate pvalue
+      cvm.pvalue  <- getpvalue(u = U2, eigen = ev)
+      names(cvm.pvalue) <- 'pvalue for Cramer-von-Mises test'
+
+
+      # 2. Do ad calculations
+      ad      <- getADStatistic(pit)
+      names(ad) <- 'Anderson-Darling Statistic'
+
+      # Calculate pvalue
+      ad.pvalue  <- getpvalue(u = ad, eigen = ev)
+      names(ad.pvalue) <- 'Anderson-Darling test'
+
+
+      # Prepare a list to return both statistics and their approximate pvalue
+      res     <- list(Statistics = c(cvm, ad), pvalue = c(cvm.pvalue, ad.pvalue) )
+      return(res)
+
     }
-
-    # Calculate pvalue
-    pvalue  <- getpvalue(u = U2, eigen = ev)
-
-    # Prepare a list to return statistic and pvalue
-    res     <- list(Statistic = U2, pvalue = pvalue)
-    return(res)
 
   }
 
@@ -227,21 +269,64 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
       ev    <- getEigenValues_manualGrid(S = score_matrix, FI = fisher, pit = pit, M = ngrid, me = method)
     }
 
-    # Calculate Cramer-von-Mises or Anderson-Darling statistics
-    if( method == 'cvm'){
-      U2        <- getCvMStatistic(pit)
-      names(U2) <- 'Cramer-von-Mises Statistic'
-    }else{
-      U2      <- getADStatistic(pit)
-      names(U2) <- 'Anderson-Darling Statistic'
+
+    # Calculate Cramer-von-Mises, Anderson-Darling statistics or both
+
+    if ( method == 'cvm' ) {
+
+      # Calculate Cramer-von-Mises statistic
+      cvm        <- getCvMStatistic(pit)
+      names(cvm) <- 'Cramer-von-Mises Statistic'
+
+      # Calculate pvalue
+      pvalue  <- getpvalue(u = cvm, eigen = ev)
+
+      # Prepare a list to return statistic and pvalue
+      res     <- list(Statistic = cvm, pvalue = pvalue)
+
+      return(res)
+
+    } else if ( method == 'ad') {
+
+      # Calculate Anderson-Darling statistic
+      ad      <- getADStatistic(pit)
+      names(ad) <- 'Anderson-Darling Statistic'
+
+      # Calculate pvalue
+      pvalue  <- getpvalue(u = ad, eigen = ev)
+
+      # Prepare a list to return statistic and pvalue
+      res     <- list(Statistic = ad, pvalue = pvalue)
+
+      return(res)
+
+    } else {
+
+      # Calculate both cvm and ad statisitcs
+
+      # 1. Do cvm calculation
+      cvm        <- getCvMStatistic(pit)
+      names(cvm) <- 'Cramer-von-Mises Statistic'
+
+      # Calculate pvalue
+      cvm.pvalue  <- getpvalue(u = cvm, eigen = ev)
+      names(cvm.pvalue) <- 'pvalue for Cramer-von-Mises test'
+
+
+      # 2. Do ad calculations
+      ad      <- getADStatistic(pit)
+      names(ad) <- 'Anderson-Darling Statistic'
+
+      # Calculate pvalue
+      ad.pvalue  <- getpvalue(u = ad, eigen = ev)
+      names(ad.pvalue) <- 'Anderson-Darling test'
+
+
+      # Prepare a list to return both statistics and their approximate pvalue
+      res     <- list(Statistics = c(cvm, ad), pvalue = c(cvm.pvalue, ad.pvalue) )
+      return(res)
+
     }
-
-    # Calculate pvalue
-    pvalue  <- getpvalue(u = U2, eigen = ev)
-
-    # Prepare a list to return statistic and pvalue
-    res     <- list(Statistic = U2, pvalue = pvalue)
-    return(res)
 
   }
 

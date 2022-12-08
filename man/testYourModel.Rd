@@ -42,15 +42,14 @@ values. If FALSE (default value), (0,1) is divided into ngrid equally spaced poi
 derivative of log likelihood. The user provided score function is evaluated at mle to verify its closeness to zero.
 Precision is used to check how close score function is to zero. The default value of precision is 1e-6.}
 
-\item{method}{a character string to indicate which statistics to calculate.
-The possible values are 'cvm' for Cramer-von Mises and 'ad' for Anderson-Darling.
-The default value is 'cvm'.}
+\item{method}{a character to indicate which statistics to calculate.
+The possible values are 'cvm' for Cramer-von Mises, 'ad' for Anderson-Darling, and 'both' for both methods. The default value is 'cvm'.}
 }
 \value{
 A list of two.
 \itemize{
-\item Statistic: The Cramer-von-Mises statistic.
-\item pvalue: The approximated pvalue for the GoF test based on EDF.
+\item Statistic: The Cramer-von-Mises statistic (and Anderson_Darling if method = 'both').
+\item pvalue: The approximate pvalue of the test. If method = 'both', two pvalues are returned.
 }
 }
 \description{
@@ -66,14 +65,14 @@ n <- 50
 sim_data <- rexp(n, rate = 2)
 # Estimate mle of scale parameter
 theta    <- expMLE(x = sim_data)
-testYourModel(x = sim_data, score = expScore, Fx = expFx, mle = theta)
+testYourModel(x = sim_data, score = expScore, Fx = expFx, mle = theta, method = 'both')
 # Example 2
 # Generate some random data from Exponential dist
 n <- 50
 sim_data <- runif(n)
 # Estimate mle of scale parameter
 theta    <- expMLE(x = sim_data)
-testYourModel(x = sim_data, score = expScore, Fx = expFx, mle = theta)
+testYourModel(x = sim_data, score = expScore, Fx = expFx, mle = theta, method = 'cvm')
 # Example 3
 # Generate some random data from Normal dist
 n <- 50
