@@ -2,13 +2,13 @@
 % Please edit documentation in R/testYourModel.R
 \name{testYourModel}
 \alias{testYourModel}
-\title{Apply Goodness of Fit (GoF) Test for a Specified Distribution Model}
+\title{Apply Goodness of Fit (GoF) Test for user Specified Distribution Model}
 \usage{
 testYourModel(
   x,
   score,
   Fx,
-  mle,
+  mle = NULL,
   ngrid = length(x),
   gridpit = FALSE,
   precision = 1e-06,
@@ -54,7 +54,8 @@ A list of two.
 }
 \description{
 This function can apply goodness of fit test based on empirical distribution function to any distribution defined by user.
-The function requires score and probability transform inverse of data.
+In the case of no parameter estimation, the function requires score and probability transform inverse of data.
+If there is any parameter that needs to be estimated, the function requires MLE of parameter too.
 }
 \examples{
 set.seed(123)

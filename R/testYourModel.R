@@ -1,7 +1,8 @@
-#' Apply Goodness of Fit (GoF) Test for a Specified Distribution Model
+#' Apply Goodness of Fit (GoF) Test for user Specified Distribution Model
 #'
 #' @description This function can apply goodness of fit test based on empirical distribution function to any distribution defined by user.
-#' The function requires score and probability transform inverse of data.
+#' In the case of no parameter estimation, the function requires score and probability transform inverse of data.
+#' If there is any parameter that needs to be estimated, the function requires MLE of parameter too.
 #'
 #' @param x A numeric vector of length n for data points. The input must be numeric.
 #' @param score can be a function provided by user that returns a matrix with n rows and p columns. The rows corresponds to each data point
@@ -63,7 +64,7 @@
 #' score.matrix <- normalScore(x = sim_data, theta = theta.value)
 #' pit.values   <- normalPIT(x = sim_data, theta = theta.value)
 #' testYourModel(x = sim_data, score = score.matrix, Fx = pit.values, mle = theta.value)
-testYourModel = function(x, score, Fx, mle, ngrid = length(x), gridpit = FALSE, precision = 1e-6, method = 'cvm'){
+testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = FALSE, precision = 1e-6, method = 'cvm'){
 
   if( !is.double(x) ){
     stop('x values must be numeric.')
@@ -87,55 +88,98 @@ testYourModel = function(x, score, Fx, mle, ngrid = length(x), gridpit = FALSE, 
     stop('Fx must be either a function or a vector')
   }
 
-  if( is.function(score) & is.function(Fx) ){
-
-    # Get the number of data points in sample
-    n    <- length(x)
-
-    # Get the number of parameters
-    p <- length(mle)
+  check <- is.function(score) & is.function(Fx)
+  if( check ){
 
     # Get the number of parameters in score and Fx
     narg1 <- length( formals(score) ) - 1
     narg2 <- length( formals(Fx) )   - 1
 
     if( narg1 != narg2 ){
-      stop('Number of parameters in score function and Fx function must be the same')
+      stop('Number of parameters in score function and Fx function must be the same.')
     }
 
-    # Apply score function over vector data to get score function.
-    score_matrix <- score(x, mle)
+  }
 
-    if( !is.matrix(score_matrix) ){
-      stop('score function did not return a matrix.')
+
+  # Case 1: No parameter estimation
+  if( is.null(mle) ){
+
+    if( is.function(score) ){
+
+      # Apply score function over vector data to get score function.
+      score_matrix <- score(x)
+
+      if( !is.matrix(score_matrix) ){
+        stop('score function did not return a matrix.')
+      }
+
+    }else{
+      score_matrix <- score
     }
 
     if( any(colSums(score_matrix) > precision) ){
       warning( paste0('Score matrix function is not zero at MLE. precision of ', precision, ' was used') )
     }
 
-    # Apply Fx function to calculate probability inverse transform of data
-    pit  <- lapply(x, FUN = Fx, mle)
-    pit  <- unlist(pit)
+    if( is.function(Fx) ){
+      # Apply Fx function to calculate probability inverse transform of data
+      pit  <- lapply(x, FUN = Fx)
+      pit  <- unlist(pit)
+    }else{
+      pit <- Fx
+    }
 
+    if( length(Fx) != nrow(score_matrix) ){
+      stop('number of rows in score matrix does not match the length of elements in pit vector.')
+    }
+
+    # Get the number of data points in sample
+    n    <- length(x)
+
+    # Calculate Fisher information matrix, estimate from sample score matrix
     fisher  <- (n-1)*var(score_matrix)/n
 
+    # Get Eigen values
     if( gridpit ){
       ev    <- getEigenValues(S = score_matrix, FI = fisher, pit = pit, me = method)
     }else{
       ev    <- getEigenValues_manualGrid(S = score_matrix, FI = fisher, pit = pit, M = ngrid, me = method)
     }
 
+    # Calculate Cramer-von-Mises or Anderson-Darling statistics
+    if( method == 'cvm'){
+      U2        <- getCvMStatistic(pit)
+      names(U2) <- 'Cramer-von-Mises Statistic'
+    }else{
+      U2      <- getADStatistic(pit)
+      names(U2) <- 'Anderson-Darling Statistic'
+    }
 
-    U2      <- getCvMStatistic(pit)
+    # Calculate pvalue
     pvalue  <- getpvalue(u = U2, eigen = ev)
 
+    # Prepare a list to return statistic and pvalue
     res     <- list(Statistic = U2, pvalue = pvalue)
     return(res)
 
   }
 
-  if( is.matrix(score)   & is.vector(Fx) ){
+  # Case 2: Estimate parameters with MLE
+  if( !is.null(mle) ){
+
+    if( is.function(score) ){
+
+      # Apply score function with mle over vector data to get score function.
+      score_matrix <- score(x, mle)
+
+      if( !is.matrix(score_matrix) ){
+        stop('score function did not return a matrix.')
+      }
+
+    }else{
+      score_matrix <- score
+    }
 
     # Get the number of data points in sample
     n    <- length(x)
@@ -143,44 +187,63 @@ testYourModel = function(x, score, Fx, mle, ngrid = length(x), gridpit = FALSE, 
     # Get the number of parameters
     p <- length(mle)
 
-    if( nrow(score) != n ){
+    if( nrow(score_matrix) != n ){
       stop('The number of rows in score matrix do not match the sample size in x.')
     }
 
-    if( ncol(score) != p){
+    if( ncol(score_matrix) != p){
       stop('The number of columns in score matrix do not match the number of estimated parameters in mle vector.')
     }
 
-    if( any( is.na(x) ) ){
-      stop('There are missing values in vector x.')
-    }
-
-    if( any( is.na(score) ) ){
-      stop('There are missing values in matrix score')
-    }
-
-    if( any( is.na(Fx) ) ){
-      stop('There are missing values in Fx values.')
-    }
-
-    if( any(colSums(score) > precision) ){
+    if( any(colSums(score_matrix) > precision) ){
       warning( paste0('Score matrix function is not zero at MLE. precision of ', precision, ' was used') )
     }
 
-    fisher  <- (n-1)*var(score)/n
-
-    if( gridpit ){
-      ev    <- getEigenValues(S = score, FI = fisher, pit = Fx, me = method)
+    if( is.function(Fx) ){
+      # Apply Fx function to calculate probability inverse transform of data
+      pit  <- lapply(x, FUN = Fx, mle)
+      pit  <- unlist(pit)
     }else{
-      ev    <- getEigenValues_manualGrid(S = score, FI = fisher, pit = Fx, M = ngrid, me = method)
+      pit <- Fx
     }
 
-    U2      <- getCvMStatistic(x = Fx)
+    if( length(pit) != nrow(score_matrix) ){
+      stop('number of rows in score matrix does not match the length of elements in pit vector.')
+    }
+
+
+    # Calculate Fisher information matrix, estimate from sample score matrix
+    fisher  <- (n-1)*var(score_matrix)/n
+
+    # Get Eigen values
+    if( gridpit ){
+      ev    <- getEigenValues(S = score_matrix, FI = fisher, pit = pit, me = method)
+    }else{
+      ev    <- getEigenValues_manualGrid(S = score_matrix, FI = fisher, pit = pit, M = ngrid, me = method)
+    }
+
+    # Calculate Cramer-von-Mises or Anderson-Darling statistics
+    if( method == 'cvm'){
+      U2        <- getCvMStatistic(pit)
+      names(U2) <- 'Cramer-von-Mises Statistic'
+    }else{
+      U2      <- getADStatistic(pit)
+      names(U2) <- 'Anderson-Darling Statistic'
+    }
+
+    # Calculate pvalue
     pvalue  <- getpvalue(u = U2, eigen = ev)
 
+    # Prepare a list to return statistic and pvalue
     res     <- list(Statistic = U2, pvalue = pvalue)
     return(res)
 
   }
 
 }
+
+
+
+
+
+
