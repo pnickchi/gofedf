@@ -15,8 +15,10 @@ calculateWnuhat = function(S, FI, pit){
 
 getEigenValues = function(S, FI, pit, me){
 
+  n       <- nrow(S)
   Mat     <- calculateWnuhat(S, FI, pit)
   W       <- var(Mat)
+  W       <- ( (n-1) * W ) / n
 
   if( me == 'cvm' ){
     ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / length(pit)
@@ -53,6 +55,7 @@ calculateWnuhat_manualGrid = function(S, FI, pit, M){
 
 getEigenValues_manualGrid = function(S, FI, pit, M, me){
 
+  n       <- nrow(S)
   Mat     <- calculateWnuhat_manualGrid(S, FI, pit, M)
   W       <- var(Mat)
 
