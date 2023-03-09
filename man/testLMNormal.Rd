@@ -61,12 +61,12 @@ It returns Cramer-von Mises statistic along with approximate pvalue for the test
 set.seed(123)
 n <- 50
 p <- 5
-X <- matrix( runif(n*p), nrow = n, ncol = p)
+xmatrix <- matrix( runif(n*p), nrow = n, ncol = p)
 e <- runif(n)
 b <- runif(p)
-y <- X \%*\% b + e
-testLMNormal(x = X, y)
+y <- xmatrix \%*\% b + e
+testLMNormal(x = xmatrix, y)
 # Or pass myfit object directly:
-myfit <- lm(y ~ X, x = TRUE, y = TRUE)
+myfit <- lm(y ~ 0 + xmatrix, x = TRUE, y = TRUE)
 testLMNormal(fit = myfit)
 }
