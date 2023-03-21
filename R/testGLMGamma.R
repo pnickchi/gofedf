@@ -84,7 +84,7 @@ testGLMGamma = function(x, y, l, fit = NULL, start.value = NULL, control = NULL,
       stop('The family in fit must be Gamma.')
     }
 
-    if( is.null(fit$x) ){
+    if( !inherits(fit,'x') ){
       stop('fit object must have the design matrix corresponding to the model. Consider setting x = TRUE in glm function to return x matrix.')
     }
 
