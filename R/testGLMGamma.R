@@ -77,7 +77,7 @@ testGLMGamma = function(x, y, l, fit = NULL, start.value = NULL, control = NULL,
   }else{
 
     if (!inherits(fit, 'glm')){
-      stop('The fit must be \'glm\' object.')
+      stop('The fit must be \'glm\' object returned by either glm or glm2 function.')
     }
 
     if( fit$family$family != 'Gamma' ){
