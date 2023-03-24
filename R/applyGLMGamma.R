@@ -38,12 +38,18 @@ applyGLMGamma = function(x, y, fml, sv, ctl, fit.included){
 
 
 
-   # This section applies family function over objects.
-   # For example, it calculates miohat, the expected value of y given X in generalized linear model
+   # Extract family function and design matrix (X) from fit object and calculates the linear predictor.
    fm              <- family(fit)
    X               <- fit$x
-   miohat          <- fm$linkinv(X %*% mle.coef)
    linearPredictor <- X %*% mle.coef
+
+   # Check if we need to add offset to the linear predictor.
+   if( !is.null(fit$offset) ){
+     linearPredictor <- linearPredictor + fit$offset
+   }
+
+   # Calculate miohat, estimated value of mean function in GLM
+   miohat          <- fm$linkinv(linearPredictor)
 
    # Calculate the score function
    # Use family function to get link function and derivative of the inverse-link function
