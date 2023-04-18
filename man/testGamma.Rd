@@ -9,7 +9,7 @@ testGamma(
   ngrid = length(x),
   gridpit = FALSE,
   hessian = FALSE,
-  rate = FALSE,
+  rate = TRUE,
   method = "cvm"
 )
 }

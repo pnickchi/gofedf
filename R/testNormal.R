@@ -29,24 +29,28 @@ testNormal = function(x, ngrid = length(x), gridpit = FALSE, hessian = FALSE, me
      stop('x must be a numeric vector.')
   }
 
-  if( !is.integer(ngrid) | !(ngrid > 0) ){
+  if( !(ngrid > 0) ){
     stop('ngrid must be a positive number.')
   }
 
+  if( !(ngrid %% 1 == 0) ){
+    stop('ngrid must be an integer number.')
+  }
+
   if( !is.logical(gridpit) ){
-    stop('gridpit must be a logical value.')
+    stop('gridpit must be either TRUE or FALSE.')
   }
 
   if( !is.logical(hessian) ){
-    stop('hessian must be a logical value.')
+    stop('hessian must be either TRUE or FALSE.')
   }
 
   if( !is.vector(method) | length(method) > 1){
-    stop('method must be a character string.')
+    stop('method must be a character string with length one.')
   }
 
-  if( !(method %in% c('cvm','ad')) ){
-     stop('method must be either cvm or ad.')
+  if( !(method %in% c('cvm','ad','both')) ){
+     stop('method must be either cvm, ad, or both.')
   }
 
   n       <- length(x)
@@ -61,24 +65,78 @@ testNormal = function(x, ngrid = length(x), gridpit = FALSE, hessian = FALSE, me
     fisher <- (n-1)*var(Score)/n
   }
 
-  if( gridpit ){
-    ev    <- getEigenValues(S = Score, FI = fisher, pit, me = method)
-  }else{
-    ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = method)
-  }
 
   if( method == 'cvm'){
-    U2      <- getCvMStatistic(pit)
-    pvalue  <- getpvalue(u = U2, eigen = ev)
-    res     <- list(Statistic = U2, pvalue = pvalue)
-  }else{
+
+    cvm      <- getCvMStatistic(pit)
+
+    if( gridpit ){
+      ev    <- getEigenValues(S = Score, FI = fisher, pit, me = 'cvm')
+    }else{
+      ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = 'cvm')
+    }
+
+    pvalue  <- getpvalue(u = cvm, eigen = ev)
+    res     <- list(Statistic = cvm, pvalue = pvalue)
+
+    return(res)
+
+  } else if ( method == 'ad') {
+
     AD      <- getADStatistic(pit)
+
+    if( gridpit ){
+      ev    <- getEigenValues(S = Score, FI = fisher, pit, me = 'ad')
+    }else{
+      ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = 'ad')
+    }
+
     pvalue  <- getpvalue(u = AD, eigen = ev)
     res     <- list(Statistic = AD, pvalue = pvalue)
+
+    return(res)
+
+  }else{
+
+    # Calculate both cvm and ad statistics
+
+    # 1. Do cvm calculation
+    cvm        <- getCvMStatistic(pit)
+    names(cvm) <- 'Cramer-von-Mises Statistic'
+
+    # Get Eigen values
+    if( gridpit ){
+      ev    <- getEigenValues(S = Score, FI = fisher, pit = pit, me = 'cvm')
+    }else{
+      ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit = pit, M = ngrid, me = 'cvm')
+    }
+
+    # Calculate pvalue
+    cvm.pvalue  <- getpvalue(u = cvm, eigen = ev)
+    names(cvm.pvalue) <- 'pvalue for Cramer-von-Mises test'
+
+
+    # 2. Do ad calculations
+    ad      <- getADStatistic(pit)
+    names(ad) <- 'Anderson-Darling Statistic'
+
+    # Get Eigen values
+    if( gridpit ){
+      ev    <- getEigenValues(S = Score, FI = fisher, pit = pit, me = 'ad')
+    }else{
+      ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit = pit, M = ngrid, me = 'ad')
+    }
+
+    # Calculate pvalue
+    ad.pvalue  <- getpvalue(u = ad, eigen = ev)
+    names(ad.pvalue) <- 'Anderson-Darling test'
+
+
+    # Prepare a list to return both statistics and their approximate pvalue
+    res     <- list(Statistics = c(cvm, ad), pvalue = c(cvm.pvalue, ad.pvalue) )
+    return(res)
+
   }
 
-  return(res)
-
-  # test
 
 }

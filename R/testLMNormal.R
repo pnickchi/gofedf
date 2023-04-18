@@ -89,12 +89,12 @@ testLMNormal = function(x, y, fit = NULL, ngrid = length(y), gridpit = FALSE, he
     }
 
     # Get C-v-M statistic
-    U2      <- getCvMStatistic(pit)
+    cvm      <- getCvMStatistic(pit)
 
     # Get pvalue
-    pvalue  <- getpvalue(u = U2, eigen = ev)
+    pvalue  <- getpvalue(u = cvm, eigen = ev)
+    res     <- list(Statistic = cvm, pvalue = pvalue)
 
-    res     <- list(Statistic = U2, pvalue = pvalue)
     return(res)
 
   }else{
@@ -126,21 +126,87 @@ testLMNormal = function(x, y, fit = NULL, ngrid = length(y), gridpit = FALSE, he
       fisher <- (n-1)*var(Score)/n
     }
 
-    # Get Eigen values
-    if( gridpit ){
-      ev    <- getEigenValues(S = Score, FI = fisher, pit, me = method)
-    }else{
-      ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = method)
+
+    if( method == 'cvm'){
+
+      # Get Eigen values
+      if( gridpit ){
+        ev    <- getEigenValues(S = Score, FI = fisher, pit, me = 'cvm')
+      }else{
+        ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = 'cvm')
+      }
+
+      # Get C-v-M statistic
+      cvm      <- getCvMStatistic(pit)
+
+      # Get pvalue
+      pvalue  <- getpvalue(u = cvm, eigen = ev)
+
+      res     <- list(Statistic = cvm, pvalue = pvalue)
+
+      return(res)
+
+    } else if ( method == 'ad') {
+
+      # Get Eigen values
+      if( gridpit ){
+        ev    <- getEigenValues(S = Score, FI = fisher, pit, me = 'ad')
+      }else{
+        ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = 'ad')
+      }
+
+      # Get C-v-M statistic
+      AD      <- getCvMStatistic(pit)
+
+      # Get pvalue
+      pvalue  <- getpvalue(u = AD, eigen = ev)
+
+      res     <- list(Statistic = AD, pvalue = pvalue)
+
+      return(res)
+
+
+    } else {
+
+      # Calculate both cvm and ad statistics
+
+      # 1. Do cvm calculation
+      cvm        <- getCvMStatistic(pit)
+      names(cvm) <- 'Cramer-von-Mises Statistic'
+
+      # Get Eigen values
+      if( gridpit ){
+        ev    <- getEigenValues(S = Score, FI = fisher, pit = pit, me = 'cvm')
+      }else{
+        ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit = pit, M = ngrid, me = 'cvm')
+      }
+
+      # Calculate pvalue
+      cvm.pvalue  <- getpvalue(u = cvm, eigen = ev)
+      names(cvm.pvalue) <- 'pvalue for Cramer-von-Mises test'
+
+
+      # 2. Do AD calculations
+      AD      <- getADStatistic(pit)
+      names(AD) <- 'Anderson-Darling Statistic'
+
+      # Get Eigen values
+      if( gridpit ){
+        ev    <- getEigenValues(S = Score, FI = fisher, pit = pit, me = 'ad')
+      }else{
+        ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit = pit, M = ngrid, me = 'ad')
+      }
+
+      # Calculate pvalue
+      ad.pvalue  <- getpvalue(u = AD, eigen = ev)
+      names(ad.pvalue) <- 'Anderson-Darling test'
+
+
+      # Prepare a list to return both statistics and their approximate pvalue
+      res     <- list(Statistics = c(cvm, AD), pvalue = c(cvm.pvalue, ad.pvalue) )
+      return(res)
+
     }
-
-    # Get C-v-M statistic
-    U2      <- getCvMStatistic(pit)
-
-    # Get pvalue
-    pvalue  <- getpvalue(u = U2, eigen = ev)
-
-    res     <- list(Statistic = U2, pvalue = pvalue)
-    return(res)
 
   }
 
