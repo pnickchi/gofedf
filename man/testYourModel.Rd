@@ -10,7 +10,7 @@ testYourModel(
   Fx,
   mle = NULL,
   ngrid = length(x),
-  gridpit = FALSE,
+  gridpit = TRUE,
   precision = 1e-06,
   method = "cvm"
 )
@@ -85,8 +85,8 @@ testYourModel(x = sim_data, score = normalScore, Fx = normalPIT, mle = theta)
 n <- 50
 sim_data <- rnorm(n)
 # Estimate mle of mean and sd
-theta.value  <- normalMLE(x = sim_data)
-score.matrix <- normalScore(x = sim_data, theta = theta.value)
-pit.values   <- normalPIT(x = sim_data, theta = theta.value)
-testYourModel(x = sim_data, score = score.matrix, Fx = pit.values, mle = theta.value)
+theta_hat  <- normalMLE(x = sim_data)
+score.matrix <- normalScore(x = sim_data, theta = theta_hat)
+pit.values   <- normalPIT(x = sim_data, theta = theta_hat)
+testYourModel(x = sim_data, score = score.matrix, Fx = pit.values, mle = theta_hat)
 }

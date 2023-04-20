@@ -48,8 +48,8 @@ normalMLE = function(x){
 #' @export
 #'
 normalPIT = function(x, theta){
-
-  res <- (x - theta[1]) / theta[2]
+  z <- (x - theta[1]) / theta[2]
+  res <- pnorm(q = z, mean = 0, sd = 1)
   return(res)
 }
 

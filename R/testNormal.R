@@ -23,7 +23,7 @@
 #' testNormal(x = sim_data)
 #' sim_data <- rgamma(100, shape = 3)
 #' testNormal(x = sim_data)
-testNormal = function(x, ngrid = length(x), gridpit = FALSE, hessian = FALSE, method = 'cvm'){
+testNormal = function(x, ngrid = length(x), gridpit = TRUE, hessian = FALSE, method = 'cvm'){
 
   if( !is.numeric(x) | !is.vector(x) ){
      stop('x must be a numeric vector.')

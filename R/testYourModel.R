@@ -60,11 +60,11 @@
 #' n <- 50
 #' sim_data <- rnorm(n)
 #' # Estimate mle of mean and sd
-#' theta.value  <- normalMLE(x = sim_data)
-#' score.matrix <- normalScore(x = sim_data, theta = theta.value)
-#' pit.values   <- normalPIT(x = sim_data, theta = theta.value)
-#' testYourModel(x = sim_data, score = score.matrix, Fx = pit.values, mle = theta.value)
-testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = FALSE, precision = 1e-6, method = 'cvm'){
+#' theta_hat  <- normalMLE(x = sim_data)
+#' score.matrix <- normalScore(x = sim_data, theta = theta_hat)
+#' pit.values   <- normalPIT(x = sim_data, theta = theta_hat)
+#' testYourModel(x = sim_data, score = score.matrix, Fx = pit.values, mle = theta_hat)
+testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = TRUE, precision = 1e-6, method = 'cvm'){
 
   if( !is.double(x) ){
     stop('x values must be numeric.')
@@ -106,7 +106,7 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
   }
 
 
-  # Case 1: No parameter estimation
+  # Case 1: No parameter estimation is needed
   if( is.null(mle) ){
 
     if( is.function(score) ){
@@ -123,7 +123,7 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
     }
 
     if( any(colSums(score_matrix) > precision) ){
-      warning( paste0('Score matrix function is not zero at MLE. precision of ', precision, ' was used') )
+      warning( paste0('Note that score function is not zero at MLE. precision of ', precision, ' was used') )
     }
 
     if( is.function(Fx) ){
@@ -144,14 +144,6 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
     # Calculate Fisher information matrix, estimate from sample score matrix
     fisher  <- (n-1)*var(score_matrix)/n
 
-    # Get Eigen values
-    if( gridpit ){
-      ev    <- getEigenValues(S = score_matrix, FI = fisher, pit = pit, me = method)
-    }else{
-      ev    <- getEigenValues_manualGrid(S = score_matrix, FI = fisher, pit = pit, M = ngrid, me = method)
-    }
-
-
     # Calculate Cramer-von-Mises, Anderson-Darling statistics or both
 
     if ( method == 'cvm') {
@@ -159,6 +151,13 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
       # Calculate Cramer-von-Mises statistic
       cvm        <- getCvMStatistic(pit)
       names(cvm) <- 'Cramer-von-Mises Statistic'
+
+      # Get Eigen values
+      if( gridpit ){
+        ev    <- getEigenValues(S = score_matrix, FI = fisher, pit = pit, me = 'cvm')
+      }else{
+        ev    <- getEigenValues_manualGrid(S = score_matrix, FI = fisher, pit = pit, M = ngrid, me = 'cvm')
+      }
 
       # Calculate pvalue
       pvalue  <- getpvalue(u = cvm, eigen = ev)
@@ -171,14 +170,23 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
     } else if ( method == 'ad') {
 
       # Calculate Anderson-Darling statistic
-      ad      <- getADStatistic(pit)
-      names(ad) <- 'Anderson-Darling Statistic'
+      AD      <- getADStatistic(pit)
+      names(AD) <- 'Anderson-Darling Statistic'
+
+
+      # Get Eigen values
+      if( gridpit ){
+        ev    <- getEigenValues(S = score_matrix, FI = fisher, pit = pit, me = 'ad')
+      }else{
+        ev    <- getEigenValues_manualGrid(S = score_matrix, FI = fisher, pit = pit, M = ngrid, me = 'ad')
+      }
+
 
       # Calculate pvalue
-      pvalue  <- getpvalue(u = ad, eigen = ev)
+      pvalue  <- getpvalue(u = AD, eigen = ev)
 
       # Prepare a list to return statistic and pvalue
-      res     <- list(Statistic = ad, pvalue = pvalue)
+      res     <- list(Statistic = AD, pvalue = pvalue)
 
       return(res)
 
@@ -273,9 +281,9 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
 
       # Get Eigen values
       if( gridpit ){
-        ev    <- getEigenValues(S = score_matrix, FI = fisher, pit = pit, me = method)
+        ev    <- getEigenValues(S = score_matrix, FI = fisher, pit = pit, me = 'cvm')
       }else{
-        ev    <- getEigenValues_manualGrid(S = score_matrix, FI = fisher, pit = pit, M = ngrid, me = method)
+        ev    <- getEigenValues_manualGrid(S = score_matrix, FI = fisher, pit = pit, M = ngrid, me = 'cvm')
       }
 
       # Calculate pvalue
@@ -289,17 +297,17 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
     } else if ( method == 'ad') {
 
       # Calculate Anderson-Darling statistic
-      ad      <- getADStatistic(pit)
-      names(ad) <- 'Anderson-Darling Statistic'
+      AD      <- getADStatistic(pit)
+      names(AD) <- 'Anderson-Darling Statistic'
       # Get Eigen values
       if( gridpit ){
-        ev    <- getEigenValues(S = score_matrix, FI = fisher, pit = pit, me = method)
+        ev    <- getEigenValues(S = score_matrix, FI = fisher, pit = pit, me = 'ad')
       }else{
-        ev    <- getEigenValues_manualGrid(S = score_matrix, FI = fisher, pit = pit, M = ngrid, me = method)
+        ev    <- getEigenValues_manualGrid(S = score_matrix, FI = fisher, pit = pit, M = ngrid, me = 'ad')
       }
 
       # Calculate pvalue
-      pvalue  <- getpvalue(u = ad, eigen = ev)
+      pvalue  <- getpvalue(u = AD, eigen = ev)
 
       # Prepare a list to return statistic and pvalue
       res     <- list(Statistic = ad, pvalue = pvalue)
@@ -327,8 +335,8 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
 
 
       # 2. Do ad calculations
-      ad      <- getADStatistic(pit)
-      names(ad) <- 'Anderson-Darling Statistic'
+      AD        <- getADStatistic(pit)
+      names(AD) <- 'Anderson-Darling Statistic'
 
       # Get Eigen values
       if( gridpit ){
@@ -338,12 +346,12 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
       }
 
       # Calculate pvalue
-      ad.pvalue  <- getpvalue(u = ad, eigen = ev)
+      ad.pvalue  <- getpvalue(u = AD, eigen = ev)
       names(ad.pvalue) <- 'Anderson-Darling test'
 
 
       # Prepare a list to return both statistics and their approximate pvalue
-      res     <- list(Statistics = c(cvm, ad), pvalue = c(cvm.pvalue, ad.pvalue) )
+      res     <- list(Statistics = c(cvm, AD), pvalue = c(cvm.pvalue, ad.pvalue) )
       return(res)
 
     }

@@ -7,7 +7,7 @@
 testNormal(
   x,
   ngrid = length(x),
-  gridpit = FALSE,
+  gridpit = TRUE,
   hessian = FALSE,
   method = "cvm"
 )

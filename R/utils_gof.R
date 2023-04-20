@@ -112,6 +112,7 @@ getpvalue = function(u, eigen){
     return(pvalue)
   }else{
     warning(paste0('CompQuadForm failed to generate a correct pvalue. The pvalue lies between ', LB, ' and ', UB))
+    return(pvalue)
   }
 
 
@@ -125,7 +126,6 @@ getpvalue = function(u, eigen){
   #   warning('CompQuadForm generated pvalue > 1. The pvalue replaced by an upper bound.')
   # }
 
-  return(pvalue)
 }
 
 
