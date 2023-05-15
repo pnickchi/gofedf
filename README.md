@@ -38,7 +38,7 @@ following cases:
 
 ## Installation
 
-You can install the released version of GoFTest from
+You can install the released version of GoFTest from (not released yet)
 [CRAN](https://CRAN.R-project.org) with:
 
 ``` r
