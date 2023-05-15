@@ -9,13 +9,14 @@ Description: Functions to run goodness of fit test based on empirical distributi
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Depends: R (>= 2.10)
 Imports: 
     stats,
     CompQuadForm,
     MASS,
-    glm2
+    glm2,
+    statmod
 NeedsCompilation: no
 Author: Richard Lockhart [aut], Payman Nickchi [aut, cre]
 Maintainer: Payman Nickchi <pnickchi@sfu.ca>

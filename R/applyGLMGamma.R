@@ -3,14 +3,25 @@ applyGLMGamma = function(x, y, fml, sv, ctl, fit.included){
    # Check if we need to fit a GLM or user already provided the fit
    if( is.null(fit.included) ){
 
+     ################################################
      # Fit a generalized linear model by glm2 package
-     fit <- glm2::glm2(formula = y ~ x,
-                       family = fml,
-                       x = TRUE,
-                       control = ctl,
-                       start   = sv,
-                       na.action = na.omit)
+     ################################################
 
+     # Check if start value is provided or not and fit accordingly
+     if( is.null(sv) ){
+       fit <- glm2::glm2(formula = y ~ x,
+                         family = fml,
+                         x = TRUE,
+                         control = ctl,
+                         na.action = na.omit)
+     }else{
+       fit <- glm2::glm2(formula = y ~ x,
+                         family = fml,
+                         x = TRUE,
+                         control = ctl,
+                         start   = sv,
+                         na.action = na.omit)
+     }
    }else{
      fit <- fit.included
    }

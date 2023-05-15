@@ -13,32 +13,37 @@ testNormal(
 )
 }
 \arguments{
-\item{x}{A numeric vector of data values with length n.}
+\item{x}{a non-empty numeric vector of sample data.}
 
-\item{ngrid}{The number of equally spaced points to discritize the (0,1) interval to estimate the covariance of the process.}
+\item{ngrid}{the number of equally spaced points to discretize the (0,1) interval for computing the covariance function.}
 
-\item{gridpit}{A Boolean indicator. If TRUE, ngrid is ignored and (0,1) interval is divided based on probability inverse transformed
-values. If FALSE (default value), (0,1) is divided into ngrid equally spaced points to estimate process.}
+\item{gridpit}{logical. If \code{TRUE} (the default value), the parameter ngrid is ignored and (0,1) interval is divided
+based on probability inverse transformed values obtained from the sample. If \code{FALSE}, the interval is divided into ngrid
+equally spaced points for computing the covariance function.}
 
-\item{hessian}{A Boolean indicator to control if Hessian matrix should be used in estimation of Fisher information matrix.
-If False (the default value), the Fisher information matrix is estimated by the observed score function.
-If TRUE, the Fisher information matrix is estimated by the observed Hessian Matrix.}
+\item{hessian}{logical. If \code{TRUE} the Fisher information matrix is estimated by the observed Hessian Matrix based on
+the sample. If \code{FALSE} (the default value) the Fisher information matrix is estimated by the variance of the
+observed score matrix.}
 
-\item{method}{a character string to indicate which statistics to calculate.
-The possible values are 'cvm' for Cramer-von Mises and 'ad' for Anderson-Darling.
-The default value is 'cvm'.}
+\item{method}{a character string indicating which goodness-of-fit statistic is to be computed. The default value is
+'cvm' for the Cramer-von-Mises statistic. Other options include 'ad' for the Anderson-Darling statistic, and 'both'
+to compute both cvm and ad.}
 }
 \value{
-A list of two.
+A list of two containing the following components:
 \itemize{
-\item Statistic: The Cramer-von-Mises statistic.
-\item pvalue: The approximated pvalue for the GoF test based on EDF.
+\item Statistic: the value of goodness-of-fit statistic.
+\item pvalue: the approximate pvalue for the goodness-of-fit test based on empirical distribution function.
+if method = 'cvm' or method = 'ad', it returns a numeric value for the statistic and pvalue. If method = 'both', it
+returns a numeric vector with two elements and one for each statistic.
 }
 }
 \description{
-Apply Goodness of Fit Test for Normal Distribution
+Performs the goodness-of-fit test based on empirical distribution function to check if an i.i.d sample
+follows a Normal distribution.
 }
 \examples{
+
 set.seed(123)
 sim_data <- rnorm(n = 100)
 testNormal(x = sim_data)

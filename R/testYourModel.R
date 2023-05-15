@@ -1,150 +1,105 @@
-#' Apply Goodness of Fit (GoF) Test for user Specified Distribution Model
+#' Apply the Goodness of Fit Test Based on Empirical Distribution Function to Any Likelihood Model.
 #'
-#' @description This function can apply goodness of fit test based on empirical distribution function to any distribution defined by user.
-#' In the case of no parameter estimation, the function requires score and probability transform inverse of data.
-#' If there is any parameter that needs to be estimated, the function requires MLE of parameter too.
+#' @description This function applies the goodness-of-fit test based on empirical distribution function.
+#' It requires certain inputs depending on whether the model involves parameter estimation or not.
+#' If the model is known and there is no parameter estimation, the function requires the sample as a vector and
+#' the probability transformed (or pit) values of the sample. This ought to be a vector as well. If there is
+#' parameter estimation in the model, the function additionally requires the score as a matrix with n
+#' rows and p columns, where n is the sample size and p is the number of estimated parameters.
+#' The function checks if the score is zero at the estimated parameter (which is assumed to be the maximum
+#' likelihood estimate).
 #'
-#' @param x A numeric vector of length n for data points. The input must be numeric.
-#' @param score can be a function provided by user that returns a matrix with n rows and p columns. The rows corresponds to each data point
-#' and each column corresponds to each parameter in the model. If score is such a function, the first argument must take x (data points) and
-#' the second argument must take a vector of mle estiamte of parameters. The function must return a matrix of n rows and p columns. testYourModel
-#' function tries apply score function with mle as input to calculate score matrix.
-#' The score input can instead be a matrix with n rows and p columns.
-#' @param Fx can be a function to calculate the probability inverse transform of data.
-#' A user provided function to calculate probability inverse transform of vector data, x. The first argument must be
-#' vector of data values, x. The second argument must be a vector of unknown parameters. The number of parameters in this function
-#' must match the number of parameters in score function (score_fn). See details for more examples.
-#' @param mle Either null (if there is no parameter in the model) or a vector of mle estimate (s) of the unknown
-#' parameter(s) in the model. The lenght of this vector must be the same as the number of columns of matrix
-#' returned by score.
-#' @param ngrid The number of equally spaced points to discritize the (0,1) interval to estimate the covariance of the stochastic process.
-#' @param gridpit A Boolean indicator. If TRUE, ngrid is ignored and (0,1) interval is divided based on probability inverse transformed
-#'  values. If FALSE (default value), (0,1) is divided into ngrid equally spaced points to estimate process.
-#' @param precision The theory behind GoF based on empirical distribution function (edf) works well if the mle is indeed the root of
-#' derivative of log likelihood. The user provided score function is evaluated at mle to verify its closeness to zero.
-#' Precision is used to check how close score function is to zero. The default value of precision is 1e-6.
-#' @param method a character to indicate which statistics to calculate.
-#' The possible values are 'cvm' for Cramer-von Mises, 'ad' for Anderson-Darling, and 'both' for both methods. The default value is 'cvm'.
-#' @return A list of two.
-#' - Statistic: The Cramer-von-Mises statistic (and Anderson_Darling if method = 'both').
-#' - pvalue: The approximate pvalue of the test. If method = 'both', two pvalues are returned.
+#' @param x a non-empty numeric vector of sample data.
+#'
+#' @param pit The probability transformed (or pit) values of the sample which ought to be a numeric vector with
+#' the same size as x.
+#'
+#' @param score The default value is null and refers to no parameter estimation case. If there is parameter estimation,
+#' the score matrix must be a matrix with n rows and p columns, where n is the sample size and p is the number of
+#' estimated parameters.
+#'
+#' @param ngrid the number of equally spaced points to discretize the (0,1) interval for computing the covariance function.
+#'
+#' @param gridpit logical. If \code{TRUE} (the default value), the parameter ngrid is ignored and (0,1) interval is divided
+#' based on probability inverse transformed values obtained from the sample. If \code{FALSE}, the interval is divided into ngrid
+#' equally spaced points for computing the covariance function.
+#'
+#' @param precision The theory behind goodness-of-fit test based on empirical distribution function (edf) works well
+#' if the MLE is indeed the root of derivative of log likelihood function. A precision of 1e-9 (default value) is used
+#' to check this. A warning message is generated if the score evaluated at MLE is not close enough to zero.
+#'
+#' @param method a character string indicating which goodness-of-fit statistic is to be computed. The default value is
+#' 'cvm' for the Cramer-von-Mises statistic. Other options include 'ad' for the Anderson-Darling statistic, and 'both'
+#' to compute both cvm and ad.
+#'
+#' @details
+#' Additional details...
+#'
+#' @return A list of two containing the following components:
+#' - Statistic: the value of goodness-of-fit statistic.
+#' - pvalue: the approximate pvalue for the goodness-of-fit test based on empirical distribution function.
+#' if method = 'cvm' or method = 'ad', it returns a numeric value for the statistic and pvalue. If method = 'both', it
+#' returns a numeric vector with two elements and one for each statistic.
+#'
 #' @export
 #'
 #' @import stats
+#' @import statmod
 #'
 #' @examples
+#' # Example: Inverse Gaussian (IG) distribution with weights
+#'
+#' # Set the seed to reproduce example.
 #' set.seed(123)
-#' # Example 1
-#' # Generate some random data from Exponential dist
+#'
+#' # Set the sample size
 #' n <- 50
-#' sim_data <- rexp(n, rate = 2)
-#' # Estimate mle of scale parameter
-#' theta    <- expMLE(x = sim_data)
-#' testYourModel(x = sim_data, score = expScore, Fx = expFx, mle = theta, method = 'both')
-#' # Example 2
-#' # Generate some random data from Exponential dist
-#' n <- 50
-#' sim_data <- runif(n)
-#' # Estimate mle of scale parameter
-#' theta    <- expMLE(x = sim_data)
-#' testYourModel(x = sim_data, score = expScore, Fx = expFx, mle = theta, method = 'cvm')
-#' # Example 3
-#' # Generate some random data from Normal dist
-#' n <- 50
-#' sim_data <- rnorm(n)
-#' # Estimate mle of mean and sd
-#' theta    <- normalMLE(x = sim_data)
-#' testYourModel(x = sim_data, score = normalScore, Fx = normalPIT, mle = theta)
-#' # Example 4
-#' # Generate some random data from Normal dist
-#' n <- 50
-#' sim_data <- rnorm(n)
-#' # Estimate mle of mean and sd
-#' theta_hat  <- normalMLE(x = sim_data)
-#' score.matrix <- normalScore(x = sim_data, theta = theta_hat)
-#' pit.values   <- normalPIT(x = sim_data, theta = theta_hat)
-#' testYourModel(x = sim_data, score = score.matrix, Fx = pit.values, mle = theta_hat)
-testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = TRUE, precision = 1e-6, method = 'cvm'){
+#'
+#' # Assign weights
+#' covariates <- rep(1,n)
+#'
+#' # Set mean and shape parameters for IG distribution.
+#' mio        <- 2
+#' lambda     <- 2
+#'
+#' # Generate a random sample from IG distribution with weighted shape.
+#' y <- statmod::rinvgauss(n, mean = mio, shape = lambda * covariates)
+#'
+#' # Compute MLE of parameters, score matrix, and pit values.
+#' theta_hat    <- IG_mlefunc(obs = y, w = covariates)
+#' print(theta_hat)
+#' score.matrix <- IG_scorefunc(obs = y, mle = theta_hat, w = covariates)
+#' pit.values   <- IG_pitfunc(obs = y , mle = theta_hat)
+#'
+#' # Apply the goodness-of-fit test.
+#' testYourModel(x = y, pit = pit.values, score = score.matrix)
+#'
+testYourModel = function(x, pit, score = NULL, ngrid = length(x), gridpit = TRUE, precision = 1e-9, method = 'cvm'){
 
   if( !is.double(x) ){
     stop('x values must be numeric.')
   }
 
+  if( !is.vector(x) ){
+    stop('x must be a vector of numeric values.')
+  }
+
   if( length(x) < 2 ){
-    stop('The numbers of data must be greater than or equal 2.')
+    stop('The number of observations in x must be greater than or equal two.')
   }
 
-  if( !is.null(mle) ){
-
-    if( any( c(!is.numeric(mle), !is.vector(mle)) ) ){
-      stop('mle must be a numeric vector')
-    }
-
+  if( any(pit < 0) | any(pit > 1) ){
+    stop('pit values must be between zero and one.')
   }
 
-  check <- is.function(score) | is.matrix(score)
-  if( !check ){
-    stop('score must be either a function or a matrix.')
-  }
-
-  check <- is.function(Fx) | is.vector(Fx)
-  if( !check ){
-    stop('Fx must be either a function or a vector')
-  }
-
-  check <- is.function(score) & is.function(Fx)
-  if( check ){
-
-    # Get the number of parameters in score and Fx
-    narg1 <- length( formals(score) ) - 1
-    narg2 <- length( formals(Fx) )   - 1
-
-    if( narg1 != narg2 ){
-      stop('Number of parameters in score function and Fx function must be the same.')
-    }
-
-  }
-
-
-  # Case 1: No parameter estimation is needed
-  if( is.null(mle) ){
-
-    if( is.function(score) ){
-
-      # Apply score function over vector data to get score function.
-      score_matrix <- score(x)
-
-      if( !is.matrix(score_matrix) ){
-        stop('score function did not return a matrix.')
-      }
-
-    }else{
-      score_matrix <- score
-    }
-
-    if( any(colSums(score_matrix) > precision) ){
-      warning( paste0('Note that score function is not zero at MLE. precision of ', precision, ' was used') )
-    }
-
-    if( is.function(Fx) ){
-      # Apply Fx function to calculate probability inverse transform of data
-      pit  <- lapply(x, FUN = Fx)
-      pit  <- unlist(pit)
-    }else{
-      pit <- Fx
-    }
-
-    if( length(pit) != nrow(score_matrix) ){
-      stop('number of rows in score matrix does not match the length of elements in pit vector.')
-    }
-
-    # Get the number of data points in sample
-    n    <- length(x)
-
-    # Calculate Fisher information matrix, estimate from sample score matrix
-    fisher  <- (n-1)*var(score_matrix)/n
-
-    # Calculate Cramer-von-Mises, Anderson-Darling statistics or both
+  #
+  # Case 1: if score is null then it means there was no parameter estimation in the model.
+  # The model is fully specified and the covariance function of the  stochastic process,
+  # $\hat W_{n}(u)$, is simply min(s,t)-st for 0 <= s,t <=1. The Eigen values are:
+  # (i) for Cramer-von-Mises:  1 / ( pi^2 * j^2 ); j=1,2,3...
+  # (ii) for Anderson-Darling: 1 / ( j * (j+1) ); j=1,2,3,...
+  #
+  if( is.null(score) ){
 
     if ( method == 'cvm') {
 
@@ -152,12 +107,9 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
       cvm        <- getCvMStatistic(pit)
       names(cvm) <- 'Cramer-von-Mises Statistic'
 
-      # Get Eigen values
-      if( gridpit ){
-        ev    <- getEigenValues(S = score_matrix, FI = fisher, pit = pit, me = 'cvm')
-      }else{
-        ev    <- getEigenValues_manualGrid(S = score_matrix, FI = fisher, pit = pit, M = ngrid, me = 'cvm')
-      }
+      # Compute the 100 leading Eigenvalues of the covariance function
+      j  <- 1:100
+      ev <- 1 / ( pi^2 * j^2 )
 
       # Calculate pvalue
       pvalue  <- getpvalue(u = cvm, eigen = ev)
@@ -170,24 +122,18 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
     } else if ( method == 'ad') {
 
       # Calculate Anderson-Darling statistic
-      AD      <- getADStatistic(pit)
+      AD        <- getADStatistic(pit)
       names(AD) <- 'Anderson-Darling Statistic'
 
-
-      # Get Eigen values
-      if( gridpit ){
-        ev    <- getEigenValues(S = score_matrix, FI = fisher, pit = pit, me = 'ad')
-      }else{
-        ev    <- getEigenValues_manualGrid(S = score_matrix, FI = fisher, pit = pit, M = ngrid, me = 'ad')
-      }
-
+      # Compute the 100 leading Eigenvalues of the covariance function
+      j <- 1:100
+      ev <- 1 / ( j * (j+1) )
 
       # Calculate pvalue
       pvalue  <- getpvalue(u = AD, eigen = ev)
 
       # Prepare a list to return statistic and pvalue
       res     <- list(Statistic = AD, pvalue = pvalue)
-
       return(res)
 
     } else {
@@ -198,81 +144,65 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
       cvm        <- getCvMStatistic(pit)
       names(U2) <- 'Cramer-von-Mises Statistic'
 
+      # Compute the 100 leading Eigenvalues of the covariance function
+      j <- 1:100
+      ev <- 1 / ( pi^2 * j^2 )
+
       # Calculate pvalue
       cvm.pvalue  <- getpvalue(u = U2, eigen = ev)
       names(cvm.pvalue) <- 'pvalue for Cramer-von-Mises test'
 
-
-      # 2. Do ad calculations
+      # 2. Do AD calculations
       ad      <- getADStatistic(pit)
       names(ad) <- 'Anderson-Darling Statistic'
+
+      # Compute the 100 leading Eigenvalues of the covariance function
+      j <- 1:100
+      ev <- 1 / ( j * (j+1) )
 
       # Calculate pvalue
       ad.pvalue  <- getpvalue(u = ad, eigen = ev)
       names(ad.pvalue) <- 'Anderson-Darling test'
 
-
       # Prepare a list to return both statistics and their approximate pvalue
       res     <- list(Statistics = c(cvm, ad), pvalue = c(cvm.pvalue, ad.pvalue) )
       return(res)
-
     }
 
   }
 
-  # Case 2: Estimate parameters with MLE
-  if( !is.null(mle) ){
+  #
+  # Case 2: if score is not null then it means there is parameter estimation in the model.
+  # The score should be a matrix with n rows (number of observations in x) and p columns
+  # (the number of estimated parameters in the model).
+  # The covariance function of the stochastic process, $\hat W_{n}(u)$, needs to be calculated
+  # based on the GoF based on EDF.
+  #
+  if( !is.null(score) ){
 
-    if( is.function(score) ){
-
-      # Apply score function with mle over vector data to get score function.
-      score_matrix <- score(x, mle)
-
-      if( !is.matrix(score_matrix) ){
-        stop('score function did not return a matrix.')
-      }
-
-    }else{
-      score_matrix <- score
+    # Check if the score is a matrix
+    if( !is.matrix(score) ){
+      stop('score must be a matrix.')
     }
 
-    # Get the number of data points in sample
+    # Get the length of x.
     n    <- length(x)
 
-    # Get the number of parameters
-    p <- length(mle)
-
-    if( nrow(score_matrix) != n ){
+    # Check if score dimension is correct
+    if( nrow(score) != n ){
       stop('The number of rows in score matrix do not match the sample size in x.')
     }
 
-    if( ncol(score_matrix) != p){
-      stop('The number of columns in score matrix do not match the number of estimated parameters in mle vector.')
+    # Check if score is zero at MLE
+    if( any(colSums(score) > precision) ){
+      warning( paste0('Score matrix is not zero at MLE. precision of ', precision, ' was used') )
     }
 
-    if( any(colSums(score_matrix) > precision) ){
-      warning( paste0('Score matrix function is not zero at MLE. precision of ', precision, ' was used') )
-    }
-
-    if( is.function(Fx) ){
-      # Apply Fx function to calculate probability inverse transform of data
-      pit  <- lapply(x, FUN = Fx, mle)
-      pit  <- unlist(pit)
-    }else{
-      pit <- Fx
-    }
-
-    if( length(pit) != nrow(score_matrix) ){
-      stop('number of rows in score matrix does not match the length of elements in pit vector.')
-    }
-
-
-    # Calculate Fisher information matrix, estimate from sample score matrix
-    fisher  <- (n-1)*var(score_matrix)/n
+    # Calculate Fisher information matrix by computing the variance of score from the sample.
+    fisher  <- (n-1)*var(score)/n
 
 
     # Calculate Cramer-von-Mises, Anderson-Darling statistics or both
-
     if ( method == 'cvm' ) {
 
       # Calculate Cramer-von-Mises statistic
@@ -281,9 +211,9 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
 
       # Get Eigen values
       if( gridpit ){
-        ev    <- getEigenValues(S = score_matrix, FI = fisher, pit = pit, me = 'cvm')
+        ev    <- getEigenValues(S = score, FI = fisher, pit = pit, me = 'cvm')
       }else{
-        ev    <- getEigenValues_manualGrid(S = score_matrix, FI = fisher, pit = pit, M = ngrid, me = 'cvm')
+        ev    <- getEigenValues_manualGrid(S = score, FI = fisher, pit = pit, M = ngrid, me = 'cvm')
       }
 
       # Calculate pvalue
@@ -299,11 +229,12 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
       # Calculate Anderson-Darling statistic
       AD      <- getADStatistic(pit)
       names(AD) <- 'Anderson-Darling Statistic'
+
       # Get Eigen values
       if( gridpit ){
-        ev    <- getEigenValues(S = score_matrix, FI = fisher, pit = pit, me = 'ad')
+        ev    <- getEigenValues(S = score, FI = fisher, pit = pit, me = 'ad')
       }else{
-        ev    <- getEigenValues_manualGrid(S = score_matrix, FI = fisher, pit = pit, M = ngrid, me = 'ad')
+        ev    <- getEigenValues_manualGrid(S = score, FI = fisher, pit = pit, M = ngrid, me = 'ad')
       }
 
       # Calculate pvalue
@@ -324,9 +255,9 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
 
       # Get Eigen values
       if( gridpit ){
-        ev    <- getEigenValues(S = score_matrix, FI = fisher, pit = pit, me = 'cvm')
+        ev    <- getEigenValues(S = score, FI = fisher, pit = pit, me = 'cvm')
       }else{
-        ev    <- getEigenValues_manualGrid(S = score_matrix, FI = fisher, pit = pit, M = ngrid, me = 'cvm')
+        ev    <- getEigenValues_manualGrid(S = score, FI = fisher, pit = pit, M = ngrid, me = 'cvm')
       }
 
       # Calculate pvalue
@@ -340,9 +271,9 @@ testYourModel = function(x, score, Fx, mle = NULL, ngrid = length(x), gridpit = 
 
       # Get Eigen values
       if( gridpit ){
-        ev    <- getEigenValues(S = score_matrix, FI = fisher, pit = pit, me = 'ad')
+        ev    <- getEigenValues(S = score, FI = fisher, pit = pit, me = 'ad')
       }else{
-        ev    <- getEigenValues_manualGrid(S = score_matrix, FI = fisher, pit = pit, M = ngrid, me = 'ad')
+        ev    <- getEigenValues_manualGrid(S = score, FI = fisher, pit = pit, M = ngrid, me = 'ad')
       }
 
       # Calculate pvalue
