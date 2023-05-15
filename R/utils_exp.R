@@ -4,7 +4,6 @@
 #' @param theta MLE estimate of data
 #'
 #' @return A vector of transformed values
-#' @export
 #'
 expFx = function(x, theta){
 
@@ -24,7 +23,6 @@ expFx = function(x, theta){
 #' @param theta MLE estimate of data
 #'
 #' @return A matrix of nx1
-#' @export
 #'
 expScore = function(x, theta){
   S <- (1/theta) - x
@@ -37,7 +35,6 @@ expScore = function(x, theta){
 #' @param x a vector data
 #'
 #' @return Numeric
-#' @export
 #'
 expMLE = function(x){
   theta <- 1 / mean(x)

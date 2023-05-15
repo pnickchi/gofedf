@@ -4,7 +4,6 @@
 #' @param theta mle
 #'
 #' @return Score matrix
-#' @export
 #'
 normalScore = function(x, theta){
 
@@ -26,7 +25,6 @@ normalScore = function(x, theta){
 #' @param x vector of data
 #'
 #' @return MLE estimates of mean and sd
-#' @export
 #'
 normalMLE = function(x){
 
@@ -45,7 +43,6 @@ normalMLE = function(x){
 #' @param theta mle
 #'
 #' @return vector of probability inverse transformed values
-#' @export
 #'
 normalPIT = function(x, theta){
   z <- (x - theta[1]) / theta[2]
@@ -60,7 +57,6 @@ normalPIT = function(x, theta){
 #' @param par a vector of mle parameters
 #'
 #' @return Observed Hessian matrix for Normal distribution
-#' @export
 #'
 observedHessianMatrixNormal = function(par){
 

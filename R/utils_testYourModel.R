@@ -1,5 +1,7 @@
 #' Compute the maximum likelihood estimate of parameters in Inverse Gaussian distribution with weighted observations.
 #'
+#' @description This function is used in \code{\link{testYourModel}} function for example purposes.
+#'
 #' @param obs a numeric vector of sample observations.
 #' @param ... a list of additional parameters to define the likelihood. In this function, weight is being passed.
 #'
@@ -30,6 +32,8 @@ IG_mlefunc = function(obs, ...){
 
 
 #' Compute the score function of the Inverse Gaussian distribution based on a sample.
+#'
+#' @description This function is used in \code{\link{testYourModel}} function for example purposes.
 #'
 #' @param obs a numeric vector of sample observations.
 #' @param ... a list of additional parameters to define the likelihood. In this function, weight and mle are being passed.
@@ -71,6 +75,8 @@ IG_scorefunc = function(obs, ...){
 #'
 #' @param obs A numeric vector of sample observations.
 #' @param ... A list of additional parameters to define the likelihood. In this function, MLE is being passed.
+#'
+#' @description This function is used in \code{\link{testYourModel}} function for example purposes.
 #'
 #' @export
 #'
