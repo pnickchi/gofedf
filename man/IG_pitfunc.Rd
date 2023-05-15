@@ -15,5 +15,5 @@ IG_pitfunc(obs, ...)
 A numeric vector of probability transformed values of sample observations.
 }
 \description{
-Compute the probability transformed values for a sample from Inverse Gaussian distribution.
+This function is used in \code{\link{testYourModel}} function for example purposes.
 }

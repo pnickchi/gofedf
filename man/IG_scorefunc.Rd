@@ -15,5 +15,5 @@ IG_scorefunc(obs, ...)
 The score matrix with n rows (number of sample observations) and 2 columns (mean and shape).
 }
 \description{
-Compute the score function of the Inverse Gaussian distribution based on a sample.
+This function is used in \code{\link{testYourModel}} function for example purposes.
 }

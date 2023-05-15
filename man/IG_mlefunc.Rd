@@ -16,5 +16,5 @@ The function compute the MLE of parameters in Inverse Gaussian distribution and 
 estimates. The first and second elements of the vector are MLE of the mean and MLE of shape, respectively.
 }
 \description{
-Compute the maximum likelihood estimate of parameters in Inverse Gaussian distribution with weighted observations.
+This function is used in \code{\link{testYourModel}} function for example purposes.
 }
