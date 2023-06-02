@@ -27,9 +27,9 @@ statistic and computing the approximate pvalue by Imhof method.
 The package can be used to apply goodness of fit test in any of the
 following cases:
 
-1)  Check if the residuals of a generalized linear model (with any link)
+1)  Check if the response variable in a generalized linear model (with any link)
     follows the Gamma distribution.
-2)  Check if the residuals of a linear model follows Normal
+2)  Check if the reponse variabel in a linear model follows Normal
     distribution.
 3)  Check if a bivariate continuous set of data follows any specific
     distribution that is defined by user.
@@ -141,7 +141,7 @@ testLMNormal(x = X, y)
 # testLMNormal(fit = myfit)
 ```
 
-### Generalized linear model with Gamma residuals
+### Generalized linear model with Gamma response variable
 
 ``` r
 # Reproducible example
@@ -156,7 +156,7 @@ b <- runif(p)
 e <- rgamma(n, shape = 3)
 y <- exp(X %*% b) * e
 
-# Test if the residuals of the model follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate pvalue
+# Test if the response of the model follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate pvalue
 testGLMGamma(x=X, y, l = 'log', method = 'cvm')
 ```
 
