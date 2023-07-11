@@ -20,20 +20,20 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Authors:
 
-*   [Payman Nickchi](https://github.com/pnickchi),
-    <pnickchi@sfu.ca> (Maintainer)
 *   [Richard Lockhart](http://www.sfu.ca/~lockhart/),
     <lockhart@sfu.ca>
+*   [Payman Nickchi](https://github.com/pnickchi),
+    <pnickchi@sfu.ca> (Maintainer)
 
 
-The GoFTest package provides tools to apply goodness of fit tests based on empirical distribution function theory. The software provides functions and routines to test the hypothesis that a sample follows a distribution by calculating Cramer-von Mises or Anderson-Darling statistic and computing the approximate pvalue by Imhof method.
+The GoFTest package provides tools to apply goodness of fit tests based on empirical distribution function theory. The software provides functions and routines to test the hypothesis that a sample follows a distribution by calculating Cramer-von Mises or Anderson-Darling statistic. An approximate p-value based on the limiting distribution of statistic
+is computed by Imhof method. More importantly the package can be used to test if a sample comes from any general likelihood model. In summary, the package can be used to apply goodness of fit test in any of the following settings: 
 
-The package can be used to apply goodness of fit test in any of the following cases: 
-
-1) Check if the residuals of a generalized linear model (with any link) follows the Gamma distribution.
-2) Check if the residuals of a linear model follows Normal distribution.
-3) Check if a bivariate continuous set of data follows any specific distribution that is defined by user. 
-4) Apply goodness of fit test for bivariate Normal, Gamma, and Exponential distributions.
+1) Check if the assumptions about the response variable in a generalized linear model (with any link) is satisfied. Current
+version only check for Gamma distribution.
+2) Check if the residuals of a linear model follows a Normal distribution.
+3) Apply goodness of fit test to examine if a set of bivariate sample follows Normal, Gamma, or Exponential distribution.
+4) Check if a bivariate continuous set of data follows any specific distribution that is defined by user. In this case, probability inverted values of the sample and score function (if there is any parameter estimation involved) is needed.
 
 
 ## Installation
@@ -66,7 +66,7 @@ library(GoFTest)
 
 ```{r}
 # Reproducible example
-set.seed(1)
+set.seed(123)
 
 # Randomly generate some data
 n <- 50
@@ -86,7 +86,7 @@ In this example, we show how to apply goodness of fit test over a vector of data
 
 ```{r}
 # Reproducible example
-set.seed(2)
+set.seed(123)
 
 # Randomly generate some data
 n <- 50
@@ -101,7 +101,7 @@ testGamma(x = sim_data, method = 'cvm')
 
 ```{r}
 # Reproducible example
-set.seed(3)
+set.seed(123)
 
 # Create a set of explanatory variables and response according to a linear model
 n <- 50
@@ -120,11 +120,11 @@ testLMNormal(x = X, y)
 ```
 
 
-### Generalized linear model with Gamma residuals
+### Generalized linear model with Gamma response and log link function
 
 ```{r}
 # Reproducible example
-set.seed(4)
+set.seed(123)
 
 
 # Create a set of explanatory variables and response according to a generalized linear model with log link
@@ -143,30 +143,41 @@ testGLMGamma(x=X, y, l = 'log', method = 'cvm')
 
 ### User defined distributions
 
-One of the most important features of the package is to allow users to apply the goodness of fit test based on empirical distribution functions for a user defined distribution. This is helpful when the functions and procedures for a distribution is not included in any R packages. 
-For example, imagine you have a sample of size $n$ such as $x_{1},x_{2},...,x_{n}$ from a model with $p$ unknown parameters such as $\theta$. The package requires 3 elements to apply GoF for your model:
+One of the most important features of the package is to allow users to apply the goodness of fit test based on empirical distribution functions for ant general likelihood model. This is helpful when the functions and procedures for a distribution is not included in any R packages. For example, imagine you have a sample of size $n$ such as $x_{1},x_{2},...,x_{n}$ from a model with $p$ unknown parameters such as $\theta$. The package requires two inputs to apply the test:
 
 1) A function to calculate score values for each observation and returns a (n x p) matrix. Each rows calculates the score for each observation. Alternatively you might have the score values as a matrix which is also acceptable.     
 
-2) A function to calculate probability inverse transformation of data. This is usually a function that returns a vector with n elements where each element is $F^{-1}(x_{i})$. You can alternatively pass a vector of values as well.
-
-3) Maximum likelihood estimate of $\theta$. 
+2) A vector of length $n$ where elements where each element is $F^{-1}(x_{i})$.
 
 ```{r}
-set.seed(123)
+# Example: Inverse Gaussian (IG) distribution with weights
+
+# Reproducible example
+#set.seed(123)
+
+
+# Set the sample size
 n <- 50
-x <- rexp(n)
 
-# Case one: score matrix and pit values are provided.
-mle.theta     <- expMLE(x)
-score.matrix  <- expScore(x, theta = mle.theta)
-pit           <- expFx(x, theta = mle.theta)
-testYourModel(x, score = score.matrix, Fx = pit, mle = mle.theta)
+# Assign weights
+covariates <- rep(1.5,n)
+
+# Set mean and shape parameters for IG distribution.
+mio        <- 2
+lambda     <- 2
+
+# Generate a random sample from IG distribution with weighted shape.
+y <- statmod::rinvgauss(n, mean = mio, shape = lambda * covariates)
+
+# Compute MLE of parameters, score matrix, and pit values.
+theta_hat    <- IG_mlefunc(obs = y, w = covariates)
+score.matrix <- IG_scorefunc(obs = y, mle = theta_hat, w = covariates)
+pit.values   <- IG_pitfunc(obs = y , mle = theta_hat)
+
+# Apply the goodness-of-fit test.
+testYourModel(x = y, pit = pit.values, score = score.matrix)
 
 
-# Case two: Two functions are provided to calculate score and pit.
-mle.theta     <- expMLE(x)
-testYourModel(x, score = expScore, Fx = expFx, mle = mle.theta)
 ```
 
 
