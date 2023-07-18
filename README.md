@@ -20,51 +20,65 @@ Authors:
 - [Payman Nickchi](https://github.com/pnickchi), <pnickchi@sfu.ca>
   (Maintainer)
 
-The `gofedf` package provides tools to apply goodness of fit tests based
-on empirical distribution function theory. The package provides
-functions and routines to test the hypothesis that a univariate sample
-follows a distribution based on the empirical distribution function. The
-theory by calculating Cramer-von Mises or Anderson-Darling statistic. An
-approximate p-value based on the limiting distribution of statistic is
-computed by farebrother method. More importantly the package can be used
-to test if a sample comes from any general likelihood model. In summary,
-the package can be used to apply goodness of fit test in any of the
-following settings:
+The `gofedf` package provides tools to apply goodness-of-fit tests based
+on empirical distribution function theory. The package offers functions
+and routines to test the hypothesis that a univariate sample follows a
+distribution based on the empirical distribution function. The theory is
+founded on reducing the problem to a stochastic process and computing
+its covariance function. An approximate p-value, computed using the
+farebrother method based on the limiting distribution of the statistic,
+is provided. Users can run the test by calculating either the Cramer-von
+Mises or Anderson-Darling statistic. The covariance function of the
+stochastic process relies on specific characteristics of the assumed
+model. Notably, knowledge of the Fisher information matrix and the
+partial derivatives of the cumulative distribution function is crucial
+for computing the covariance function. However, obtaining these
+quantities can be computationally intensive or challenging in general
+likelihood models. To overcome this limitation, we propose an
+alternative method for estimating the covariance function of the
+stochastic process directly from the sample data. The package provides
+tools for this estimation and for testing if a sample comes from any
+general likelihood model. In summary, the package can be used to apply a
+goodness-of-fit test in any of the following settings:
 
-1)  Check if the assumptions about the response variable in a
-    generalized linear model (with any link) is satisfied. Current
-    version only check for Gamma distribution.
-2)  Check if the residuals of a linear model follows a Normal
-    distribution.
-3)  Apply goodness of fit test to examine if a set of bivariate sample
-    follows Normal, Gamma, or Exponential distribution.
-4)  Check if a bivariate continuous set of data follows any specific
-    distribution that is defined by user. In this case, probability
-    inverted values of the sample and score function (if there is any
-    parameter estimation involved) is needed.
+- Verify if the assumptions about the response variable in a generalized
+  linear model (with any link function) are satisfied. The current
+  version only checks for the Gamma distribution.
+
+- Validate if the residuals of a linear model follow a Normal
+  distribution.
+
+- Apply a goodness-of-fit test to examine if a set of bivariate samples
+  follows a Normal, Gamma, or Exponential distribution.
+
+- Determine if a bivariate continuous set of data conforms to a specific
+  distribution defined by the user. In this case, probability inverted
+  values of the sample and the score function (if any parameter
+  estimation is involved) are required.
 
 ## Installation
 
-You can install the released version of GoFTest from
+You can install the released version of `gofedf` from
 [CRAN](https://CRAN.R-project.org) with:
 
 ``` r
-install.packages('GoFTest')
+install.packages('gofedf')
 ```
 
 And the development version from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github('pnickchi/GoFTest')
+devtools::install_github('pnickchi/gofedf')
 ```
 
-## Example
+## Examples
 
-### Bivariate Normal distribution
+### 1. Bivariate Normal distribution
 
-In this example, we show how to apply goodness of fit test over a vector
-of data and check if the data follows a normal distribution.
+In this example, we demonstrate how to apply a goodness-of-fit test
+based on the empirical distribution function (EDF) to assess whether a
+vector of data follows a Normal distribution.
 
 ``` r
 # Reproducible example
@@ -74,28 +88,34 @@ set.seed(123)
 n <- 50
 sim_data <- rnorm(n)
 
-# Test if the data follows a normal distribution, calculate Cramer-von Mises statistic and approximate pvalue
+# Test if the data follows a Normal distribution, calculate Cramer-von Mises statistic and approximate p-value of the test.
 testNormal(x = sim_data, method = 'cvm')
 ```
+
+    ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
+    ## correct pvalue. The pvalue lies between 0.26737599937446 and 1
 
     ## $Statistic
     ## [1] 0.03781322
     ## 
     ## $pvalue
-    ## [1] 0.6646717
+    ## [1] 8
 
 ``` r
-# Test if the data follows a normal distribution, calculate Anderson-Darling statistic and approximate pvalue
+# Test if the data follows a Normal distribution, calculate Anderson-Darling statistic and approximate p-value of the test.
 testNormal(x = sim_data, method = 'ad')
 ```
+
+    ## Warning in getpvalue(u = AD, eigen = ev): CompQuadForm failed to generate a
+    ## correct pvalue. The pvalue lies between 0.263880190202964 and 1
 
     ## $Statistic
     ## [1] 0.2179704
     ## 
     ## $pvalue
-    ## [1] 0.7833757
+    ## [1] 8
 
-### Bivariate Gamma distribution
+### 2. Bivariate Gamma distribution
 
 In this example, we show how to apply goodness of fit test over a vector
 of data and check if the data follows a Gamma distribution.
@@ -112,13 +132,16 @@ sim_data <- rgamma(n, shape = 3)
 testGamma(x = sim_data, method = 'cvm')
 ```
 
+    ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
+    ## correct pvalue. The pvalue lies between 0.144766470183369 and 0.993008632555107
+
     ## $Statistic
     ## [1] 0.0549759
     ## 
     ## $pvalue
-    ## [1] 0.3446122
+    ## [1] 8
 
-### Linear model with normal residuals
+### 3. Linear model with normal residuals
 
 ``` r
 # Reproducible example
@@ -136,11 +159,15 @@ y <- X %*% b + e
 testLMNormal(x = X, y)
 ```
 
+    ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
+    ## correct pvalue. The pvalue lies between 0.0144740066675692 and
+    ## 0.341840751142698
+
     ## $Statistic
     ## [1] 0.0971424
     ## 
     ## $pvalue
-    ## [1] 0.03694917
+    ## [1] 8
 
 ``` r
 # Or alternatively just pass 'myfit' object directly instead of X and y:
@@ -148,7 +175,7 @@ testLMNormal(x = X, y)
 # testLMNormal(fit = myfit)
 ```
 
-### Generalized linear model with Gamma response and log link function
+### 4. Generalized linear model with Gamma response and log link function
 
 ``` r
 # Reproducible example
@@ -167,20 +194,23 @@ y <- exp(X %*% b) * e
 testGLMGamma(x=X, y, l = 'log', method = 'cvm')
 ```
 
+    ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
+    ## correct pvalue. The pvalue lies between 0.258929317433151 and 1
+
     ## $Statistic
     ## [1] 0.04026585
     ## 
     ## $pvalue
-    ## [1] 0.5894211
+    ## [1] 8
     ## 
     ## $converged
     ## [1] TRUE
 
-### User defined distributions
+### 4. General likelihood model
 
 One of the most important features of the package is to allow users to
 apply the goodness of fit test based on empirical distribution functions
-for ant general likelihood model. This is helpful when the functions and
+for any general likelihood model. This is helpful when the functions and
 procedures for a distribution is not included in any R packages. For
 example, imagine you have a sample of size $n$ such as
 $x_{1},x_{2},...,x_{n}$ from a model with $p$ unknown parameters such as
@@ -223,17 +253,21 @@ pit.values   <- IG_pitfunc(obs = y , mle = theta_hat)
 testYourModel(x = y, pit = pit.values, score = score.matrix)
 ```
 
+    ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
+    ## correct pvalue. The pvalue lies between 0.00530976850160436 and
+    ## 0.164692390389004
+
     ## $Statistic
     ## Cramer-von-Mises Statistic 
     ##                  0.1698982 
     ## 
     ## $pvalue
-    ## [1] 0.01243791
+    ## [1] 8
 
 ### References
 
-\[1\] Stephens, M.A. (1974). [EDF Statistics for Goodness of Fit and
-Some Comparisons.](https://doi.org/10.2307/2286009) *Journal of the
-American Statistical Association*, Vol. 69, 730-737. \[2\] Stephens,
-M.A. (1976). \[Asymptotic results for goodness-of-fit statistics with
-unknown parameters.\] *Annals of Statistics*, Vol. 4, 357-369.
+\[1\] Stephens, M.A. (1974). \[EDF Statistics for Goodness of Fit and
+Some Comparisons.\] *Journal of the American Statistical Association*,
+Vol. 69, 730-737. \[2\] Stephens, M.A. (1976). \[Asymptotic results for
+goodness-of-fit statistics with unknown parameters.\] *Annals of
+Statistics*, Vol. 4, 357-369.

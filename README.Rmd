@@ -27,17 +27,17 @@ Authors:
 
 The `gofedf` package provides tools to apply goodness-of-fit tests based on empirical distribution function theory. The package offers functions and routines to test the hypothesis that a univariate sample follows a distribution based on the empirical distribution function. The theory is founded on reducing the problem to a stochastic process and computing its covariance function. An approximate p-value, computed using the farebrother method based on the limiting distribution of the statistic, is provided. Users can run the test by calculating either the Cramer-von Mises or Anderson-Darling statistic. The covariance function of the stochastic process relies on specific characteristics of the assumed model. Notably, knowledge of the Fisher information matrix and the partial derivatives of the cumulative distribution function is crucial for computing the covariance function. However, obtaining these quantities can be computationally intensive or challenging in general likelihood models. To overcome this limitation, we propose an alternative method for estimating the covariance function of the stochastic process directly from the sample data. The package provides tools for this estimation and for testing if a sample comes from any general likelihood model. In summary, the package can be used to apply a goodness-of-fit test in any of the following settings:
 
-1) Verify if the assumptions about the response variable in a generalized linear model (with any link function) are satisfied. The current version only checks for the Gamma distribution.
+- Verify if the assumptions about the response variable in a generalized linear model (with any link function) are satisfied. The current version only checks for the Gamma distribution.
 
-2) Validate if the residuals of a linear model follow a Normal distribution.
+- Validate if the residuals of a linear model follow a Normal distribution.
 
-3) Apply a goodness-of-fit test to examine if a set of bivariate samples follows a Normal, Gamma, or Exponential distribution.
+- Apply a goodness-of-fit test to examine if a set of bivariate samples follows a Normal, Gamma, or Exponential distribution.
 
-4) Determine if a bivariate continuous set of data conforms to a specific distribution defined by the user. In this case, probability inverted values of the sample and the score function (if any parameter estimation is involved) are required.
+- Determine if a bivariate continuous set of data conforms to a specific distribution defined by the user. In this case, probability inverted values of the sample and the score function (if any parameter estimation is involved) are required.
 
 ## Installation
 
-You can install the released version of gofedf from [CRAN](https://CRAN.R-project.org) with:
+You can install the released version of `gofedf` from [CRAN](https://CRAN.R-project.org) with:
 
 ```{r, eval=FALSE}
 install.packages('gofedf')
@@ -139,8 +139,7 @@ testGLMGamma(x=X, y, l = 'log', method = 'cvm')
 ```
 
 
-
-### General likelihood model
+### 4. General likelihood model
 
 One of the most important features of the package is to allow users to apply the goodness of fit test based on empirical distribution functions for any general likelihood model. This is helpful when the functions and procedures for a distribution is not included in any R packages. For example, imagine you have a sample of size $n$ such as $x_{1},x_{2},...,x_{n}$ from a model with $p$ unknown parameters such as $\theta$. The package requires two inputs to apply the test:
 
