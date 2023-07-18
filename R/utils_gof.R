@@ -106,7 +106,7 @@ getpvalue = function(u, eigen){
 
   UB <- getUpperBoundForpvalue(statistic = u, lambda = eigen)
 
-  pvalue  <- CompQuadForm::imhof(q = u, lambda = eigen)$Qq
+  pvalue  <- CompQuadForm::farebrother(q = u, lambda = eigen)$Qq
 
   if( (pvalue >= LB) & (pvalue <= UB) ){
     return(pvalue)
@@ -114,17 +114,6 @@ getpvalue = function(u, eigen){
     warning(paste0('CompQuadForm failed to generate a correct pvalue. The pvalue lies between ', LB, ' and ', UB))
     return(pvalue)
   }
-
-
-  # if( pvalue < 0 ){
-  #   pvalue <- 2 * pnorm( - sqrt( u / max(eigen) ) )
-  #   warning('CompQuadForm generated a negative pvalue. The pvalue replaced by a lower bound.')
-  # }
-  #
-  # if( pvalue > 1 ){
-  #   pvalue <- 1
-  #   warning('CompQuadForm generated pvalue > 1. The pvalue replaced by an upper bound.')
-  # }
 
 }
 
@@ -193,7 +182,6 @@ getUpperBoundForpvalue = function(statistic, lambda, tol = 1e-10, max.iter = 50)
       f.UB <- f.mid
     }
 
-    #print( paste('f.LB is ', f.LB, 'f.UB is ', f.UB) )
   }
 
   root <- (t_LB + t_UB)/2

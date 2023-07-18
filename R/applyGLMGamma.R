@@ -1,6 +1,8 @@
 applyGLMGamma = function(x, y, fml, sv, ctl, fit.included){
 
+   #
    # Check if we need to fit a GLM or user already provided the fit
+   #
    if( is.null(fit.included) ){
 
      ################################################
@@ -46,7 +48,6 @@ applyGLMGamma = function(x, y, fml, sv, ctl, fit.included){
    names(par)[length(par)]  <- 'shape'
 
    ###############################################################################################
-
 
 
    # Extract family function and design matrix (X) from fit object and calculates the linear predictor.
