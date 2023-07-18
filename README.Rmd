@@ -8,14 +8,12 @@ date: "`r Sys.Date()`"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# GoFTest
+# gofedf
 
 <!-- badges: start -->
-
-[![CRAN status](https://www.r-pkg.org/badges/version/PEIMAN2)](https://cran.r-project.org/package=PEIMAN2) 
-[![GitHub Release](https://img.shields.io/github/release/jafarilab/PEIMAN2?style=flat)](https://github.com/jafarilab/PEIMAN2/releases) 
-[![Github All Releases](https://img.shields.io/github/downloads/jafarilab/PEIMAN2/total.svg?style=flat)](https://github.com/jafarilab/PEIMAN2)
-
+[![CRAN status](https://www.r-pkg.org/badges/version/gofedf)](https://cran.r-project.org/package=gofedf) 
+[![GitHub Release](https://img.shields.io/github/release/pnickchi/gofedf?style=flat)](https://github.com/pnickchi/gofedf/releases) 
+[![Github All Releases](https://img.shields.io/github/downloads/pnickchi/gofedf/total.svg?style=flat)](https://github.com/pnickchi/gofedf)
 <!-- badges: end -->
 
 
@@ -27,22 +25,22 @@ Authors:
     <pnickchi@sfu.ca> (Maintainer)
 
 
-The GoFTest package provides tools to apply goodness of fit tests based on empirical distribution function theory. The software provides functions and routines to test the hypothesis that a sample follows a distribution by calculating Cramer-von Mises or Anderson-Darling statistic. An approximate p-value based on the limiting distribution of statistic
-is computed by Imhof method. More importantly the package can be used to test if a sample comes from any general likelihood model. In summary, the package can be used to apply goodness of fit test in any of the following settings: 
+The `gofedf` package provides tools to apply goodness-of-fit tests based on empirical distribution function theory. The package offers functions and routines to test the hypothesis that a univariate sample follows a distribution based on the empirical distribution function. The theory is founded on reducing the problem to a stochastic process and computing its covariance function. An approximate p-value, computed using the farebrother method based on the limiting distribution of the statistic, is provided. Users can run the test by calculating either the Cramer-von Mises or Anderson-Darling statistic. The covariance function of the stochastic process relies on specific characteristics of the assumed model. Notably, knowledge of the Fisher information matrix and the partial derivatives of the cumulative distribution function is crucial for computing the covariance function. However, obtaining these quantities can be computationally intensive or challenging in general likelihood models. To overcome this limitation, we propose an alternative method for estimating the covariance function of the stochastic process directly from the sample data. The package provides tools for this estimation and for testing if a sample comes from any general likelihood model. In summary, the package can be used to apply a goodness-of-fit test in any of the following settings:
 
-1) Check if the assumptions about the response variable in a generalized linear model (with any link) is satisfied. Current
-version only check for Gamma distribution.
-2) Check if the residuals of a linear model follows a Normal distribution.
-3) Apply goodness of fit test to examine if a set of bivariate sample follows Normal, Gamma, or Exponential distribution.
-4) Check if a bivariate continuous set of data follows any specific distribution that is defined by user. In this case, probability inverted values of the sample and score function (if there is any parameter estimation involved) is needed.
+1) Verify if the assumptions about the response variable in a generalized linear model (with any link function) are satisfied. The current version only checks for the Gamma distribution.
 
+2) Validate if the residuals of a linear model follow a Normal distribution.
+
+3) Apply a goodness-of-fit test to examine if a set of bivariate samples follows a Normal, Gamma, or Exponential distribution.
+
+4) Determine if a bivariate continuous set of data conforms to a specific distribution defined by the user. In this case, probability inverted values of the sample and the score function (if any parameter estimation is involved) are required.
 
 ## Installation
 
-You can install the released version of GoFTest from [CRAN](https://CRAN.R-project.org) with:
+You can install the released version of gofedf from [CRAN](https://CRAN.R-project.org) with:
 
 ```{r, eval=FALSE}
-install.packages('GoFTest')
+install.packages('gofedf')
 ```
 
 
@@ -50,18 +48,18 @@ And the development version from [GitHub](https://github.com/) with:
 
 ```{r, eval=FALSE}
 # install.packages("devtools")
-devtools::install_github('pnickchi/GoFTest')
+devtools::install_github('pnickchi/gofedf')
 ```
 
 
-## Example
+## Examples
 
 
-### Bivariate Normal distribution
-In this example, we show how to apply goodness of fit test over a vector of data and check if the data follows a normal distribution.
+### 1. Bivariate Normal distribution
+In this example, we demonstrate how to apply a goodness-of-fit test based on the empirical distribution function (EDF) to assess whether a vector of data follows a Normal distribution.
 
 ```{r, echo = FALSE}
-library(GoFTest)
+library(gofedf)
 ```
 
 
@@ -73,16 +71,16 @@ set.seed(123)
 n <- 50
 sim_data <- rnorm(n)
 
-# Test if the data follows a normal distribution, calculate Cramer-von Mises statistic and approximate pvalue
+# Test if the data follows a Normal distribution, calculate Cramer-von Mises statistic and approximate p-value of the test.
 testNormal(x = sim_data, method = 'cvm')
 
-# Test if the data follows a normal distribution, calculate Anderson-Darling statistic and approximate pvalue
+# Test if the data follows a Normal distribution, calculate Anderson-Darling statistic and approximate p-value of the test.
 testNormal(x = sim_data, method = 'ad')
 
 ```
 
 
-### Bivariate Gamma distribution
+### 2. Bivariate Gamma distribution
 In this example, we show how to apply goodness of fit test over a vector of data and check if the data follows a Gamma distribution.
 
 ```{r}
@@ -98,7 +96,7 @@ testGamma(x = sim_data, method = 'cvm')
 ```
 
 
-### Linear model with normal residuals
+### 3. Linear model with normal residuals
 
 ```{r}
 # Reproducible example
@@ -121,7 +119,7 @@ testLMNormal(x = X, y)
 ```
 
 
-### Generalized linear model with Gamma response and log link function
+### 4. Generalized linear model with Gamma response and log link function
 
 ```{r}
 # Reproducible example
@@ -142,9 +140,9 @@ testGLMGamma(x=X, y, l = 'log', method = 'cvm')
 
 
 
-### User defined distributions
+### General likelihood model
 
-One of the most important features of the package is to allow users to apply the goodness of fit test based on empirical distribution functions for ant general likelihood model. This is helpful when the functions and procedures for a distribution is not included in any R packages. For example, imagine you have a sample of size $n$ such as $x_{1},x_{2},...,x_{n}$ from a model with $p$ unknown parameters such as $\theta$. The package requires two inputs to apply the test:
+One of the most important features of the package is to allow users to apply the goodness of fit test based on empirical distribution functions for any general likelihood model. This is helpful when the functions and procedures for a distribution is not included in any R packages. For example, imagine you have a sample of size $n$ such as $x_{1},x_{2},...,x_{n}$ from a model with $p$ unknown parameters such as $\theta$. The package requires two inputs to apply the test:
 
 1) A function to calculate score values for each observation and returns a (n x p) matrix. Each rows calculates the score for each observation. Alternatively you might have the score values as a matrix which is also acceptable.     
 
@@ -182,3 +180,6 @@ testYourModel(x = y, pit = pit.values, score = score.matrix)
 ```
 
 
+### References
+[1] Stephens, M.A. (1974). [EDF Statistics for Goodness of Fit and Some Comparisons.] *Journal of the American Statistical Association*, Vol. 69, 730-737.
+[2] Stephens, M.A. (1976). [Asymptotic results for goodness-of-fit statistics with unknown parameters.] *Annals of Statistics*, Vol. 4, 357-369.

@@ -1,44 +1,51 @@
 README
 ================
-2022-11-15
+2023-07-18
 
-# GoFTest
+# gofedf
 
 <!-- badges: start -->
 
-[![CRANstatus](https://www.r-pkg.org/badges/version/GoFTest)](https://cran.r-project.org/package=GoFTest)
-[![GitHubRelease](https://img.shields.io/github/release/GoFTest/GoFTest?style=flat)](https://github.com/GoFTest/PEIMAN2/releases)
-[![Github All Releases](https://img.shields.io/github/downloads/GoFTest/PEIMAN2/total.svg?style=flat)](https://github.com/GoFTest/PEIMAN2)
-
+[![CRAN
+status](https://www.r-pkg.org/badges/version/gofedf)](https://cran.r-project.org/package=gofedf)
+[![GitHub
+Release](https://img.shields.io/github/release/pnickchi/gofedf?style=flat)](https://github.com/pnickchi/gofedf/releases)
+[![Github All
+Releases](https://img.shields.io/github/downloads/pnickchi/gofedf/total.svg?style=flat)](https://github.com/pnickchi/gofedf)
 <!-- badges: end -->
 
 Authors:
 
+- [Richard Lockhart](http://www.sfu.ca/~lockhart/), <lockhart@sfu.ca>
 - [Payman Nickchi](https://github.com/pnickchi), <pnickchi@sfu.ca>
   (Maintainer)
-- [Richard Lockhart](http://www.sfu.ca/~lockhart/), <lockhart@sfu.ca>
 
-The GoFTest package provides tools to apply goodness of fit tests based
-on empirical distribution function theory. The software provides
-functions and routines to test the hypothesis that a sample follows a
-distribution by calculating Cramer-von Mises or Anderson-Darling
-statistic and computing the approximate pvalue by Imhof method.
+The `gofedf` package provides tools to apply goodness of fit tests based
+on empirical distribution function theory. The package provides
+functions and routines to test the hypothesis that a univariate sample
+follows a distribution based on the empirical distribution function. The
+theory by calculating Cramer-von Mises or Anderson-Darling statistic. An
+approximate p-value based on the limiting distribution of statistic is
+computed by farebrother method. More importantly the package can be used
+to test if a sample comes from any general likelihood model. In summary,
+the package can be used to apply goodness of fit test in any of the
+following settings:
 
-The package can be used to apply goodness of fit test in any of the
-following cases:
-
-1)  Check if the response variable in a generalized linear model (with any link)
-    follows the Gamma distribution.
-2)  Check if the reponse variabel in a linear model follows Normal
+1)  Check if the assumptions about the response variable in a
+    generalized linear model (with any link) is satisfied. Current
+    version only check for Gamma distribution.
+2)  Check if the residuals of a linear model follows a Normal
     distribution.
-3)  Check if a bivariate continuous set of data follows any specific
-    distribution that is defined by user.
-4)  Apply goodness of fit test for bivariate Normal, Gamma, and
-    Exponential distributions.
+3)  Apply goodness of fit test to examine if a set of bivariate sample
+    follows Normal, Gamma, or Exponential distribution.
+4)  Check if a bivariate continuous set of data follows any specific
+    distribution that is defined by user. In this case, probability
+    inverted values of the sample and score function (if there is any
+    parameter estimation involved) is needed.
 
 ## Installation
 
-You can install the released version of GoFTest from (not released yet)
+You can install the released version of GoFTest from
 [CRAN](https://CRAN.R-project.org) with:
 
 ``` r
@@ -61,7 +68,7 @@ of data and check if the data follows a normal distribution.
 
 ``` r
 # Reproducible example
-set.seed(1)
+set.seed(123)
 
 # Randomly generate some data
 n <- 50
@@ -72,10 +79,10 @@ testNormal(x = sim_data, method = 'cvm')
 ```
 
     ## $Statistic
-    ## [1] 0.06711927
+    ## [1] 0.03781322
     ## 
     ## $pvalue
-    ## [1] 0.2622589
+    ## [1] 0.6646717
 
 ``` r
 # Test if the data follows a normal distribution, calculate Anderson-Darling statistic and approximate pvalue
@@ -83,10 +90,10 @@ testNormal(x = sim_data, method = 'ad')
 ```
 
     ## $Statistic
-    ## [1] 0.4788945
+    ## [1] 0.2179704
     ## 
     ## $pvalue
-    ## [1] 0.1274992
+    ## [1] 0.7833757
 
 ### Bivariate Gamma distribution
 
@@ -95,7 +102,7 @@ of data and check if the data follows a Gamma distribution.
 
 ``` r
 # Reproducible example
-set.seed(2)
+set.seed(123)
 
 # Randomly generate some data
 n <- 50
@@ -106,16 +113,16 @@ testGamma(x = sim_data, method = 'cvm')
 ```
 
     ## $Statistic
-    ## [1] 0.0916967
+    ## [1] 0.0549759
     ## 
     ## $pvalue
-    ## [1] 0.1676796
+    ## [1] 0.3446122
 
 ### Linear model with normal residuals
 
 ``` r
 # Reproducible example
-set.seed(3)
+set.seed(123)
 
 # Create a set of explanatory variables and response according to a linear model
 n <- 50
@@ -130,10 +137,10 @@ testLMNormal(x = X, y)
 ```
 
     ## $Statistic
-    ## [1] 0.07322979
+    ## [1] 0.0971424
     ## 
     ## $pvalue
-    ## [1] 0.1542016
+    ## [1] 0.03694917
 
 ``` r
 # Or alternatively just pass 'myfit' object directly instead of X and y:
@@ -141,11 +148,11 @@ testLMNormal(x = X, y)
 # testLMNormal(fit = myfit)
 ```
 
-### Generalized linear model with Gamma response variable
+### Generalized linear model with Gamma response and log link function
 
 ``` r
 # Reproducible example
-set.seed(4)
+set.seed(123)
 
 
 # Create a set of explanatory variables and response according to a generalized linear model with log link
@@ -156,15 +163,15 @@ b <- runif(p)
 e <- rgamma(n, shape = 3)
 y <- exp(X %*% b) * e
 
-# Test if the response of the model follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate pvalue
+# Test if the residuals of the model follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate pvalue
 testGLMGamma(x=X, y, l = 'log', method = 'cvm')
 ```
 
     ## $Statistic
-    ## [1] 0.02131014
+    ## [1] 0.04026585
     ## 
     ## $pvalue
-    ## [1] 0.9278594
+    ## [1] 0.5894211
     ## 
     ## $converged
     ## [1] TRUE
@@ -173,58 +180,60 @@ testGLMGamma(x=X, y, l = 'log', method = 'cvm')
 
 One of the most important features of the package is to allow users to
 apply the goodness of fit test based on empirical distribution functions
-for a user defined distribution. This is helpful when the functions and
+for ant general likelihood model. This is helpful when the functions and
 procedures for a distribution is not included in any R packages. For
-example, imagine you have a sample of size
-![n](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;n "n")
-such as
-![x\_{1},x\_{2},...,x\_{n}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;x_%7B1%7D%2Cx_%7B2%7D%2C...%2Cx_%7Bn%7D "x_{1},x_{2},...,x_{n}")
-from a model with
-![p](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;p "p")
-unknown parameters such as
-![\theta](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Ctheta "\theta").
-The package requires 3 elements to apply GoF for your model:
+example, imagine you have a sample of size $n$ such as
+$x_{1},x_{2},...,x_{n}$ from a model with $p$ unknown parameters such as
+$\theta$. The package requires two inputs to apply the test:
 
 1)  A function to calculate score values for each observation and
     returns a (n x p) matrix. Each rows calculates the score for each
     observation. Alternatively you might have the score values as a
     matrix which is also acceptable.
 
-2)  A function to calculate probability inverse transformation of data.
-    This is usually a function that returns a vector with n elements
-    where each element is
-    ![F^{-1}(x\_{i})](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;F%5E%7B-1%7D%28x_%7Bi%7D%29 "F^{-1}(x_{i})").
-    You can alternatively pass a vector of values as well.
-
-3)  Maximum likelihood estimate of
-    ![\theta](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Ctheta "\theta").
+2)  A vector of length $n$ where elements where each element is
+    $F^{-1}(x_{i})$.
 
 ``` r
-set.seed(123)
+# Example: Inverse Gaussian (IG) distribution with weights
+
+# Reproducible example
+#set.seed(123)
+
+
+# Set the sample size
 n <- 50
-x <- rexp(n)
 
-# Case one: score matrix and pit values are provided.
-mle.theta     <- expMLE(x)
-score.matrix  <- expScore(x, theta = mle.theta)
-pit           <- expFx(x, theta = mle.theta)
-testYourModel(x, score = score.matrix, Fx = pit, mle = mle.theta)
+# Assign weights
+covariates <- rep(1.5,n)
+
+# Set mean and shape parameters for IG distribution.
+mio        <- 2
+lambda     <- 2
+
+# Generate a random sample from IG distribution with weighted shape.
+y <- statmod::rinvgauss(n, mean = mio, shape = lambda * covariates)
+
+# Compute MLE of parameters, score matrix, and pit values.
+theta_hat    <- IG_mlefunc(obs = y, w = covariates)
+score.matrix <- IG_scorefunc(obs = y, mle = theta_hat, w = covariates)
+pit.values   <- IG_pitfunc(obs = y , mle = theta_hat)
+
+# Apply the goodness-of-fit test.
+testYourModel(x = y, pit = pit.values, score = score.matrix)
 ```
 
     ## $Statistic
-    ## [1] 0.08503541
+    ## Cramer-von-Mises Statistic 
+    ##                  0.1698982 
     ## 
     ## $pvalue
-    ## [1] 0.4519658
+    ## [1] 0.01243791
 
-``` r
-# Case two: Two functions are provided to calculate score and pit.
-mle.theta     <- expMLE(x)
-testYourModel(x, score = expScore, Fx = expFx, mle = mle.theta)
-```
+### References
 
-    ## $Statistic
-    ## [1] 0.08503541
-    ## 
-    ## $pvalue
-    ## [1] 0.4519658
+\[1\] Stephens, M.A. (1974). [EDF Statistics for Goodness of Fit and
+Some Comparisons.](https://doi.org/10.2307/2286009) *Journal of the
+American Statistical Association*, Vol. 69, 730-737. \[2\] Stephens,
+M.A. (1976). \[Asymptotic results for goodness-of-fit statistics with
+unknown parameters.\] *Annals of Statistics*, Vol. 4, 357-369.
