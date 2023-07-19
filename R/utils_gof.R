@@ -12,7 +12,6 @@ calculateWnuhat = function(S, FI, pit){
 
 }
 
-
 getEigenValues = function(S, FI, pit, me){
 
   n       <- nrow(S)
@@ -34,7 +33,6 @@ getEigenValues = function(S, FI, pit, me){
 
 }
 
-
 calculateWnuhat_manualGrid = function(S, FI, pit, M){
 
   n       <- nrow(S)
@@ -50,7 +48,6 @@ calculateWnuhat_manualGrid = function(S, FI, pit, M){
   return(Mat)
 
 }
-
 
 getEigenValues_manualGrid = function(S, FI, pit, M, me){
 
@@ -74,7 +71,6 @@ getEigenValues_manualGrid = function(S, FI, pit, M, me){
 
 }
 
-
 getCvMStatistic = function(x){
 
   n <- length(x)
@@ -85,7 +81,6 @@ getCvMStatistic = function(x){
   return(res)
 
 }
-
 
 getADStatistic = function(x){
 
@@ -98,7 +93,6 @@ getADStatistic = function(x){
   return(res)
 
 }
-
 
 getpvalue = function(u, eigen){
 
