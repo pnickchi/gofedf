@@ -179,5 +179,6 @@ testYourModel(x = y, pit = pit.values, score = score.matrix)
 
 ### References
 
-[1] Stephens, M.A. (1974). [EDF Statistics for Goodness of Fit and Some Comparisons.] *Journal of the American Statistical Association*, Vol. 69, 730-737.
+[1] Stephens, M.A. (1974). [EDF Statistics for Goodness of Fit and Some Comparisons.] *Journal of the American Statistical Association*, Vol. 69, 730-737.   
+
 [2] Stephens, M.A. (1976). [Asymptotic results for goodness-of-fit statistics with unknown parameters.] *Annals of Statistics*, Vol. 4, 357-369.

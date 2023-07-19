@@ -76,10 +76,6 @@ devtools::install_github('pnickchi/gofedf')
 
 ### 1. Bivariate Normal distribution
 
-In this example, we demonstrate how to apply a goodness-of-fit test
-based on the empirical distribution function (EDF) to assess whether a
-vector of data follows a Normal distribution.
-
 ``` r
 # Reproducible example
 set.seed(123)
@@ -93,13 +89,13 @@ testNormal(x = sim_data, method = 'cvm')
 ```
 
     ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
-    ## correct pvalue. The pvalue lies between 0.26737599937446 and 1
+    ## valid p-value. The p-value lies between 0.26737599937446 and 1
 
     ## $Statistic
     ## [1] 0.03781322
     ## 
     ## $pvalue
-    ## [1] -7
+    ## [1] 8
 
 ``` r
 # Test if the data follows a Normal distribution, calculate Anderson-Darling statistic and approximate p-value of the test.
@@ -107,18 +103,15 @@ testNormal(x = sim_data, method = 'ad')
 ```
 
     ## Warning in getpvalue(u = AD, eigen = ev): CompQuadForm failed to generate a
-    ## correct pvalue. The pvalue lies between 0.263880190202964 and 1
+    ## valid p-value. The p-value lies between 0.263880190202964 and 1
 
     ## $Statistic
     ## [1] 0.2179704
     ## 
     ## $pvalue
-    ## [1] -7
+    ## [1] 8
 
 ### 2. Bivariate Gamma distribution
-
-In this example, we show how to apply goodness of fit test over a vector
-of data and check if the data follows a Gamma distribution.
 
 ``` r
 # Reproducible example
@@ -133,13 +126,13 @@ testGamma(x = sim_data, method = 'cvm')
 ```
 
     ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
-    ## correct pvalue. The pvalue lies between 0.144766470183369 and 0.993008632555107
+    ## valid p-value. The p-value lies between 0.144766470183369 and 0.993008632555107
 
     ## $Statistic
     ## [1] 0.0549759
     ## 
     ## $pvalue
-    ## [1] -7
+    ## [1] 8
 
 ### 3. Linear model with normal residuals
 
@@ -147,7 +140,7 @@ testGamma(x = sim_data, method = 'cvm')
 # Reproducible example
 set.seed(123)
 
-# Create a set of explanatory variables and response according to a linear model
+# Create a set of explanatory variables and a response variable according to a linear model
 n <- 50
 p <- 5
 X <- matrix( runif(n*p), nrow = n, ncol = p)
@@ -160,14 +153,14 @@ testLMNormal(x = X, y)
 ```
 
     ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
-    ## correct pvalue. The pvalue lies between 0.0144740066675692 and
+    ## valid p-value. The p-value lies between 0.0144740066675692 and
     ## 0.341840751142698
 
     ## $Statistic
     ## [1] 0.0971424
     ## 
     ## $pvalue
-    ## [1] -7
+    ## [1] 8
 
 ``` r
 # Or alternatively just pass 'myfit' object directly instead of X and y:
@@ -195,34 +188,36 @@ testGLMGamma(x=X, y, l = 'log', method = 'cvm')
 ```
 
     ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
-    ## correct pvalue. The pvalue lies between 0.258929317433151 and 1
+    ## valid p-value. The p-value lies between 0.258929317433151 and 1
 
     ## $Statistic
     ## [1] 0.04026585
     ## 
     ## $pvalue
-    ## [1] -7
+    ## [1] 8
     ## 
     ## $converged
     ## [1] TRUE
 
-### 4. General likelihood model
+### 5. General likelihood model
 
 One of the most important features of the package is to allow users to
-apply the goodness of fit test based on empirical distribution functions
+apply the goodness-of-fit test based on empirical distribution functions
 for any general likelihood model. This is helpful when the functions and
-procedures for a distribution is not included in any R packages. For
-example, imagine you have a sample of size $n$ such as
-$x_{1},x_{2},...,x_{n}$ from a model with $p$ unknown parameters such as
-$\theta$. The package requires two inputs to apply the test:
+procedures for a distribution are not included in any R packages. For
+example, consider you have a sample of size $n$, such as
+$x_1, x_2, \ldots, x_n$, from a model with $p$ unknown parameters, such
+as $\theta$. The package requires the followings to apply the test:
 
-1)  A function to calculate score values for each observation and
-    returns a (n x p) matrix. Each rows calculates the score for each
-    observation. Alternatively you might have the score values as a
-    matrix which is also acceptable.
+1)  A function to compute score function which returns a $n \times p$
+    matrix. Alternatively you can pass the matrix directly.
 
-2)  A vector of length $n$ where elements where each element is
-    $F^{-1}(x_{i})$.
+2)  A vector of length $n$ contains the probability inverse transformed
+    (PIT) values of sample, i.e $F^{-1}(x_{i})$.
+
+In the following example, we show how to apply the test for Inverse
+Gaussian distribution. Note that `IG_scorefunc` is a function to return
+score function and `IG_pitfunc` returns a vector of PIT values.
 
 ``` r
 # Example: Inverse Gaussian (IG) distribution with weights
@@ -254,7 +249,7 @@ testYourModel(x = y, pit = pit.values, score = score.matrix)
 ```
 
     ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
-    ## correct pvalue. The pvalue lies between 0.00530976850160436 and
+    ## valid p-value. The p-value lies between 0.00530976850160436 and
     ## 0.164692390389004
 
     ## $Statistic
@@ -262,12 +257,14 @@ testYourModel(x = y, pit = pit.values, score = score.matrix)
     ##                  0.1698982 
     ## 
     ## $pvalue
-    ## [1] -7
+    ## [1] 8
 
 ### References
 
 \[1\] Stephens, M.A. (1974). \[EDF Statistics for Goodness of Fit and
 Some Comparisons.\] *Journal of the American Statistical Association*,
-Vol. 69, 730-737. \[2\] Stephens, M.A. (1976). \[Asymptotic results for
-goodness-of-fit statistics with unknown parameters.\] *Annals of
-Statistics*, Vol. 4, 357-369.
+Vol. 69, 730-737.
+
+\[2\] Stephens, M.A. (1976). \[Asymptotic results for goodness-of-fit
+statistics with unknown parameters.\] *Annals of Statistics*, Vol. 4,
+357-369.
