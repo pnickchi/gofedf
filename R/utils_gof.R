@@ -106,12 +106,12 @@ getpvalue = function(u, eigen){
 
   UB <- getUpperBoundForpvalue(statistic = u, lambda = eigen)
 
-  pvalue  <- CompQuadForm::farebrother(q = u, lambda = eigen)$Qq
+  pvalue <- CompQuadForm::farebrother(q = u, lambda = eigen)$Qq
 
   if( (pvalue >= LB) & (pvalue <= UB) ){
     return(pvalue)
   }else{
-    warning(paste0('CompQuadForm failed to generate a correct pvalue. The pvalue lies between ', LB, ' and ', UB))
+    warning(paste0('CompQuadForm failed to generate a valid p-value. The p-value lies between ', LB, ' and ', UB))
     return(pvalue)
   }
 

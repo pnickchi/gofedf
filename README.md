@@ -99,7 +99,7 @@ testNormal(x = sim_data, method = 'cvm')
     ## [1] 0.03781322
     ## 
     ## $pvalue
-    ## [1] 8
+    ## [1] -7
 
 ``` r
 # Test if the data follows a Normal distribution, calculate Anderson-Darling statistic and approximate p-value of the test.
@@ -113,7 +113,7 @@ testNormal(x = sim_data, method = 'ad')
     ## [1] 0.2179704
     ## 
     ## $pvalue
-    ## [1] 8
+    ## [1] -7
 
 ### 2. Bivariate Gamma distribution
 
@@ -139,7 +139,7 @@ testGamma(x = sim_data, method = 'cvm')
     ## [1] 0.0549759
     ## 
     ## $pvalue
-    ## [1] 8
+    ## [1] -7
 
 ### 3. Linear model with normal residuals
 
@@ -167,7 +167,7 @@ testLMNormal(x = X, y)
     ## [1] 0.0971424
     ## 
     ## $pvalue
-    ## [1] 8
+    ## [1] -7
 
 ``` r
 # Or alternatively just pass 'myfit' object directly instead of X and y:
@@ -201,7 +201,7 @@ testGLMGamma(x=X, y, l = 'log', method = 'cvm')
     ## [1] 0.04026585
     ## 
     ## $pvalue
-    ## [1] 8
+    ## [1] -7
     ## 
     ## $converged
     ## [1] TRUE
@@ -262,7 +262,7 @@ testYourModel(x = y, pit = pit.values, score = score.matrix)
     ##                  0.1698982 
     ## 
     ## $pvalue
-    ## [1] 8
+    ## [1] -7
 
 ### References
 
