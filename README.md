@@ -132,11 +132,23 @@ testGamma(x = sim_data, method = 'cvm')
 set.seed(123)
 
 # Create a set of explanatory variables and a response variable according to a linear model
+
+# Sample size
 n <- 50
+
+# Number of explanatory variables
 p <- 5
-X <- matrix( runif(n*p), nrow = n, ncol = p)
-e <- runif(n)
+
+# Generate some coefficients
 b <- runif(p)
+
+# Simulate random explanatory variables
+X <- matrix( runif(n*p), nrow = n, ncol = p)
+
+# Generate some error terms from Normal distribution
+e <- rnorm(n)
+
+# Compute response variable
 y <- X %*% b + e
 
 # Test if the residuals of the model follows a Normal distribution, calculate Cramer-von Mises statistic and approximate pvalue
@@ -144,10 +156,10 @@ testLMNormal(x = X, y)
 ```
 
     ## $Statistic
-    ## [1] 0.0971424
+    ## [1] 0.02437418
     ## 
     ## $pvalue
-    ## [1] 0.03694924
+    ## [1] 0.8819758
 
 ``` r
 # Or alternatively just pass 'myfit' object directly instead of X and y:
