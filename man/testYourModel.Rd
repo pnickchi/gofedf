@@ -42,8 +42,8 @@ to compute both cvm and ad.}
 A list of two containing the following components:
 \itemize{
 \item Statistic: the value of goodness-of-fit statistic.
-\item pvalue: the approximate pvalue for the goodness-of-fit test based on empirical distribution function.
-if method = 'cvm' or method = 'ad', it returns a numeric value for the statistic and pvalue. If method = 'both', it
+\item p-value: the approximate p-value for the goodness-of-fit test based on empirical distribution function.
+if method = 'cvm' or method = 'ad', it returns a numeric value for the statistic and p-value. If method = 'both', it
 returns a numeric vector with two elements and one for each statistic.
 }
 }
@@ -56,9 +56,6 @@ parameter estimation in the model, the function additionally requires the score 
 rows and p columns, where n is the sample size and p is the number of estimated parameters.
 The function checks if the score is zero at the estimated parameter (which is assumed to be the maximum
 likelihood estimate).
-}
-\details{
-Additional details...
 }
 \examples{
 # Example: Inverse Gaussian (IG) distribution with weights

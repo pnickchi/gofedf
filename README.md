@@ -6,10 +6,8 @@ README
 
 <!-- badges: start -->
 
-[![CRAN
-status](https://www.r-pkg.org/badges/version/gofedf)](https://cran.r-project.org/package=gofedf)
-[![GitHub
-Release](https://img.shields.io/github/release/pnickchi/gofedf?style=flat)](https://github.com/pnickchi/gofedf/releases)
+[![CRANstatus](https://www.r-pkg.org/badges/version/gofedf)](https://cran.r-project.org/package=gofedf)
+[![GitHubRelease](https://img.shields.io/github/release/pnickchi/gofedf?style=flat)](https://github.com/pnickchi/gofedf/releases)
 [![Github All
 Releases](https://img.shields.io/github/downloads/pnickchi/gofedf/total.svg?style=flat)](https://github.com/pnickchi/gofedf)
 <!-- badges: end -->
@@ -115,7 +113,7 @@ set.seed(123)
 n <- 50
 sim_data <- rgamma(n, shape = 3)
 
-# Test if the data follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate pvalue
+# Test if the data follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate p-value
 testGamma(x = sim_data, method = 'cvm')
 ```
 
@@ -151,7 +149,7 @@ e <- rnorm(n)
 # Compute response variable
 y <- X %*% b + e
 
-# Test if the residuals of the model follows a Normal distribution, calculate Cramer-von Mises statistic and approximate pvalue
+# Test if the residuals of the model follows a Normal distribution, calculate Cramer-von Mises statistic and approximate p-value
 testLMNormal(x = X, y)
 ```
 
@@ -182,7 +180,7 @@ b <- runif(p)
 e <- rgamma(n, shape = 3)
 y <- exp(X %*% b) * e
 
-# Test if the residuals of the model follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate pvalue
+# Test if the residuals of the model follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate p-value
 testGLMGamma(x=X, y, l = 'log', method = 'cvm')
 ```
 

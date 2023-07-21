@@ -46,8 +46,8 @@ to compute both cvm and ad.}
 A list of three containing the following components:
 \itemize{
 \item Statistic: the value of goodness-of-fit statistic.
-\item pvalue: the approximate pvalue for the goodness-of-fit test based on empirical distribution function.
-if method = 'cvm' or method = 'ad', it returns a numeric value for the statistic and pvalue. If method = 'both', it
+\item p-value: the approximate p-value for the goodness-of-fit test based on empirical distribution function.
+if method = 'cvm' or method = 'ad', it returns a numeric value for the statistic and p-value. If method = 'both', it
 returns a numeric vector with two elements and one for each statistic.
 \item converged: logical to indicate if the IWLS algorithm have converged or not.
 }

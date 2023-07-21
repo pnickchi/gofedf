@@ -32,13 +32,11 @@
 #' 'cvm' for the Cramer-von-Mises statistic. Other options include 'ad' for the Anderson-Darling statistic, and 'both'
 #' to compute both cvm and ad.
 #'
-#' @details
-#' Additional details...
 #'
 #' @return A list of two containing the following components:
 #' - Statistic: the value of goodness-of-fit statistic.
-#' - pvalue: the approximate pvalue for the goodness-of-fit test based on empirical distribution function.
-#' if method = 'cvm' or method = 'ad', it returns a numeric value for the statistic and pvalue. If method = 'both', it
+#' - p-value: the approximate p-value for the goodness-of-fit test based on empirical distribution function.
+#' if method = 'cvm' or method = 'ad', it returns a numeric value for the statistic and p-value. If method = 'both', it
 #' returns a numeric vector with two elements and one for each statistic.
 #'
 #' @export

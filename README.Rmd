@@ -11,8 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 # gofedf
 
 <!-- badges: start -->
-[![CRAN status](https://www.r-pkg.org/badges/version/gofedf)](https://cran.r-project.org/package=gofedf) 
-[![GitHub Release](https://img.shields.io/github/release/pnickchi/gofedf?style=flat)](https://github.com/pnickchi/gofedf/releases) 
+[![CRANstatus](https://www.r-pkg.org/badges/version/gofedf)](https://cran.r-project.org/package=gofedf)
+[![GitHubRelease](https://img.shields.io/github/release/pnickchi/gofedf?style=flat)](https://github.com/pnickchi/gofedf/releases)
 [![Github All Releases](https://img.shields.io/github/downloads/pnickchi/gofedf/total.svg?style=flat)](https://github.com/pnickchi/gofedf)
 <!-- badges: end -->
 
@@ -23,7 +23,6 @@ Authors:
     <lockhart@sfu.ca>
 *   [Payman Nickchi](https://github.com/pnickchi),
     <pnickchi@sfu.ca> (Maintainer)
-
 
 The `gofedf` package provides tools to apply goodness-of-fit tests based on empirical distribution function theory. The package offers functions and routines to test the hypothesis that a univariate sample follows a distribution based on the empirical distribution function. The theory is founded on reducing the problem to a stochastic process and computing its covariance function. An approximate p-value, computed using the farebrother method based on the limiting distribution of the statistic, is provided. Users can run the test by calculating either the Cramer-von Mises or Anderson-Darling statistic. The covariance function of the stochastic process relies on specific characteristics of the assumed model. Notably, knowledge of the Fisher information matrix and the partial derivatives of the cumulative distribution function is crucial for computing the covariance function. However, obtaining these quantities can be computationally intensive or challenging in general likelihood models. To overcome this limitation, we propose an alternative method for estimating the covariance function of the stochastic process directly from the sample data. The package provides tools for this estimation and for testing if a sample comes from any general likelihood model. In summary, the package can be used to apply a goodness-of-fit test in any of the following settings:
 
@@ -89,7 +88,7 @@ set.seed(123)
 n <- 50
 sim_data <- rgamma(n, shape = 3)
 
-# Test if the data follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate pvalue
+# Test if the data follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate p-value
 testGamma(x = sim_data, method = 'cvm')
 ```
 
@@ -120,7 +119,7 @@ e <- rnorm(n)
 # Compute response variable
 y <- X %*% b + e
 
-# Test if the residuals of the model follows a Normal distribution, calculate Cramer-von Mises statistic and approximate pvalue
+# Test if the residuals of the model follows a Normal distribution, calculate Cramer-von Mises statistic and approximate p-value
 testLMNormal(x = X, y)
 
 # Or alternatively just pass 'myfit' object directly instead of X and y:
@@ -144,7 +143,7 @@ b <- runif(p)
 e <- rgamma(n, shape = 3)
 y <- exp(X %*% b) * e
 
-# Test if the residuals of the model follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate pvalue
+# Test if the residuals of the model follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate p-value
 testGLMGamma(x=X, y, l = 'log', method = 'cvm')
 ```
 
