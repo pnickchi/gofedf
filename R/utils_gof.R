@@ -213,7 +213,7 @@ getpvalue = function(u, eigen){
   pvalue <- CompQuadForm::farebrother(q = u, lambda = eigen)$Qq
 
   # Check if the computed p-value by CompQuadForm package falls between lower and upper bound.
-  if( pvalue %in% c(LB,UB) ){
+  if( (pvalue >= LB) & (pvalue <= UB) ){
     return(pvalue)
   }else{
     warning(paste0('CompQuadForm failed to generate a valid p-value. The p-value lies between ', LB, ' and ', UB))

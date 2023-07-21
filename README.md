@@ -88,9 +88,6 @@ sim_data <- rnorm(n)
 testNormal(x = sim_data, method = 'cvm')
 ```
 
-    ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
-    ## valid p-value. The p-value lies between 0.26737599937446 and 1
-
     ## $Statistic
     ## [1] 0.03781322
     ## 
@@ -101,9 +98,6 @@ testNormal(x = sim_data, method = 'cvm')
 # Test if the data follows a Normal distribution, calculate Anderson-Darling statistic and approximate p-value of the test.
 testNormal(x = sim_data, method = 'ad')
 ```
-
-    ## Warning in getpvalue(u = AD, eigen = ev): CompQuadForm failed to generate a
-    ## valid p-value. The p-value lies between 0.263880190202964 and 1
 
     ## $Statistic
     ## [1] 0.2179704
@@ -124,9 +118,6 @@ sim_data <- rgamma(n, shape = 3)
 # Test if the data follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate pvalue
 testGamma(x = sim_data, method = 'cvm')
 ```
-
-    ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
-    ## valid p-value. The p-value lies between 0.139209714298494 and 0.988473356471052
 
     ## $Statistic
     ## [1] 0.0549759
@@ -164,9 +155,6 @@ y <- X %*% b + e
 testLMNormal(x = X, y)
 ```
 
-    ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
-    ## valid p-value. The p-value lies between 0.393126566658023 and 1
-
     ## $Statistic
     ## [1] 0.02437418
     ## 
@@ -197,9 +185,6 @@ y <- exp(X %*% b) * e
 # Test if the residuals of the model follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate pvalue
 testGLMGamma(x=X, y, l = 'log', method = 'cvm')
 ```
-
-    ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
-    ## valid p-value. The p-value lies between 0.258929317433151 and 1
 
     ## $Statistic
     ## [1] 0.04026585
@@ -258,10 +243,6 @@ pit.values   <- IG_pitfunc(obs = y , mle = theta_hat)
 # Apply the goodness-of-fit test.
 testYourModel(x = y, pit = pit.values, score = score.matrix)
 ```
-
-    ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
-    ## valid p-value. The p-value lies between 0.0252541702845713 and
-    ## 0.442071561069901
 
     ## $Statistic
     ## Cramer-von-Mises Statistic 
