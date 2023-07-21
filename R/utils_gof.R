@@ -1,46 +1,61 @@
+#' Calculate the estimate of W_{n}(u) process over a grid of pit values.
+#'
+#' @param S score matrix with n rows and p columns.
+#' @param FI Fisher information matrix with p rows and p columns.
+#' @param pit a numeric vector of PIT values.
+#'
+#' @return a matrix with n rows and n columns
+#'
+#' @noRd
 calculateWnuhat = function(S, FI, pit){
 
+  # Find the number of observations
   n       <- nrow(S)
+
+  # Compute the values of indicator function over pit values
   ind     <- outer(pit, pit, '<=')
+
+  # Estimate the Psi vector by covariance of indicator and score
   Psi_hat <- ( (n-1) * cov(ind, S) ) / n
 
+  # Compute the covariance function over the grid (pit)
   Mat     <- ( ind - S %*% solve( FI ) %*% t(Psi_hat) )
   colnames(Mat) <- 1:n
   rownames(Mat) <- 1:n
 
+  # Return the matrix
   return(Mat)
 
 }
 
-getEigenValues = function(S, FI, pit, me){
 
-  n       <- nrow(S)
-  Mat     <- calculateWnuhat(S, FI, pit)
-  W       <- var(Mat)
-  W       <- ( (n-1) * W ) / n
-
-  if( me == 'cvm' ){
-    ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / length(pit)
-    return(ev)
-  }
-
-  if( me == 'ad'){
-    adj.value <- sqrt( outer( pit * (1- pit), pit * (1- pit) ) )
-    W <- W / adj.value
-    ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / length(pit)
-    return(ev)
-  }
-
-}
-
+#' Calculate the estimate of W_{n}(u) process on a grid of equally spaced values over (0,1) interval
+#'
+#' @param S score matrix with n rows and p columns.
+#' @param FI Fisher information matrix with p rows and p columns.
+#' @param pit a numeric vector of PIT values.
+#' @param M number of equally spaced values over (0,1) interval.
+#'
+#' @return a matrix with n rows and M columns
+#'
+#' @noRd
 calculateWnuhat_manualGrid = function(S, FI, pit, M){
 
+  # Find the number of observations
   n       <- nrow(S)
+
+  # Create a grid points over (0,1) interval. Note that we need to add a small number to the edges of interval.
+  # The covariance function does not define on the edges. We used 1e-5 for the epsilon.
   epsilon <- 1e-5
   gridpts <- seq(0 + epsilon, 1 - epsilon, length = M)
+
+  # Compute the values of indicator function over pit values
   ind     <- outer(pit, gridpts, '<=')
+
+  # Estimate the Psi vector by covariance of indicator and score
   Psi_hat <- ( (n-1) * cov(ind, S) ) / n
 
+  # Compute the estimate of W_{n}(u) process over the grid (pit)
   Mat     <- ( ind - S %*% solve( FI ) %*% t(Psi_hat) )
   colnames(Mat) <- paste0('u', 1:M)
   rownames(Mat) <- 1:n
@@ -49,12 +64,69 @@ calculateWnuhat_manualGrid = function(S, FI, pit, M){
 
 }
 
+
+#' Compute Eigenvalues of the covariance matrix
+#'
+#' @param S score matrix with n rows and p columns.
+#' @param FI Fisher information matrix with p rows and p columns.
+#' @param pit a numeric vector of PIT values.
+#' @param me the goodness-of-fit statistic, Cramer-von-Mises or Anderson-Darling.
+#'
+#' @return a numeric vector of Eigenvalues.
+#'
+#' @noRd
+getEigenValues = function(S, FI, pit, me){
+
+  # Find the number of observations
+  n       <- nrow(S)
+
+  # Compute the estimate of W_{n}(u) process over a grid of pit values.
+  Mat     <- calculateWnuhat(S, FI, pit)
+
+  # Compute the covariance of the estimate of W_{n}(u) process and adjust for the sample size.
+  W       <- var(Mat)
+  W       <- ( (n-1) * W ) / n
+
+  # Compute the Eigenvalues of the covariance matrix depending on the goodness-of-fit statistic
+  if( me == 'cvm' ){
+    ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / length(pit)
+    return(ev)
+  }
+
+  if( me == 'ad'){
+    adj.value <- sqrt( outer( pit * (1- pit), pit * (1- pit) ) )
+    W       <- W / adj.value
+    ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / length(pit)
+    return(ev)
+  }
+
+}
+
+
+#' Compute Eigenvalues of the covariance matrix
+#'
+#' @param S score matrix with n rows and p columns.
+#' @param FI Fisher information matrix with p rows and p columns.
+#' @param pit a numeric vector of PIT values.
+#' @param M number of equally spaced values over (0,1) interval.
+#' @param me the goodness-of-fit statistic, Cramer-von-Mises or Anderson-Darling.
+#'
+#' @return a numeric vector of Eigenvalues.
+#'
+#' @noRd
 getEigenValues_manualGrid = function(S, FI, pit, M, me){
 
+  # Find the number of observations
   n       <- nrow(S)
-  Mat     <- calculateWnuhat_manualGrid(S, FI, pit, M)
-  W       <- var(Mat)
 
+  # Compute the estimate of W_{n}(u) process over a grid of values equally spaced over (0,1).
+  Mat     <- calculateWnuhat_manualGrid(S, FI, pit, M)
+
+  # Compute the covariance of the estimate of W_{n}(u) process and adjust for the sample size.
+  W       <- var(Mat)
+  W       <- ( (n-1) * W ) / n
+
+  # Compute the Eigenvalues of the covariance matrix depending on the goodness-of-fit statistic
   if( me == 'cvm' ){
     ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / M
     return(ev)
@@ -71,40 +143,77 @@ getEigenValues_manualGrid = function(S, FI, pit, M, me){
 
 }
 
+
+#' Compute the Cramer-von-Mises statistics
+#'
+#' @param x a numeric vector of pit values
+#'
+#' @return a numeric value, CvM statistics
+#'
+#' @noRd
 getCvMStatistic = function(x){
 
-  n <- length(x)
-  Z <- sort(x)
-  a <- seq(from = 1, to = 2*n-1, by = 2)
-  a <- a/(2*n)
+  n   <- length(x)
+  Z   <- sort(x)
+  a   <- seq(from = 1, to = 2*n-1, by = 2)
+  a   <- a/(2*n)
   res <- sum( (Z - a)^2 ) + 1/(12*n)
   return(res)
 
 }
 
+
+#' Compute the Anderson-Darling statistics
+#'
+#' @param x a numeric vector of pit values
+#'
+#' @return a numeric value, AD statistics
+#'
+#' @noRd
 getADStatistic = function(x){
 
-  n <- length(x)
-  Z <- sort(x)
-  a <- seq(from = 1, to = n, by = 1)
-  a <- (2 * a) - 1
-  S <- sum( a * ( log(Z) + log( 1 - rev(Z) ) ) )
+  n   <- length(x)
+  Z   <- sort(x)
+  a   <- seq(from = 1, to = n, by = 1)
+  a   <- (2 * a) - 1
+  S   <- sum( a * ( log(Z) + log( 1 - rev(Z) ) ) )
   res <- (-S/n) - n
   return(res)
 
 }
 
+
+#' Calculate p-value for the goodness-of-fit test.
+#'
+#' @description The calculation of p-value is done by the aid of \code{CompQuadForm} package and \code{Farebrother} function.
+#' It computes Pr(Q > u) where Q is a sum of squared Chi-quared variables weighted by non-zero Eigenvalues.
+#'
+#' @param u  a numeric value, Cramer-von-Mises statistic or Anderson-Darling statistic.
+#' @param eigen a numeric vector of Eigenvalues.
+#'
+#' @return p-value
+#'
+#' @noRd
 getpvalue = function(u, eigen){
 
+  # Compute the lower bound for the probability of Pr(Q > u)
   LB <- getLowerBoundForpvalue(statistic = u, lambda = eigen)
 
+  # Compute the upper bound for the probability of Pr(Q > u)
   UB <- getUpperBoundForpvalue(statistic = u, lambda = eigen)
 
+  # The Farebrother algorithm requires the Eigenvalues to be positive.
+  # Due to numerical computations, sometimes some of the Eigenvalues become small negative values.
+  # To address this, we correct the issue by selecting only those Eigenvalues that are greater than or equal to a cutoff.
+  # The cutoff is the sum of Eigenvalues multiplied by 1e-6.
   cutoff <- sum(eigen) * 1e-6
   eigen  <- eigen[eigen >= cutoff]
+
+  # Compute p-value
   pvalue <- CompQuadForm::farebrother(q = u, lambda = eigen)$Qq
 
-  if( (pvalue >= LB) & (pvalue <= UB) ){
+  # Check if the computed p-value by CompQuadForm package falls between lower and upper bound.
+  if( pvalue %in% c(LB,UB) ){
     return(pvalue)
   }else{
     warning(paste0('CompQuadForm failed to generate a valid p-value. The p-value lies between ', LB, ' and ', UB))
@@ -113,6 +222,15 @@ getpvalue = function(u, eigen){
 
 }
 
+
+#' Compute lower bound for p-value
+#'
+#' @param statistic a numeric value, Cramer-von-Mises statistics or Anderson-Darling statistics
+#' @param lambda a numeric vector containing Eigenvalues
+#'
+#' @return a numeric value
+#'
+#' @noRd
 getLowerBoundForpvalue = function(statistic, lambda){
 
   term1 <- integrate(f = integrandForLowerBound, lower = 0, upper = statistic/lambda[1], ST = statistic, EV = lambda)$value
@@ -121,15 +239,17 @@ getLowerBoundForpvalue = function(statistic, lambda){
 
 }
 
-integrandForLowerBound = function(t, ST, EV){
-  # ST is the statistic from the sample
-  # EV is the vector of Eigen values
-  a   <- EV[2] / EV[1]
-  b   <- ST / EV[1]
-  res <- pchisq(q = (b-t)/a, df = 1, lower.tail = FALSE) * dchisq(x = t, df = 1)
-  return(res)
-}
 
+#' Compute upper bound for p-value.
+#'
+#' @param statistic a numeric value, Cramer-von-Mises statistics or Anderson-Darling statistics.
+#' @param lambda a numeric vector containing Eigenvalues.
+#' @param tol the tolerance used to find the solution. The default value is 1e-10.
+#' @param max.iter the maximum number of iteration to find the solution. The default value is 50.
+#'
+#' @return a numeric value
+#'
+#' @noRd
 getUpperBoundForpvalue = function(statistic, lambda, tol = 1e-10, max.iter = 50){
 
   # Check to see if the root is at t = 0 and return the root and upper bound for pvalue.
@@ -139,7 +259,7 @@ getUpperBoundForpvalue = function(statistic, lambda, tol = 1e-10, max.iter = 50)
     return(UB_pvalue = fval)
   }
 
-  # Define the interval to search for the root
+  # Define the interval to search for the root using bisection method.
   t_LB <- 0
   t_UB <- 1/(2*max(lambda)) - 1e-6
 
@@ -184,4 +304,22 @@ getUpperBoundForpvalue = function(statistic, lambda, tol = 1e-10, max.iter = 50)
 
   return(UB_pvalue = fval)
 
+}
+
+
+
+#' Integrand function to compute lower bound
+#'
+#' @param t function argument
+#' @param ST a numeric value, Cramer-von-Mises statistics or Anderson-Darling statistics.
+#' @param EV a numeric vector containing Eigenvalues.
+#'
+#' @return a numeric value
+#'
+#' @noRd
+integrandForLowerBound = function(t, ST, EV){
+  a   <- EV[2] / EV[1]
+  b   <- ST / EV[1]
+  res <- pchisq(q = (b-t)/a, df = 1, lower.tail = FALSE) * dchisq(x = t, df = 1)
+  return(res)
 }

@@ -1,3 +1,12 @@
+#' Compute MLE estimates in the case of linear model.
+#'
+#' @param x a matrix with explanatory variables.
+#'
+#' @param y a numeric vector of response variables.
+#'
+#' @return a numeric vector of estimates.
+#'
+#' @noRd
 getMLEinLMNormal = function(x, y){
 
   # Get sample size
@@ -14,23 +23,55 @@ getMLEinLMNormal = function(x, y){
   return( list(coef = coefhat, sigma2 = sigma2hat) )
 }
 
+
+#' Compute score function in the case of linear model.
+#'
+#' @param x a matrix with explanatory variables.
+#'
+#' @param y a numeric vector of response variables.
+#'
+#' @param theta a numeric vector with mle values.
+#'
+#' @return a score matrix, rows present samples and columns presents the variables.
+#'
+#' @noRd
 getScoreinLMNormal = function(x, y, theta){
 
+  # Extract the mle of coefficient
   betahat <- theta$coef
   sigma2  <- theta$sigma2
-  s       <- sqrt(sigma2)
+  sigma   <- sqrt(sigma2)
 
-  n <- nrow(x)
-  p <- ncol(x)
-  yhat <- x %*% betahat
-  S <- matrix(NA, nrow = n, ncol = p + 1)
+  # Get the number of rows and columns in x matrix
+  n       <- nrow(x)
+  p       <- ncol(x)
+
+  # Find the fitted values
+  yhat    <- x %*% betahat
+
+  # Compute the score matrix
+  S       <- matrix(NA, nrow = n, ncol = p + 1)
   S[,1:p] <- ( x* as.numeric(y-yhat) ) / sigma2
-  S[,p+1] <- (-1/s) + (y - yhat)^2 / s^3
+  S[,p+1] <- (-1/sigma) + (y - yhat)^2 / sigma^3
 
+  # Return the score matrix
   return(S)
 
 }
 
+
+#' Compute Fisher information matrix in the case of linear model with Normal residuals.
+#'
+#' @param x a matrix with explanatory variables.
+#'
+#' @param y a numeric vector of response variables.
+#'
+#' @param theta a numeric vector with mle values.
+#'
+#' @return Fisher information matrix.
+#'
+#' @noRd
+#'
 getObservedHessMatrixinLMNormal = function(x, y, theta){
 
   sigma2   <- theta$sigma2
