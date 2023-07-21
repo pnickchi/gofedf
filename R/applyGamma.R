@@ -1,6 +1,18 @@
+#' Apply Gamma distribution to sample and compute required components for the test.
+#'
+#' @description Compute Maximum likelihood estimates of the parameters in Gamma distribution, Score function evaluated at the sample,
+#' and probability inverse transformed (PIT) values of sample.
+#'
+#' @param x a numeric vector.
+#'
+#' @param use.rate logical. If \code{TRUE} the rate parameter is returned while estimating MLE. Otherwise the scale is returned.
+#'
+#' @return a list with three elements.
+#'
+#' @noRd
 applyGamma = function(x, use.rate){
 
-  # Calculate MLE of parameters in Gamma distribution
+  # Compute MLE of parameters in Gamma distribution
   par    <- estimateGamma(x, ur = use.rate)
   alpha  <- par[1]
   lambda <- par[2]
@@ -10,7 +22,7 @@ applyGamma = function(x, use.rate){
   S2     <- (alpha / lambda) - x
   S      <- cbind(S1,S2)
 
-  # Calculate the probability inverse transfer of sample
+  # Compute the probability inverse transfer of sample
   pit <- pgamma(q = x, shape = alpha, rate = lambda)
 
   # Define the list to return

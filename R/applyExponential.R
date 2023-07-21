@@ -1,3 +1,13 @@
+#' Apply Exponential distribution to sample and compute required components for the test.
+#'
+#' @description Compute Maximum likelihood estimates of the parameters in Exponential distribution, Score function evaluated at the sample,
+#' and probability inverse transformed (PIT) values of sample.
+#'
+#' @param x a numeric vector.
+#'
+#' @return a list with three elements.
+#'
+#' @noRd
 applyExponential = function(x){
 
   # Calculate MLE of parameter for Exponential distribution

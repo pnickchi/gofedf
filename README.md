@@ -1,6 +1,6 @@
 README
 ================
-2023-07-18
+2023-07-20
 
 # gofedf
 
@@ -88,28 +88,22 @@ sim_data <- rnorm(n)
 testNormal(x = sim_data, method = 'cvm')
 ```
 
-    ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
-    ## valid p-value. The p-value lies between 0.26737599937446 and 1
-
     ## $Statistic
     ## [1] 0.03781322
     ## 
     ## $pvalue
-    ## [1] 8
+    ## [1] 0.6646717
 
 ``` r
 # Test if the data follows a Normal distribution, calculate Anderson-Darling statistic and approximate p-value of the test.
 testNormal(x = sim_data, method = 'ad')
 ```
 
-    ## Warning in getpvalue(u = AD, eigen = ev): CompQuadForm failed to generate a
-    ## valid p-value. The p-value lies between 0.263880190202964 and 1
-
     ## $Statistic
     ## [1] 0.2179704
     ## 
     ## $pvalue
-    ## [1] 8
+    ## [1] 0.7833757
 
 ### 2. Bivariate Gamma distribution
 
@@ -125,14 +119,11 @@ sim_data <- rgamma(n, shape = 3)
 testGamma(x = sim_data, method = 'cvm')
 ```
 
-    ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
-    ## valid p-value. The p-value lies between 0.144766470183369 and 0.993008632555107
-
     ## $Statistic
     ## [1] 0.0549759
     ## 
     ## $pvalue
-    ## [1] 8
+    ## [1] 0.3446122
 
 ### 3. Linear model with normal residuals
 
@@ -152,15 +143,11 @@ y <- X %*% b + e
 testLMNormal(x = X, y)
 ```
 
-    ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
-    ## valid p-value. The p-value lies between 0.0144740066675692 and
-    ## 0.341840751142698
-
     ## $Statistic
     ## [1] 0.0971424
     ## 
     ## $pvalue
-    ## [1] 8
+    ## [1] 0.03694924
 
 ``` r
 # Or alternatively just pass 'myfit' object directly instead of X and y:
@@ -187,14 +174,11 @@ y <- exp(X %*% b) * e
 testGLMGamma(x=X, y, l = 'log', method = 'cvm')
 ```
 
-    ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
-    ## valid p-value. The p-value lies between 0.258929317433151 and 1
-
     ## $Statistic
     ## [1] 0.04026585
     ## 
     ## $pvalue
-    ## [1] 8
+    ## [1] 0.5894211
     ## 
     ## $converged
     ## [1] TRUE
@@ -248,16 +232,12 @@ pit.values   <- IG_pitfunc(obs = y , mle = theta_hat)
 testYourModel(x = y, pit = pit.values, score = score.matrix)
 ```
 
-    ## Warning in getpvalue(u = cvm, eigen = ev): CompQuadForm failed to generate a
-    ## valid p-value. The p-value lies between 0.00530976850160436 and
-    ## 0.164692390389004
-
     ## $Statistic
     ## Cramer-von-Mises Statistic 
     ##                  0.1698982 
     ## 
     ## $pvalue
-    ## [1] 8
+    ## [1] 0.01243791
 
 ### References
 
