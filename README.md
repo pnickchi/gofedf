@@ -219,7 +219,7 @@ score function and `IG_pitfunc` returns a vector of PIT values.
 # Example: Inverse Gaussian (IG) distribution with weights
 
 # Reproducible example
-#set.seed(123)
+set.seed(123)
 
 
 # Set the sample size
@@ -246,10 +246,10 @@ testYourModel(x = y, pit = pit.values, score = score.matrix)
 
     ## $Statistic
     ## Cramer-von-Mises Statistic 
-    ##                  0.1698982 
+    ##                  0.1402415 
     ## 
     ## $pvalue
-    ## [1] 0.01243791
+    ## [1] 0.05200096
 
 ### References
 

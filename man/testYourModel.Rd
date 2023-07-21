@@ -70,7 +70,7 @@ set.seed(123)
 n <- 50
 
 # Assign weights
-covariates <- rep(1,n)
+covariates <- rep(1.5,n)
 
 # Set mean and shape parameters for IG distribution.
 mio        <- 2
