@@ -100,6 +100,8 @@ getpvalue = function(u, eigen){
 
   UB <- getUpperBoundForpvalue(statistic = u, lambda = eigen)
 
+  cutoff <- sum(eigen) * 1e-6
+  eigen  <- eigen[eigen >= cutoff]
   pvalue <- CompQuadForm::farebrother(q = u, lambda = eigen)$Qq
 
   if( (pvalue >= LB) & (pvalue <= UB) ){
@@ -110,7 +112,6 @@ getpvalue = function(u, eigen){
   }
 
 }
-
 
 getLowerBoundForpvalue = function(statistic, lambda){
 
@@ -184,7 +185,3 @@ getUpperBoundForpvalue = function(statistic, lambda, tol = 1e-10, max.iter = 50)
   return(UB_pvalue = fval)
 
 }
-
-
-
-
