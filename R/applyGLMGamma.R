@@ -1,8 +1,27 @@
+#' Apply GLM to sample with the assumption of Gamma response and compute required components for the test.
+#'
+#' @description Compute maximum likelihood estimates of the coefficients and shape parameter in Gamma distribution, Score function
+#' evaluated at the sample, and probability inverse transformed (PIT) values of sample.
+#'
+#' @param x a matrix of explanatory variables.
+#'
+#' @param y a numeric vector of response values.
+#'
+#' @param fml a character vector to define family function in GLM.
+#'
+#' @param sv starting value for computing MLE of coefficients.
+#'
+#' @param ctl a list of parameters to control the fitting process in \code{glm} or \code{glm2} function.
+#'
+#' @param fit.included logical to indicate if the fit is included as an object of class \code{glm}.
+#'
+#' @return a list with three elements.
+#'
+#' @noRd
 applyGLMGamma = function(x, y, fml, sv, ctl, fit.included){
 
-   #
-   # Check if we need to fit a GLM or user already provided the fit
-   #
+
+   # Check if the fit object is provided or not. If not, use glm2 package to fit the model.
    if( is.null(fit.included) ){
 
      ################################################
@@ -29,8 +48,6 @@ applyGLMGamma = function(x, y, fml, sv, ctl, fit.included){
    }
 
 
-   ###############################################################################################
-
    #
    # This section calculates the MLE of parameters in the model.
    # There are p coefficients in beta vector.
@@ -40,14 +57,13 @@ applyGLMGamma = function(x, y, fml, sv, ctl, fit.included){
    # coef function from stats package extracts MLE estimate of beta parameter in the model.
    mle.coef                 <- coef(fit)
 
-   #
+   # Use gamma.shape function from MASS package to compute mle of shape parameter in Gamma distribution
    mle.alpha                <- MASS::gamma.shape(fit, it.lim = 30, eps.max = 1e-9)[1]$alpha
 
-   # Build a vector for MLE estiamtes, p parameters for beta and last parameter for mle of shape parameter
+   # Build a vector for MLE estimates, p parameters for beta and last parameter for mle of shape parameter
    par                      <- c(mle.coef, mle.alpha)
    names(par)[length(par)]  <- 'shape'
 
-   ###############################################################################################
 
 
    # Extract family function and design matrix (X) from fit object and calculates the linear predictor.

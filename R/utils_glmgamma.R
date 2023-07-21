@@ -1,3 +1,15 @@
+#' Compute Fisher information matrix in the case of GLM with Gamma response variable.
+#'
+#' @description Computes the Fisher information matrix of parameters in the case of a generalized linear model with the assumption of Gamma
+#' for the response variable.
+#'
+#' @param par mle of shape parameter for the Gamma distribution.
+#'
+#' @param x matrix of explanatory variable.
+#'
+#' @return a Fisher information matrix with n rows (number of observations in the sample) and p columns (number of parameters in the model).
+#'
+#' @noRd
 getFisherInformationForGLMGamma = function(par, x){
 
   n           <- nrow(x)
