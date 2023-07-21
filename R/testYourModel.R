@@ -56,7 +56,7 @@
 #' n <- 50
 #'
 #' # Assign weights
-#' covariates <- rep(1,n)
+#' covariates <- rep(1.5,n)
 #'
 #' # Set mean and shape parameters for IG distribution.
 #' mio        <- 2
@@ -142,14 +142,14 @@ testYourModel = function(x, pit, score = NULL, ngrid = length(x), gridpit = TRUE
 
       # 1. Do cvm calculation
       cvm        <- getCvMStatistic(pit)
-      names(U2) <- 'Cramer-von-Mises Statistic'
+      names(cvm) <- 'Cramer-von-Mises Statistic'
 
       # Compute the 100 leading Eigenvalues of the covariance function
       j <- 1:100
       ev <- 1 / ( pi^2 * j^2 )
 
       # Calculate pvalue
-      cvm.pvalue  <- getpvalue(u = U2, eigen = ev)
+      cvm.pvalue  <- getpvalue(u = cvm, eigen = ev)
       names(cvm.pvalue) <- 'pvalue for Cramer-von-Mises test'
 
       # 2. Do AD calculations
