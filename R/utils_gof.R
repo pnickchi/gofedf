@@ -205,8 +205,8 @@ getpvalue = function(u, eigen){
   # The Farebrother algorithm requires the Eigenvalues to be positive.
   # Due to numerical computations, sometimes some of the Eigenvalues become small negative values.
   # To address this, we correct the issue by selecting only those Eigenvalues that are greater than or equal to a cutoff.
-  # The cutoff is the sum of Eigenvalues multiplied by 1e-6.
-  cutoff <- sum(eigen) * 1e-6
+  # The cutoff is the sum of Eigenvalues that are positive multiplied by 1e-6.
+  cutoff <- sum(eigen[eigen>=0]) * 1e-6
   eigen  <- eigen[eigen >= cutoff]
 
   # Compute p-value
