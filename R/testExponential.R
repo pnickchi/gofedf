@@ -47,7 +47,7 @@ testExponential = function(x, ngrid = length(x), gridpit = FALSE, hessian = FALS
   if( hessian ){
     fisher <- matrix( n / (par[1])^2, nrow = 1, ncol = 1 )
   }else{
-    fisher <- (n-1)*var(Score)/n
+    fisher <- var(Score)
   }
 
 

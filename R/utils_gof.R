@@ -16,7 +16,8 @@ calculateWnuhat = function(S, FI, pit){
   ind     <- outer(pit, pit, '<=')
 
   # Estimate the Psi vector by covariance of indicator and score
-  Psi_hat <- ( (n-1) * cov(ind, S) ) / n
+  #Psi_hat <- ( (n-1) * cov(ind, S) ) / n
+  Psi_hat <- cov(ind, S)
 
   # Compute the covariance function over the grid (pit)
   Mat     <- ( ind - S %*% solve( FI ) %*% t(Psi_hat) )
@@ -53,7 +54,8 @@ calculateWnuhat_manualGrid = function(S, FI, pit, M){
   ind     <- outer(pit, gridpts, '<=')
 
   # Estimate the Psi vector by covariance of indicator and score
-  Psi_hat <- ( (n-1) * cov(ind, S) ) / n
+  #Psi_hat <- ( (n-1) * cov(ind, S) ) / n
+  Psi_hat <- cov(ind, S)
 
   # Compute the estimate of W_{n}(u) process over the grid (pit)
   Mat     <- ( ind - S %*% solve( FI ) %*% t(Psi_hat) )

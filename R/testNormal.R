@@ -73,7 +73,7 @@ testNormal = function(x, ngrid = length(x), gridpit = TRUE, hessian = FALSE, met
   if( hessian ){
     fisher <- observedHessianMatrixNormal(par)
   }else{
-    fisher <- (n-1)*var(Score)/n
+    fisher <- var(Score)
   }
 
 

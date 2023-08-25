@@ -68,7 +68,7 @@ testGLMGamma = function(x, y, l, fit = NULL, start.value = NULL, control = NULL,
     pit     <- temp$pit
     par     <- temp$par
 
-    fisher  <- (n-1)*var(Score)/n
+    fisher  <- var(Score)
 
     if( method == 'cvm'){
 
@@ -145,7 +145,7 @@ testGLMGamma = function(x, y, l, fit = NULL, start.value = NULL, control = NULL,
     pit     <- temp$pit
     par     <- temp$par
 
-    fisher  <- (n-1)*var(Score)/n
+    fisher  <- var(Score)
 
 
     if( method == 'cvm'){

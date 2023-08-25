@@ -74,9 +74,9 @@ testLMNormal = function(x, y, fit = NULL, ngrid = length(y), gridpit = FALSE, he
 
     # Get Fisher information matrix
     if( hessian ){
-      fisher <- getObservedHessMatrixinLMNormal(x, y, par)
+      fisher <- observedHessianMatrixLMNormal(x, y, par)
     }else{
-      fisher <- (n-1)*var(Score)/n
+      fisher <- var(Score)
     }
 
     # Get Eigen values
@@ -119,9 +119,9 @@ testLMNormal = function(x, y, fit = NULL, ngrid = length(y), gridpit = FALSE, he
 
     # Get Fisher information matrix
     if( hessian ){
-      fisher <- getObservedHessMatrixinLMNormal(x, y, par)
+      fisher <- observedHessianMatrixLMNormal(x, y, par)
     }else{
-      fisher <- (n-1)*var(Score)/n
+      fisher <- var(Score)
     }
 
 

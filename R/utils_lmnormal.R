@@ -72,7 +72,7 @@ getScoreinLMNormal = function(x, y, theta){
 #'
 #' @noRd
 #'
-getObservedHessMatrixinLMNormal = function(x, y, theta){
+observedHessianMatrixLMNormal = function(x, y, theta){
 
   sigma2   <- theta$sigma2
 

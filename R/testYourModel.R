@@ -197,7 +197,7 @@ testYourModel = function(x, pit, score = NULL, ngrid = length(x), gridpit = TRUE
     }
 
     # Calculate Fisher information matrix by computing the variance of score from the sample.
-    fisher  <- (n-1)*var(score)/n
+    fisher  <- var(score)
 
 
     # Calculate Cramer-von-Mises, Anderson-Darling statistics or both

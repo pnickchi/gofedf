@@ -10,7 +10,7 @@
 #' @return a Fisher information matrix with n rows (number of observations in the sample) and p columns (number of parameters in the model).
 #'
 #' @noRd
-getFisherInformationForGLMGamma = function(par, x){
+observedHessianMatrixGLMGamma = function(par, x){
 
   n           <- nrow(x)
   rindx       <- ncol(x) + 1

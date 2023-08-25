@@ -51,7 +51,7 @@ testGamma = function(x, ngrid = length(x), gridpit = FALSE, hessian = FALSE, rat
   if( hessian ){
     fisher <- observedHessianMatrixGamma(par)
   }else{
-    fisher  <- (n-1)*var(Score)/n
+    fisher  <- var(Score)
   }
 
 
