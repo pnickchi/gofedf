@@ -63,7 +63,7 @@ testGamma = function(x, ngrid = length(x), gridpit = FALSE, hessian = FALSE, rat
       ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = 'cvm')
     }
 
-    cvm      <- getCvMStatistic(pit)
+    cvm     <- getCvMStatistic(pit)
     pvalue  <- getpvalue(u = cvm, eigen = ev)
     res     <- list(Statistic = cvm, pvalue = pvalue)
 
