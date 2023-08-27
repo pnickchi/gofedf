@@ -219,6 +219,7 @@ getpvalue = function(u, eigen){
     return(pvalue)
   }else{
     warning(paste0('CompQuadForm failed to generate a valid p-value. The p-value lies between ', LB, ' and ', UB))
+    pvalue <- (LB + UB)/2
     return(pvalue)
   }
 
