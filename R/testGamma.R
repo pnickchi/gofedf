@@ -49,9 +49,9 @@ testGamma = function(x, ngrid = length(x), gridpit = FALSE, hessian = FALSE, rat
   par    <- temp$par
 
   if( hessian ){
-    fisher <- observedHessianMatrixGamma(par)
+    fisher <- gammaFisherByHessian(par)
   }else{
-    fisher  <- var(Score)
+    fisher <- (n-1)*var(Score)/n
   }
 
 

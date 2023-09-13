@@ -16,8 +16,8 @@ calculateWnuhat = function(S, FI, pit){
   ind     <- outer(pit, pit, '<=')
 
   # Estimate the Psi vector by covariance of indicator and score
-  #Psi_hat <- ( (n-1) * cov(ind, S) ) / n
-  Psi_hat <- cov(ind, S)
+  Psi_hat <- ( (n-1) * cov(ind, S) ) / n
+  #Psi_hat <- cov(ind, S)
 
   # Compute the covariance function over the grid (pit)
   Mat     <- ( ind - S %*% solve( FI ) %*% t(Psi_hat) )
@@ -54,8 +54,8 @@ calculateWnuhat_manualGrid = function(S, FI, pit, M){
   ind     <- outer(pit, gridpts, '<=')
 
   # Estimate the Psi vector by covariance of indicator and score
-  #Psi_hat <- ( (n-1) * cov(ind, S) ) / n
-  Psi_hat <- cov(ind, S)
+  Psi_hat <- ( (n-1) * cov(ind, S) ) / n
+  #Psi_hat <- cov(ind, S)
 
   # Compute the estimate of W_{n}(u) process over the grid (pit)
   Mat     <- ( ind - S %*% solve( FI ) %*% t(Psi_hat) )
@@ -208,18 +208,17 @@ getpvalue = function(u, eigen){
   # Due to numerical computations, sometimes some of the Eigenvalues become small negative values.
   # To address this, we correct the issue by selecting only those Eigenvalues that are greater than or equal to a cutoff.
   # The cutoff is the sum of Eigenvalues that are positive multiplied by 1e-6.
-  cutoff <- sum(eigen[eigen>=0]) * 1e-6
-  eigen  <- eigen[eigen >= cutoff]
+  # cutoff <- sum(eigen[eigen>=0]) * 1e-6
+  # eigen  <- eigen[eigen >= cutoff]
 
   # Compute p-value
-  pvalue <- CompQuadForm::farebrother(q = u, lambda = eigen)$Qq
+  pvalue <- CompQuadForm::imhof(q = u, lambda = eigen)$Qq
 
   # Check if the computed p-value by CompQuadForm package falls between lower and upper bound.
   if( (pvalue >= LB) & (pvalue <= UB) ){
     return(pvalue)
   }else{
     warning(paste0('CompQuadForm failed to generate a valid p-value. The p-value lies between ', LB, ' and ', UB))
-    pvalue <- (LB + UB)/2
     return(pvalue)
   }
 

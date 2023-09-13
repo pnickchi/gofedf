@@ -7,7 +7,8 @@
 testGLMGamma(
   x,
   y,
-  l,
+  l = "log",
+  hessian = FALSE,
   fit = NULL,
   start.value = NULL,
   control = NULL,
@@ -23,6 +24,10 @@ presents covariats.}
 \item{l}{a character vector indicating the link function that should be used for Gamma family. Some common
 link functions for Gamma family are 'log' and 'inverse'. For more details see \code{\link{make.link}} from stats
 package in R.}
+
+\item{hessian}{logical. If \code{TRUE} the Fisher information matrix is estimated by the observed Hessian Matrix based on
+the sample. If \code{FALSE} (the default value) the Fisher information matrix is estimated by the variance of the
+observed score matrix.}
 
 \item{fit}{is an object of class \code{glm} and its default value is NULL. If a fit of class \code{glm} is provided,
 the arguments \code{x}, \code{y}, and \code{l} will be ignored. We recommend using \code{\link{glm2}} function from
@@ -65,6 +70,6 @@ b <- runif(p)
 e <- rgamma(n, shape = 3)
 y <- exp(x \%*\% b) * e
 testGLMGamma(x, y, l = 'log')
-myfit <- glm(y ~ x, family = Gamma('log'), x = TRUE)
+myfit <- glm(y ~ x, family = Gamma('log'), x = TRUE, y = TRUE)
 testGLMGamma(fit = myfit)
 }

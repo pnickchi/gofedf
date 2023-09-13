@@ -30,9 +30,9 @@
 #' @examples
 #'
 #' set.seed(123)
-#' sim_data <- rnorm(n = 100)
+#' sim_data <- rnorm(n = 50)
 #' testNormal(x = sim_data)
-#' sim_data <- rgamma(100, shape = 3)
+#' sim_data <- rgamma(50, shape = 3)
 #' testNormal(x = sim_data)
 testNormal = function(x, ngrid = length(x), gridpit = TRUE, hessian = FALSE, method = 'cvm'){
 
@@ -71,9 +71,9 @@ testNormal = function(x, ngrid = length(x), gridpit = TRUE, hessian = FALSE, met
   par     <- temp$par
 
   if( hessian ){
-    fisher <- observedHessianMatrixNormal(par)
+    fisher <- normalFisherByHessian(par)
   }else{
-    fisher <- var(Score)
+    fisher <- (n-1)*var(Score)/n
   }
 
 

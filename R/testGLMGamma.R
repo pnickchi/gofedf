@@ -12,6 +12,10 @@
 #' link functions for Gamma family are 'log' and 'inverse'. For more details see \code{\link{make.link}} from stats
 #' package in R.
 #'
+#' @param hessian logical. If \code{TRUE} the Fisher information matrix is estimated by the observed Hessian Matrix based on
+#' the sample. If \code{FALSE} (the default value) the Fisher information matrix is estimated by the variance of the
+#' observed score matrix.
+#'
 #' @param fit is an object of class \code{glm} and its default value is NULL. If a fit of class \code{glm} is provided,
 #' the arguments \code{x}, \code{y}, and \code{l} will be ignored. We recommend using \code{\link{glm2}} function from
 #' \code{\link{glm2}} package since it provides better convergence while optimizing the likelihood to estimate
@@ -48,35 +52,65 @@
 #' e <- rgamma(n, shape = 3)
 #' y <- exp(x %*% b) * e
 #' testGLMGamma(x, y, l = 'log')
-#' myfit <- glm(y ~ x, family = Gamma('log'), x = TRUE)
+#' myfit <- glm(y ~ x, family = Gamma('log'), x = TRUE, y = TRUE)
 #' testGLMGamma(fit = myfit)
-testGLMGamma = function(x, y, l, fit = NULL, start.value = NULL, control = NULL, method = 'cvm'){
+testGLMGamma = function(x, y, l = 'log', hessian = FALSE, fit = NULL, start.value = NULL, control = NULL, method = 'cvm'){
 
 
-  if( is.null(control) ){
-    control <- glm.control(epsilon = 1e-8, maxit = 100, trace = F)
-  }else{
-    control <- control
-  }
+   if( is.null(control) ){
+     control <- glm.control(epsilon = 1e-8, maxit = 100, trace = F)
+   }else{
+     control <- control
+   }
 
-  if( is.null(fit) ){
+   if( is.null(fit) ){
 
-    family  <- Gamma(link = l)
-    n       <- length(y)
-    temp    <- applyGLMGamma(x, y, fml = family, sv = start.value, ctl = control, fit.included = NULL)
-    Score   <- temp$Score
-    pit     <- temp$pit
-    par     <- temp$par
+     # Check if the starting values are included
+     if( is.null(start.value) ){
+       fit <- glm2::glm2(formula = y ~ x, family = Gamma(link = l), x = TRUE, y = TRUE, control = control, na.action = na.omit)
+     }else{
+       fit <- glm2::glm2(formula = y ~ x, family = Gamma(link = l), x = TRUE, y = TRUE, control = control, na.action = na.omit, start = start.value)
+     }
 
-    fisher  <- var(Score)
+     y       <- fit$y
+     n       <- length(y)
 
-    if( method == 'cvm'){
+   }else{
+
+     if (!inherits(fit, 'glm')){
+       stop('The fit must be \'glm\' object returned by either glm or glm2 function.')
+     }
+
+     if( fit$family$family != 'Gamma' ){
+       stop('The family in fit must be Gamma.')
+     }
+
+     if( !is.matrix(fit$x) ){
+       stop('fit object must have the design matrix corresponding to the model. Consider setting x = TRUE in glm function to return x matrix.')
+     }
+
+   }
+
+   temp    <- applyGLMGamma(fit = fit)
+   Score   <- temp$Score
+   pit     <- temp$pit
+   par     <- temp$par
+   converged <- temp$converged
+
+   if(hessian){
+     fisher  <- observedHessianMatrixGLMGamma(fit = fit, mle_shape = par['shape'])
+   }else{
+     fisher  <- (n-1)*var(Score)/n
+   }
+
+
+   if( method == 'cvm'){
 
       ev      <- getEigenValues(S = Score, FI = fisher, pit, me = 'cvm')
       cvm     <- getCvMStatistic(pit)
       pvalue  <- getpvalue(u = cvm, eigen = ev)
 
-      res     <- list(Statistic = cvm, pvalue = pvalue, converged = temp$converged)
+      res     <- list(Statistic = cvm, pvalue = pvalue, converged = converged)
       return(res)
 
     } else if ( method == 'ad') {
@@ -85,7 +119,7 @@ testGLMGamma = function(x, y, l, fit = NULL, start.value = NULL, control = NULL,
       ad      <- getADStatistic(pit)
       pvalue  <- getpvalue(u = ad, eigen = ev)
 
-      res     <- list(Statistic = U2, pvalue = pvalue, converged = temp$converged)
+      res     <- list(Statistic = ad, pvalue = pvalue, converged = converged)
       return(res)
 
     } else {
@@ -120,87 +154,5 @@ testGLMGamma = function(x, y, l, fit = NULL, start.value = NULL, control = NULL,
       res     <- list(Statistics = c(cvm, ad), pvalue = c(cvm.pvalue, ad.pvalue) )
       return(res)
     }
-
-
-  }else{
-
-    if (!inherits(fit, 'glm')){
-      stop('The fit must be \'glm\' object returned by either glm or glm2 function.')
-    }
-
-    if( fit$family$family != 'Gamma' ){
-      stop('The family in fit must be Gamma.')
-    }
-
-    if( !is.matrix(fit$x) ){
-      stop('fit object must have the design matrix corresponding to the model. Consider setting x = TRUE in glm function to return x matrix.')
-    }
-
-    x       <- fit$x
-    y       <- fit$y
-    family  <- fit$family
-    n       <- length(y)
-    temp    <- applyGLMGamma(x, y, fml = family, sv = start.value, ctl = control, fit.included = fit)
-    Score   <- temp$Score
-    pit     <- temp$pit
-    par     <- temp$par
-
-    fisher  <- var(Score)
-
-
-    if( method == 'cvm'){
-
-      ev    <- getEigenValues(S = Score, FI = fisher, pit, me = 'cvm')
-      U2      <- getCvMStatistic(pit)
-      pvalue  <- getpvalue(u = U2, eigen = ev)
-
-      res     <- list(Statistic = U2, pvalue = pvalue, converged = temp$converged)
-      return(res)
-
-    } else if ( method == 'ad') {
-
-      ev      <- getEigenValues(S = Score, FI = fisher, pit, me = 'ad')
-      U2      <- getCvMStatistic(pit)
-      pvalue  <- getpvalue(u = U2, eigen = ev)
-
-      res     <- list(Statistic = U2, pvalue = pvalue, converged = temp$converged)
-      return(res)
-
-    } else {
-
-      # Calculate both cvm and ad statisitcs
-
-      # 1. Do cvm calculation
-      cvm        <- getCvMStatistic(pit)
-      names(cvm) <- 'Cramer-von-Mises Statistic'
-
-      # Get Eigen values
-      ev    <- getEigenValues(S = Score, FI = fisher, pit = pit, me = 'cvm')
-
-      # Calculate pvalue
-      cvm.pvalue  <- getpvalue(u = cvm, eigen = ev)
-      names(cvm.pvalue) <- 'pvalue for Cramer-von-Mises test'
-
-
-      # 2. Do ad calculations
-      ad      <- getADStatistic(pit)
-      names(ad) <- 'Anderson-Darling Statistic'
-
-      # Get Eigen values
-      ev    <- getEigenValues(S = Score, FI = fisher, pit = pit, me = 'ad')
-
-      # Calculate pvalue
-      ad.pvalue  <- getpvalue(u = ad, eigen = ev)
-      names(ad.pvalue) <- 'Anderson-Darling test'
-
-
-      # Prepare a list to return both statistics and their approximate pvalue
-      res     <- list(Statistics = c(cvm, ad), pvalue = c(cvm.pvalue, ad.pvalue), converged = temp$converged )
-      return(res)
-
-    }
-
-  }
-
 
 }

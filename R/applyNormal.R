@@ -10,21 +10,16 @@
 #' @noRd
 applyNormal = function(x){
 
-  # Compute MLE of parameters for Normal distribution
-  n  <- length(x)
-  m  <- mean(x)
-  s  <- sqrt( (n-1) * var(x) / n )
-  par <- c(m, s)
+  # Call normalMLE() function to compute MLE of parameters for Normal distribution
+  par <- normalMLE(x)
 
-  # Compute score function
-  S1 <- (x - m) / (s^2)
-  S2 <- (x - m)^2/s^3 - rep(1/s,n)
-  S  <- cbind(S1,S2)
+  # Call normalScore() function to compute score function
+  S   <- normalScore(x = x, theta = par)
 
-  # Compute probability inverse transform of data
-  pit <- pnorm( (x - m) / s, mean = 0, sd = 1)
+  # Call normalPIT() function to compute probability inverse transform
+  pit <- normalPIT(x = x, theta = par)
 
-  # Define the list to return
+  # Define a list to return
   res <- list(Score = S, pit = pit, par = par)
   return(res)
 }

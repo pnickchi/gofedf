@@ -45,8 +45,8 @@ follows a Normal distribution.
 \examples{
 
 set.seed(123)
-sim_data <- rnorm(n = 100)
+sim_data <- rnorm(n = 50)
 testNormal(x = sim_data)
-sim_data <- rgamma(100, shape = 3)
+sim_data <- rgamma(50, shape = 3)
 testNormal(x = sim_data)
 }
