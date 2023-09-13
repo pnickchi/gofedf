@@ -5,7 +5,6 @@
 #'
 #' @return Score matrix with n rows and two columns.
 #'
-#' @noRd
 gammaScore = function(x, theta){
 
   # Extract MLE of shape and scale from theta argument
@@ -35,7 +34,6 @@ gammaScore = function(x, theta){
 #'
 #' @return a vector of length two with shape and scale/rate.
 #'
-#' @noRd
 gammaMLE = function(x, ur){
 
   # Find the the number of observations in the sample
@@ -87,7 +85,6 @@ gammaMLE = function(x, ur){
 #'
 #' @return a vector of length n containing the probability inverse transformed (PIT) values
 #'
-#' @noRd
 gammaPIT = function(x, theta){
 
   # Extract MLE of shape and scale from theta argument

@@ -9,7 +9,6 @@
 #'
 #' @return a list with three elements.
 #'
-#' @noRd
 applyGamma = function(x, use.rate){
 
   # Compute MLE of parameters in Gamma distribution

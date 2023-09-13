@@ -6,7 +6,6 @@
 #'
 #' @return Score matrix with n rows and two columns.
 #'
-#' @noRd
 normalScore = function(x, theta){
 
   # Get the sample size
@@ -34,7 +33,6 @@ normalScore = function(x, theta){
 #'
 #' @return a numeric vector of length two, containing MLE of parameters in Normal dist.
 #'
-#' @noRd
 normalMLE = function(x){
 
   # Get the sample size
@@ -61,7 +59,6 @@ normalMLE = function(x){
 #'
 #' @return a vector of length n containing the probability inverse transformed (PIT) values
 #'
-#' @noRd
 normalPIT = function(x, theta){
 
   # Extract MLE of mean and sd
@@ -85,7 +82,6 @@ normalPIT = function(x, theta){
 #'
 #' @return Fisher information matrix for Normal distribution
 #'
-#' @noRd
 normalFisherByHessian = function(theta){
 
   # Extract the MLE of sd from theta vector
