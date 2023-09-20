@@ -95,6 +95,7 @@ glmgammaFisherByHessian = function(fit, mle_shape){
 
   # Extract the design matrix
   X        <- fit$x
+  y        <- fit$y
   n        <- nrow(X)
 
   # Compute the linear predictor value
@@ -113,12 +114,23 @@ glmgammaFisherByHessian = function(fit, mle_shape){
   partial.mu      <- fm$mu.eta(linearPredictor)
   temp            <- partial.mu / miohat
   Xm              <- X * as.vector(temp)
+  Xmm             <- as.vector( sqrt(y/miohat) ) * X
+
 
   # Compute Hessian matrix
   p <- ncol(X) + 1
-  Hessian          <- matrix(0, nrow = p, ncol = p)
-  Hessian[1,1]     <- trigamma(mle_shape) - (1/mle_shape)
-  Hessian[2:p,2:p] <- mle_shape * t(Xm) %*% Xm / n
+  Hessian     <- matrix(0, nrow = p, ncol = p)
+
+  first_term  <- -mle_shape * t(fit$x) %*% fit$x / n
+
+  second_term <- mle_shape * t(Xm) %*% Xm / n
+
+  third_term  <- mle_shape * t(Xmm) %*% ( Xmm ) / n
+
+  fourth_term <- -2*mle_shape * t(Xmm) %*% Xmm / n
+
+  Hessian[1,1]     <- (-1)*trigamma(mle_shape) + (1)/(mle_shape)
+  Hessian[2:p,2:p] <- first_term + second_term + third_term + fourth_term
 
   return(Hessian)
 
