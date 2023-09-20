@@ -224,15 +224,15 @@ testLMNormal(x = X, y)
 
 ``` r
 # Or alternatively just pass 'lm.fit' object directly instead:
-lm.fit <- lm(y ~ X - 1, x = TRUE, y = TRUE)
+lm.fit <- lm(y ~ X, x = TRUE, y = TRUE)
 testLMNormal(fit = lm.fit)
 ```
 
     ## $Statistic
-    ## [1] 0.02437418
+    ## [1] 0.02285164
     ## 
     ## $pvalue
-    ## [1] 0.9248414
+    ## [1] 0.9208541
 
 ### 4. Gamma GLM with any link function
 

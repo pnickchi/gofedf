@@ -149,7 +149,7 @@ testLMNormal(x = X, y)
 
 ```{r}
 # Or alternatively just pass 'lm.fit' object directly instead:
-lm.fit <- lm(y ~ X - 1, x = TRUE, y = TRUE)
+lm.fit <- lm(y ~ X, x = TRUE, y = TRUE)
 testLMNormal(fit = lm.fit)
 ```
 
