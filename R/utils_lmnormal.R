@@ -1,13 +1,49 @@
-#' Compute MLE estimates in the case of linear model.
+#' Compute score function for linear models.
 #'
-#' @param x a matrix with explanatory variables.
+#' @param x a matrix with n rows and p columns containing the explanatory variables.
 #'
-#' @param y a numeric vector of response variables.
+#' @param y a numeric vector of length n containing the response variable.
+#'
+#' @param theta a numeric vector of length (p+1), containing MLE of parameters in a linear model.
+#'
+#' @return Score matrix with n rows and (p+1) columns.
+#'
+lmScore = function(x, y, theta){
+
+  # Extract the MLE of coefficients in the linear model
+  betahat <- theta$coef
+  sigma2  <- theta$sigma2
+  sigma   <- sqrt(sigma2)
+
+  # Get the number of rows and columns in x matrix
+  n       <- nrow(x)
+  p       <- ncol(x)
+
+  # Compute the fitted values
+  yhat    <- x %*% betahat
+
+  # Define a matrix for score
+  S       <- matrix(NA, nrow = n, ncol = p + 1)
+
+  # Compute the score matrix
+  S[,1:p] <- ( x * as.numeric(y-yhat) ) / sigma2
+  S[,p+1] <- (-1/sigma) + (y - yhat)^2 / sigma^3
+
+  # Return the score matrix
+  return(S)
+
+}
+
+
+#' Compute maximum likelihood estimates for linear models
+#'
+#' @param x a matrix with n rows and p columns containing the explanatory variables.
+#'
+#' @param y a numeric vector of length n containing the response variable.
 #'
 #' @return a numeric vector of estimates.
 #'
-#' @noRd
-getMLEinLMNormal = function(x, y){
+lmMLE = function(x, y){
 
   # Get sample size
   n          <- nrow(x)
@@ -24,55 +60,39 @@ getMLEinLMNormal = function(x, y){
 }
 
 
-#' Compute score function in the case of linear model.
+#' Compute probability inverse transform values for linear models.
 #'
-#' @param x a matrix with explanatory variables.
+#' @param x a matrix with n rows and p columns containing the explanatory variables.
 #'
-#' @param y a numeric vector of response variables.
+#' @param y a numeric vector of length n containing the response variable.
 #'
-#' @param theta a numeric vector with mle values.
+#' @param theta a numeric vector of length (p+1), containing MLE of parameters in a linear model.
 #'
-#' @return a score matrix, rows present samples and columns presents the variables.
+#' @return a vector of length n containing the probability inverse transformed (PIT) values
 #'
-#' @noRd
-getScoreinLMNormal = function(x, y, theta){
+lmPIT = function(x, y, theta){
 
-  # Extract the mle of coefficient
-  betahat <- theta$coef
-  sigma2  <- theta$sigma2
-  sigma   <- sqrt(sigma2)
+  # Compute PIT values with pnorm function
+  pit <- pnorm( (y - x %*% theta$coef ) / sqrt(theta$sigma2), mean = 0, sd = 1)
+  pit <- as.numeric(pit)
 
-  # Get the number of rows and columns in x matrix
-  n       <- nrow(x)
-  p       <- ncol(x)
-
-  # Find the fitted values
-  yhat    <- x %*% betahat
-
-  # Compute the score matrix
-  S       <- matrix(NA, nrow = n, ncol = p + 1)
-  S[,1:p] <- ( x* as.numeric(y-yhat) ) / sigma2
-  S[,p+1] <- (-1/sigma) + (y - yhat)^2 / sigma^3
-
-  # Return the score matrix
-  return(S)
+  # Return pit values
+  return(pit)
 
 }
 
 
 #' Compute Fisher information matrix in the case of linear model with Normal residuals.
 #'
-#' @param x a matrix with explanatory variables.
+#' @param x a matrix with n rows and p columns containing the explanatory variables.
 #'
-#' @param y a numeric vector of response variables.
+#' @param y a numeric vector of length n containing the response variable.
 #'
-#' @param theta a numeric vector with mle values.
+#' @param theta a numeric vector of length (p+1), containing MLE of parameters in a linear model.
 #'
-#' @return Fisher information matrix.
+#' @return Fisher information matrix for linear models.
 #'
-#' @noRd
-#'
-observedHessianMatrixLMNormal = function(x, y, theta){
+lmFisherByHessian = function(x, y, theta){
 
   sigma2   <- theta$sigma2
 

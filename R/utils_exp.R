@@ -1,38 +1,28 @@
-#' The Probability Transform Inverse Function for Exponential Distribution
+#' Compute score function for Exponential distribution.
 #'
-#' @param x a vector data
-#' @param theta MLE estimate of data
+#' @param x a numeric vector of length n
 #'
-#' @return A vector of transformed values
+#' @param theta a numeric vector of length two, containing MLE of parameters in Exponential dist.
 #'
-expFx = function(x, theta){
-
-  if( all(x > 0) ){
-    res <- 1 - exp(-theta*x)
-  }else{
-    res <- 0
-  }
-
-  return(res)
-
-}
-
-#' Calculate Score Function for Exponential Distribution
-#'
-#' @param x a vector data
-#' @param theta MLE estimate of data
-#'
-#' @return A matrix of nx1
+#' @return Score matrix with n rows and two columns.
 #'
 expScore = function(x, theta){
+
+  # Compute score
   S <- (1/theta) - x
+
+  # Convert the vector to a matrix
   S <- as.matrix(S)
+
+  # Return the score
   return(S)
 }
 
-#' Calculate MLE of Parameter in Exponential Distribution
+
+
+#' Calculate MLE of rate in Exponential dist.
 #'
-#' @param x a vector data
+#' @param x a numeric vector of length n
 #'
 #' @return Numeric
 #'
@@ -40,3 +30,22 @@ expMLE = function(x){
   theta <- 1 / mean(x)
   return(theta)
 }
+
+
+
+#' Compute probability inverse transform values for Exponential dist.
+#'
+#' @param x a numeric vector of length n
+#'
+#' @param theta a numeric vector of length one, containing MLE rate in Exponential dist.
+#'
+#' @return a vector of length n containing the probability inverse transformed (PIT) values
+#'
+expPIT = function(x, theta){
+
+  res <- pexp(q = x, rate = theta)
+  return(res)
+
+}
+
+

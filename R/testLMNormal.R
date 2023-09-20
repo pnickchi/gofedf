@@ -43,17 +43,16 @@
 #' n <- 50
 #' p <- 5
 #' x <- matrix( runif(n*p), nrow = n, ncol = p)
-#' e <- runif(n)
+#' e <- rnorm(n)
 #' b <- runif(p)
 #' y <- x %*% b + e
 #' testLMNormal(x, y)
 #' # Or pass lm.fit object directly:
-#' lm.fit <- lm(y ~ 0 + x, x = TRUE, y = TRUE)
+#' lm.fit <- lm(y ~ x, x = TRUE, y = TRUE)
 #' testLMNormal(fit = lm.fit)
 testLMNormal = function(x, y, fit = NULL, ngrid = length(y), gridpit = FALSE, hessian = FALSE, method = 'cvm'){
 
 
-  # Check if fitted object if provided or not
   if( is.null(fit) ){
 
     if( is.vector(x) ){
@@ -65,6 +64,8 @@ testLMNormal = function(x, y, fit = NULL, ngrid = length(y), gridpit = FALSE, he
 
     if( is.matrix(x) ){
       n <- nrow(x)
+      int         <- rep(1, n)
+      x           <- cbind(int,x)
     }
 
     temp   <- applyLMNormal(x = x, y = y)
@@ -74,9 +75,9 @@ testLMNormal = function(x, y, fit = NULL, ngrid = length(y), gridpit = FALSE, he
 
     # Get Fisher information matrix
     if( hessian ){
-      fisher <- observedHessianMatrixLMNormal(x, y, par)
+      fisher <- lmFisherByHessian(x = x, y = y, theta = par)
     }else{
-      fisher <- var(Score)
+      fisher <- (n-1)*var(Score)/n
     }
 
     # Get Eigen values
@@ -106,7 +107,7 @@ testLMNormal = function(x, y, fit = NULL, ngrid = length(y), gridpit = FALSE, he
     }
 
     if( !is.vector(fit$y) ){
-      stop('fit object must have the used response variable. Consider setting y = TRUE in lm function to return reponse y.')
+      stop('fit object must contain the response variable. Consider setting y = TRUE in lm function to return reponse variable.')
     }
 
     x <- fit$x
@@ -119,9 +120,9 @@ testLMNormal = function(x, y, fit = NULL, ngrid = length(y), gridpit = FALSE, he
 
     # Get Fisher information matrix
     if( hessian ){
-      fisher <- observedHessianMatrixLMNormal(x, y, par)
+      fisher <- lmFisherByHessian(x = x, y = y, theta = par)
     }else{
-      fisher <- var(Score)
+      fisher <- (n-1)*var(Score)/n
     }
 
 

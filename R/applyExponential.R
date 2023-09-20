@@ -11,16 +11,14 @@
 applyExponential = function(x){
 
   # Calculate MLE of parameter for Exponential distribution
-  n      <- length(x)
-  lambda <- 1 / mean(x)
-  par    <- lambda
+  par <- expMLE(x)
 
   # Compute score function for sample
-  S1 <- (1/lambda) - x
+  S1 <- expScore(x, theta = par)
   S  <- cbind(S1)
 
   # Calculate the probability inverse transform of sample
-  pit <- pexp(q = x, rate = lambda, lower.tail = TRUE)
+  pit <- expPIT(x, theta = par)
 
   # Define the list to return
   res <- list(Score = S, pit = pit, par = par)

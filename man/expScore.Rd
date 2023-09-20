@@ -2,18 +2,18 @@
 % Please edit documentation in R/utils_exp.R
 \name{expScore}
 \alias{expScore}
-\title{Calculate Score Function for Exponential Distribution}
+\title{Compute score function for Exponential distribution.}
 \usage{
 expScore(x, theta)
 }
 \arguments{
-\item{x}{a vector data}
+\item{x}{a numeric vector of length n}
 
-\item{theta}{MLE estimate of data}
+\item{theta}{a numeric vector of length two, containing MLE of parameters in Exponential dist.}
 }
 \value{
-A matrix of nx1
+Score matrix with n rows and two columns.
 }
 \description{
-Calculate Score Function for Exponential Distribution
+Compute score function for Exponential distribution.
 }

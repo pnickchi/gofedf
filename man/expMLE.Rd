@@ -2,16 +2,16 @@
 % Please edit documentation in R/utils_exp.R
 \name{expMLE}
 \alias{expMLE}
-\title{Calculate MLE of Parameter in Exponential Distribution}
+\title{Calculate MLE of rate in Exponential dist.}
 \usage{
 expMLE(x)
 }
 \arguments{
-\item{x}{a vector data}
+\item{x}{a numeric vector of length n}
 }
 \value{
 Numeric
 }
 \description{
-Calculate MLE of Parameter in Exponential Distribution
+Calculate MLE of rate in Exponential dist.
 }

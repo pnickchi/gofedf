@@ -54,23 +54,22 @@
 #' n <- 50
 #'
 #' # Assign weights
-#' covariates <- rep(1.5,n)
+#' weights <- rep(1.5,n)
 #'
 #' # Set mean and shape parameters for IG distribution.
 #' mio        <- 2
 #' lambda     <- 2
 #'
 #' # Generate a random sample from IG distribution with weighted shape.
-#' y <- statmod::rinvgauss(n, mean = mio, shape = lambda * covariates)
+#' sim_data <- statmod::rinvgauss(n, mean = mio, shape = lambda * weights)
 #'
 #' # Compute MLE of parameters, score matrix, and pit values.
-#' theta_hat    <- IG_mlefunc(obs = y, w = covariates)
-#' print(theta_hat)
-#' score.matrix <- IG_scorefunc(obs = y, mle = theta_hat, w = covariates)
-#' pit.values   <- IG_pitfunc(obs = y , mle = theta_hat)
+#' theta_hat    <- inversegaussianMLE(obs = sim_data,   w = weights)
+#' ScoreMatrix  <- inversegaussianScore(obs = sim_data, w = weights, mle = theta_hat)
+#' pitvalues    <- inversegaussianPIT(obs = sim_data ,  w = weights, mle = theta_hat)
 #'
 #' # Apply the goodness-of-fit test.
-#' testYourModel(x = y, pit = pit.values, score = score.matrix)
+#' testYourModel(x = sim_data, pit = pitvalues, score = ScoreMatrix)
 #'
 testYourModel = function(x, pit, score = NULL, ngrid = length(x), gridpit = TRUE, precision = 1e-9, method = 'cvm'){
 
@@ -197,7 +196,7 @@ testYourModel = function(x, pit, score = NULL, ngrid = length(x), gridpit = TRUE
     }
 
     # Calculate Fisher information matrix by computing the variance of score from the sample.
-    fisher  <- var(score)
+    fisher  <- (n-1)*var(score)/n
 
 
     # Calculate Cramer-von-Mises, Anderson-Darling statistics or both

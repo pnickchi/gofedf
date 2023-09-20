@@ -30,12 +30,12 @@
 #' @examples
 #' set.seed(123)
 #' n <- 50
-#' sim_data <- rexp(n)
+#' sim_data <- rexp(n, rate = 2)
 #' testExponential(x = sim_data)
 testExponential = function(x, ngrid = length(x), gridpit = FALSE, hessian = FALSE, method = 'cvm'){
 
   if( any( x < 0 ) ){
-    stop('x values must be positive for Exponential.')
+    stop('x values must be positive for Exponential distribution.')
   }
 
   n       <- length(x)
@@ -47,13 +47,13 @@ testExponential = function(x, ngrid = length(x), gridpit = FALSE, hessian = FALS
   if( hessian ){
     fisher <- matrix( n / (par[1])^2, nrow = 1, ncol = 1 )
   }else{
-    fisher <- var(Score)
+    fisher <- (n-1)*var(Score)/n
   }
 
 
   if( method == 'cvm'){
 
-    U2      <- getCvMStatistic(pit)
+    cvm      <- getCvMStatistic(pit)
 
     if( gridpit ){
       ev    <- getEigenValues(S = Score, FI = fisher, pit, me = 'cvm')
@@ -61,9 +61,9 @@ testExponential = function(x, ngrid = length(x), gridpit = FALSE, hessian = FALS
       ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = 'cvm')
     }
 
-    pvalue  <- getpvalue(u = U2, eigen = ev)
+    pvalue  <- getpvalue(u = cvm, eigen = ev)
 
-    res     <- list(Statistic = U2, pvalue = pvalue)
+    res     <- list(Statistic = cvm, pvalue = pvalue)
     return(res)
 
   } else if ( method == 'ad') {

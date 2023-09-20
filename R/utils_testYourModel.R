@@ -3,17 +3,17 @@
 #' @description This function is used in \code{\link{testYourModel}} function for example purposes.
 #'
 #' @param obs a numeric vector of sample observations.
-#' @param ... a list of additional parameters to define the likelihood. In this function, weight is being passed.
+#' @param ... a list of additional parameters to define the likelihood.
 #'
 #' @export
 #'
 #' @return The function compute the MLE of parameters in Inverse Gaussian distribution and returns a vector of
-#' estimates. The first and second elements of the vector are MLE of the mean and MLE of shape, respectively.
+#' estimates. The first and second elements of the vector are MLE of the mean and shape, respectively.
 #'
-IG_mlefunc = function(obs, ...){
+inversegaussianMLE = function(obs, ...){
 
   args <- list(...)
-  w <- args$w
+  w    <- args$w
 
   if( any(w<0) ){
     stop('The weights must be positive.')
@@ -36,12 +36,12 @@ IG_mlefunc = function(obs, ...){
 #' @description This function is used in \code{\link{testYourModel}} function for example purposes.
 #'
 #' @param obs a numeric vector of sample observations.
-#' @param ... a list of additional parameters to define the likelihood. In this function, weight and mle are being passed.
+#' @param ... a list of additional parameters to define the likelihood.
 #'
 #' @export
 #'
 #' @return The score matrix with n rows (number of sample observations) and 2 columns (mean and shape).
-IG_scorefunc = function(obs, ...){
+inversegaussianScore = function(obs, ...){
 
   args <- list(...)
   mle <- args$mle
@@ -74,7 +74,7 @@ IG_scorefunc = function(obs, ...){
 #' Compute the probability transformed values for a sample from Inverse Gaussian distribution.
 #'
 #' @param obs A numeric vector of sample observations.
-#' @param ... A list of additional parameters to define the likelihood. In this function, MLE is being passed.
+#' @param ... A list of additional parameters to define the likelihood.
 #'
 #' @description This function is used in \code{\link{testYourModel}} function for example purposes.
 #'
@@ -83,17 +83,15 @@ IG_scorefunc = function(obs, ...){
 #' @import statmod
 #'
 #' @return A numeric vector of probability transformed values of sample observations.
-IG_pitfunc = function(obs, ...){
+inversegaussianPIT = function(obs, ...){
 
-  # Extract the MLE
+  # Extract the MLE and weights
   args <- list(...)
-  mle <- args$mle
-
-  # Set observations as y
-  y <- obs
+  mle  <- args$mle
+  w    <- args$w
 
   # Compute pit values with the estimated MLE
-  pit <- statmod::pinvgauss(q = y, mean = mle[1], shape = mle[2])
+  pit <- statmod::pinvgauss(q = obs, mean = mle[1], shape = mle[2] * w)
 
   # return pit values
   return(pit)

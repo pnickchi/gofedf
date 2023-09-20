@@ -24,7 +24,7 @@ Authors:
 *   [Payman Nickchi](https://github.com/pnickchi),
     <pnickchi@sfu.ca> (Maintainer)
 
-The `gofedf` package provides computational tools to apply goodness-of-fit tests based on empirical distribution function theory. The package offers functions and routines to test the hypothesis that a univariate sample follows a distribution based on the empirical distribution function. The theory is founded on reducing the problem to a stochastic process and computing its covariance function. An approximate p-value is computed using the Farebrother method based on the limiting distribution of the statistic. Users can run the test by calculating either the Cramer-von Mises or Anderson-Darling statistic. The covariance function of the stochastic process relies on specific characteristics of the assumed model. Notably, knowledge of the Fisher information matrix and the partial derivatives of the cumulative distribution function is crucial for computing the covariance function. However, obtaining these quantities can be computationally intensive or challenging in general likelihood models. To overcome this limitation, we propose an alternative method for estimating the covariance function of the stochastic process directly from the sample data. The package provides tools for this estimation and for testing if a sample comes from any general likelihood model. In summary, the package can be used to apply a goodness-of-fit test in any of the following settings:
+The `gofedf` package provides computational tools to apply goodness-of-fit tests based on empirical distribution function theory. The package offers functions and routines to test the hypothesis that a univariate sample follows a distribution based on the empirical distribution function. The theory is founded on reducing the problem to a stochastic process and computing its covariance function. An approximate p-value is computed using the Imhof method based on the limiting distribution of the statistic. Users can run the test by calculating either the Cramer-von Mises or Anderson-Darling statistic. The covariance function of the stochastic process relies on specific characteristics of the assumed model. Notably, knowledge of the Fisher information matrix and the partial derivatives of the cumulative distribution function is crucial for computing the covariance function. However, obtaining these quantities can be computationally intensive or challenging in general likelihood models. To overcome this limitation, we propose an alternative method for estimating the covariance function of the stochastic process directly from the sample data. The package provides tools for this estimation and for testing if a sample comes from any general likelihood model. In summary, the package can be used to apply a goodness-of-fit test in any of the following settings:
 
 - Validate if the assumptions about the response variable in a generalized linear model (with any link function) are satisfied. The current version only checks for the Gamma distribution.
 
@@ -228,9 +228,9 @@ lambda     <- 2
 y <- statmod::rinvgauss(n, mean = mio, shape = lambda * covariates)
 
 # Compute MLE of parameters, score matrix, and pit values.
-theta_hat    <- IG_mlefunc(obs = y, w = covariates)
-score.matrix <- IG_scorefunc(obs = y, mle = theta_hat, w = covariates)
-pit.values   <- IG_pitfunc(obs = y , mle = theta_hat)
+theta_hat    <- inversegaussianMLE(obs = y, w = covariates)
+score.matrix <- inversegaussianScore(obs = y, w = covariates, mle = theta_hat)
+pit.values   <- inversegaussianPIT(obs = y , w = covariates, mle = theta_hat)
 
 # Apply the goodness-of-fit test.
 testYourModel(x = y, pit = pit.values, score = score.matrix)
@@ -242,3 +242,5 @@ testYourModel(x = y, pit = pit.values, score = score.matrix)
 [1] Stephens, M.A. (1974). [EDF Statistics for Goodness of Fit and Some Comparisons.] *Journal of the American Statistical Association*, Vol. 69, 730-737.   
 
 [2] Stephens, M.A. (1976). [Asymptotic results for goodness-of-fit statistics with unknown parameters.] *Annals of Statistics*, Vol. 4, 357-369.
+
+[3] Imhof, J.P. (1961). [Computing the Distribution of Quadratic Forms in Normal Variables] *Biometrika*, Vol. 48, 419-426.

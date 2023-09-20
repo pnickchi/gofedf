@@ -45,6 +45,6 @@ follows an Exponential distribution.
 \examples{
 set.seed(123)
 n <- 50
-sim_data <- rexp(n)
+sim_data <- rexp(n, rate = 2)
 testExponential(x = sim_data)
 }

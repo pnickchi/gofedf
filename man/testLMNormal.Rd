@@ -60,11 +60,11 @@ set.seed(123)
 n <- 50
 p <- 5
 x <- matrix( runif(n*p), nrow = n, ncol = p)
-e <- runif(n)
+e <- rnorm(n)
 b <- runif(p)
 y <- x \%*\% b + e
 testLMNormal(x, y)
 # Or pass lm.fit object directly:
-lm.fit <- lm(y ~ 0 + x, x = TRUE, y = TRUE)
+lm.fit <- lm(y ~ x, x = TRUE, y = TRUE)
 testLMNormal(fit = lm.fit)
 }

@@ -15,42 +15,13 @@
 #' @noRd
 applyGLMGamma = function(fit){
 
-   # coef function from stats package extracts MLE estimate of beta parameter in the model.
-   mle.coef                 <- coef(fit)
+   # Compute MLE of parameters (coefficients in the model + shape parameter in Gamma)
+   par <- glmMLE(fit)
 
-   # Use gamma.shape function from MASS package to compute MLE of shape parameter in Gamma distribution
-   # Note: in our testing and simluation, we did not see any improvement in the estimate by increasing
-   # it.lim or reducing eps.max.
-   mle.alpha                <- MASS::gamma.shape(fit, it.lim = 30, eps.max = 1e-9)[1]$alpha
-
-   # Build a vector for MLE estimates, p parameters for beta and last parameter for mle of shape parameter
-   par                      <- c(mle.coef, mle.alpha)
-   names(par)[length(par)]  <- 'shape'
-
-
-   # Extract family function, design matrix (X) from fit object, compute the linear predictor and extracy response variable.
-   fm              <- family(fit)
-   X               <- fit$x
-   linearPredictor <- X %*% mle.coef
-   y               <- fit$y
-
-   # Check if we need to add offset to the linear predictor.
-   if( !is.null(fit$offset) ){
-     linearPredictor <- linearPredictor + fit$offset
-   }
-
-   # Calculate miohat, estimated value of mean function in GLM
-   miohat          <- fm$linkinv(linearPredictor)
-
-   # Calculate the score function
-   # Use family function to get link function and derivative of the inverse-link function
-   S1    <- 1 - digamma(mle.alpha) + log(mle.alpha) + log(y/miohat) - (y/miohat)
-   S2    <- ( fm$mu.eta(linearPredictor) / miohat ) * mle.alpha * ( (y/miohat) - 1 )
-   S2    <- as.vector(S2) * X
-   S     <- cbind(S1,S2)
-
-   # Calculate probability inverse transfer of data
-   pit <- pgamma(q = as.numeric(y), shape = mle.alpha, scale = miohat/mle.alpha)
+   # Compute the Score and PIT for the case of GLM with Gamma
+   temp <- glmScorePIT(fit, theta = par['shape'])
+   S    <- temp$Score
+   pit  <- temp$pit
 
    # Define the list to return
    res <- list(Score = S, pit = pit, par = par, converged = fit$converged)

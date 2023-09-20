@@ -82,12 +82,16 @@ getEigenValues = function(S, FI, pit, me){
   # Find the number of observations
   n       <- nrow(S)
 
+  # Find the number of parameters
+  p       <- ncol(S)
+
   # Compute the estimate of W_{n}(u) process over a grid of pit values.
   Mat     <- calculateWnuhat(S, FI, pit)
 
   # Compute the covariance of the estimate of W_{n}(u) process and adjust for the sample size.
   W       <- var(Mat)
-  W       <- ( (n-1) * W ) / n
+  #W       <- ( (n-1) * W ) / (n)
+  W       <- ( (n-1) * W ) / (n-p-1)
 
   # Compute the Eigenvalues of the covariance matrix depending on the goodness-of-fit statistic
   if( me == 'cvm' ){
@@ -121,12 +125,16 @@ getEigenValues_manualGrid = function(S, FI, pit, M, me){
   # Find the number of observations
   n       <- nrow(S)
 
+  # Find the number of parameters
+  p       <- ncol(S)
+
   # Compute the estimate of W_{n}(u) process over a grid of values equally spaced over (0,1).
   Mat     <- calculateWnuhat_manualGrid(S, FI, pit, M)
 
   # Compute the covariance of the estimate of W_{n}(u) process and adjust for the sample size.
   W       <- var(Mat)
-  W       <- ( (n-1) * W ) / n
+  #W       <- ( (n-1) * W ) / (n)
+  W       <- ( (n-1) * W ) / (n-p-1)
 
   # Compute the Eigenvalues of the covariance matrix depending on the goodness-of-fit statistic
   if( me == 'cvm' ){
@@ -204,14 +212,7 @@ getpvalue = function(u, eigen){
   # Compute the upper bound for the probability of Pr(Q > u)
   UB <- getUpperBoundForpvalue(statistic = u, lambda = eigen)
 
-  # The Farebrother algorithm requires the Eigenvalues to be positive.
-  # Due to numerical computations, sometimes some of the Eigenvalues become small negative values.
-  # To address this, we correct the issue by selecting only those Eigenvalues that are greater than or equal to a cutoff.
-  # The cutoff is the sum of Eigenvalues that are positive multiplied by 1e-6.
-  # cutoff <- sum(eigen[eigen>=0]) * 1e-6
-  # eigen  <- eigen[eigen >= cutoff]
-
-  # Compute p-value
+  # Compute p-value by imhof method
   pvalue <- CompQuadForm::imhof(q = u, lambda = eigen)$Qq
 
   # Check if the computed p-value by CompQuadForm package falls between lower and upper bound.

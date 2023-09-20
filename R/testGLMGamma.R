@@ -8,6 +8,13 @@
 #'
 #' @param y is a vector of numeric values with the same number of observations or number of rows as x.
 #'
+#' @param fit is an object of class \code{glm} and its default value is NULL. If a fit of class \code{glm} is provided,
+#' the arguments \code{x}, \code{y}, and \code{l} will be ignored. We recommend using \code{\link{glm2}} function from
+#' \code{\link{glm2}} package since it provides better convergence while optimizing the likelihood to estimate
+#' coefficients of the model by IWLS method. It is required to return design matrix by \code{x} = \code{TRUE} in
+#' \code{\link{glm}} or \code{\link{glm2}} function. For more information on how to do this, refer to the help
+#' documentation for the \code{\link{glm}} or \code{\link{glm2}} function.
+#'
 #' @param l a character vector indicating the link function that should be used for Gamma family. Some common
 #' link functions for Gamma family are 'log' and 'inverse'. For more details see \code{\link{make.link}} from stats
 #' package in R.
@@ -15,13 +22,6 @@
 #' @param hessian logical. If \code{TRUE} the Fisher information matrix is estimated by the observed Hessian Matrix based on
 #' the sample. If \code{FALSE} (the default value) the Fisher information matrix is estimated by the variance of the
 #' observed score matrix.
-#'
-#' @param fit is an object of class \code{glm} and its default value is NULL. If a fit of class \code{glm} is provided,
-#' the arguments \code{x}, \code{y}, and \code{l} will be ignored. We recommend using \code{\link{glm2}} function from
-#' \code{\link{glm2}} package since it provides better convergence while optimizing the likelihood to estimate
-#' coefficients of the model by IWLS method. It is required to return design matrix by \code{x} = \code{TRUE} in
-#' \code{\link{glm}} or \code{\link{glm2}} function. For more information on how to do this, refer to the help
-#' documentation for the \code{\link{glm}} or \code{\link{glm2}} function.
 #'
 #' @param start.value a numeric value or vector. This is the same as \code{start} argument in \code{\link{glm}} or
 #' \code{\link{glm2}}. The value is a starting point in iteratively reweighted least squares (IRLS) algorithm for
@@ -54,98 +54,132 @@
 #' testGLMGamma(x, y, l = 'log')
 #' myfit <- glm(y ~ x, family = Gamma('log'), x = TRUE, y = TRUE)
 #' testGLMGamma(fit = myfit)
-testGLMGamma = function(x, y, l = 'log', hessian = FALSE, fit = NULL, start.value = NULL, control = NULL, method = 'cvm'){
-
-
-   if( is.null(control) ){
-     control <- glm.control(epsilon = 1e-8, maxit = 100, trace = F)
-   }else{
-     control <- control
-   }
+testGLMGamma = function(x, y, fit = NULL, l = 'log', hessian = FALSE, start.value = NULL, control = NULL, method = 'cvm'){
 
    if( is.null(fit) ){
 
-     # Check if the starting values are included
-     if( is.null(start.value) ){
-       fit <- glm2::glm2(formula = y ~ x, family = Gamma(link = l), x = TRUE, y = TRUE, control = control, na.action = na.omit)
-     }else{
-       fit <- glm2::glm2(formula = y ~ x, family = Gamma(link = l), x = TRUE, y = TRUE, control = control, na.action = na.omit, start = start.value)
+     # Check if the link is valid
+     if( !(l %in% c('inverse','identity','log')) ){
+       stop('The link for Gamma must be inverse, identity, or log.')
      }
 
-     y       <- fit$y
-     n       <- length(y)
+     if( is.null(control) ){
+       ctl <- glm.control(epsilon = 1e-8, maxit = 100, trace = F)
+     }else{
+       ctl <- control
+     }
 
-   }else{
+     # Fit a GLM to the data and check for starting value to compute maximum likelihood estimation of coefficients
+     if( is.null(start.value) ){
+
+       fitobj <- glm2::glm2(formula = y ~ x, family = Gamma(link = l), x = TRUE, y = TRUE, control = ctl, na.action = na.omit)
+
+     }else{
+
+       if( length(start.value) != (ncol(x)+1) ){
+         stop('The lenght of starting.value does not match the number of columns in x.')
+       }
+
+       fitobj <- glm2::glm2(formula = y ~ x, family = Gamma(link = l), x = TRUE, y = TRUE, control = ctl, na.action = na.omit, start = start.value)
+     }
+
+     # Get the sample size
+     n       <- length(fitobj$y)
+
+   }
+
+   if( !is.null(fit) ){
 
      if (!inherits(fit, 'glm')){
        stop('The fit must be \'glm\' object returned by either glm or glm2 function.')
      }
 
      if( fit$family$family != 'Gamma' ){
-       stop('The family in fit must be Gamma.')
+       stop('The family must be Gamma.')
+     }
+
+     if( !(fit$family$link %in% c('inverse','identity','log')) ){
+       stop('The link for Gamma must be inverse, identity, or log.')
      }
 
      if( !is.matrix(fit$x) ){
-       stop('fit object must have the design matrix corresponding to the model. Consider setting x = TRUE in glm function to return x matrix.')
+       stop('fit must contain the design matrix. Consider setting x = TRUE in glm or glm2 function to return x matrix.')
      }
 
+     if( !is.vector(fit$y) ){
+       stop('fit must contain the response variable. Consider setting y = TRUE in glm or glm2 function to return response variable.')
+     }
+
+     fitobj <- fit
    }
 
-   temp    <- applyGLMGamma(fit = fit)
+   # Apply GLM Gamma to compute score, MLE of parameters, and pit values
+   temp    <- applyGLMGamma(fit = fitobj)
    Score   <- temp$Score
    pit     <- temp$pit
    par     <- temp$par
+
+   # Boolean to check if the IWLS algorithm have converged
    converged <- temp$converged
 
    if(hessian){
-     fisher  <- observedHessianMatrixGLMGamma(fit = fit, mle_shape = par['shape'])
+     fisher  <- glmgammaFisherByHessian(fit = fitobj, mle_shape = par['shape'])
    }else{
      fisher  <- (n-1)*var(Score)/n
    }
 
-
    if( method == 'cvm'){
 
-      ev      <- getEigenValues(S = Score, FI = fisher, pit, me = 'cvm')
-      cvm     <- getCvMStatistic(pit)
-      pvalue  <- getpvalue(u = cvm, eigen = ev)
+     # Compute Eigen values
+     ev      <- getEigenValues(S = Score, FI = fisher, pit, me = 'cvm')
 
-      res     <- list(Statistic = cvm, pvalue = pvalue, converged = converged)
-      return(res)
+     # Compute cvm statistic
+     cvm     <- getCvMStatistic(pit)
+
+     # Compute p-value
+     pvalue  <- getpvalue(u = cvm, eigen = ev)
+
+     res     <- list(Statistic = cvm, pvalue = pvalue, converged = converged)
+     return(res)
 
     } else if ( method == 'ad') {
 
-      ev      <- getEigenValues(S = Score, FI = fisher, pit, me = 'ad')
-      ad      <- getADStatistic(pit)
-      pvalue  <- getpvalue(u = ad, eigen = ev)
+     # Compute Eigen values
+     ev      <- getEigenValues(S = Score, FI = fisher, pit, me = 'ad')
 
-      res     <- list(Statistic = ad, pvalue = pvalue, converged = converged)
-      return(res)
+     # Compute ad statistics
+     ad      <- getADStatistic(pit)
+
+     # Compute p-value
+     pvalue  <- getpvalue(u = ad, eigen = ev)
+
+     res     <- list(Statistic = ad, pvalue = pvalue, converged = converged)
+     return(res)
 
     } else {
 
       # Calculate both cvm and ad statisitcs
 
-      # 1. Do cvm calculation
+      # Compute cvm statistic
       cvm        <- getCvMStatistic(pit)
       names(cvm) <- 'Cramer-von-Mises Statistic'
 
-      # Get Eigen values
+      # Compute Eigen values
       ev    <- getEigenValues(S = Score, FI = fisher, pit = pit, me = 'cvm')
 
-      # Calculate pvalue
+      # Compute p-value
       cvm.pvalue  <- getpvalue(u = cvm, eigen = ev)
       names(cvm.pvalue) <- 'pvalue for Cramer-von-Mises test'
 
 
-      # 2. Do ad calculations
+      # 2. Compute ad calculations
       ad      <- getADStatistic(pit)
       names(ad) <- 'Anderson-Darling Statistic'
 
-      # Get Eigen values
+      # Compute Eigen values
       ev    <- getEigenValues(S = Score, FI = fisher, pit = pit, me = 'ad')
 
-      # Calculate pvalue
+      # Compute p-value
       ad.pvalue  <- getpvalue(u = ad, eigen = ev)
       names(ad.pvalue) <- 'Anderson-Darling test'
 

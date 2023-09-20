@@ -1,6 +1,6 @@
 README
 ================
-2023-08-25
+2023-09-19
 
 # gofedf
 
@@ -24,8 +24,8 @@ The package offers functions and routines to test the hypothesis that a
 univariate sample follows a distribution based on the empirical
 distribution function. The theory is founded on reducing the problem to
 a stochastic process and computing its covariance function. An
-approximate p-value is computed using the Farebrother method based on
-the limiting distribution of the statistic. Users can run the test by
+approximate p-value is computed using the Imhof method based on the
+limiting distribution of the statistic. Users can run the test by
 calculating either the Cramer-von Mises or Anderson-Darling statistic.
 The covariance function of the stochastic process relies on specific
 characteristics of the assumed model. Notably, knowledge of the Fisher
@@ -114,7 +114,7 @@ testNormal(x = x, method = 'cvm')
     ## [1] 0.03781322
     ## 
     ## $pvalue
-    ## [1] 0.6646717
+    ## [1] 0.7068748
 
 ``` r
 # Test if the data follows a Normal distribution by calculating the Anderson-Darling statistic and approximate p-value of the test.
@@ -125,7 +125,7 @@ testNormal(x = x, method = 'ad')
     ## [1] 0.2179704
     ## 
     ## $pvalue
-    ## [1] 0.7833757
+    ## [1] 0.8205091
 
 ``` r
 # Generate some random sample from a non Normal distribution.
@@ -137,7 +137,7 @@ testNormal(x = x, method = 'cvm')
     ## [1] 0.2141872
     ## 
     ## $pvalue
-    ## [1] 0.002816061
+    ## [1] 0.004121803
 
 ### 2. Bivariate Gamma distribution
 
@@ -161,7 +161,7 @@ testGamma(x = x, method = 'cvm')
     ## [1] 0.0549759
     ## 
     ## $pvalue
-    ## [1] 0.3318735
+    ## [1] 0.3714256
 
 ``` r
 # Generate some random sample from a distribution that is not Gamma
@@ -173,7 +173,7 @@ testNormal(x = x, method = 'cvm')
     ## [1] 0.07085577
     ## 
     ## $pvalue
-    ## [1] 0.1464319
+    ## [1] 0.176295
 
 ### 3. Linear model with Normal error terms
 
@@ -217,10 +217,10 @@ testLMNormal(x = X, y)
 ```
 
     ## $Statistic
-    ## [1] 0.02437418
+    ## [1] 0.02285164
     ## 
     ## $pvalue
-    ## [1] 0.8740983
+    ## [1] 0.9208541
 
 ``` r
 # Or alternatively just pass 'lm.fit' object directly instead:
@@ -232,7 +232,7 @@ testLMNormal(fit = lm.fit)
     ## [1] 0.02437418
     ## 
     ## $pvalue
-    ## [1] 0.8740983
+    ## [1] 0.9248414
 
 ### 4. Gamma GLM with any link function
 
@@ -288,7 +288,7 @@ testGLMGamma(x=X, y, l = 'log', method = 'cvm')
     ## [1] 0.0870493
     ## 
     ## $pvalue
-    ## [1] 0.1139862
+    ## [1] 0.1874801
     ## 
     ## $converged
     ## [1] TRUE
@@ -303,7 +303,7 @@ testGLMGamma(fit = glm.fit, l = 'log')
     ## [1] 0.0870493
     ## 
     ## $pvalue
-    ## [1] 0.1139862
+    ## [1] 0.1874801
     ## 
     ## $converged
     ## [1] TRUE
@@ -373,9 +373,9 @@ lambda     <- 2
 y <- statmod::rinvgauss(n, mean = mio, shape = lambda * covariates)
 
 # Compute MLE of parameters, score matrix, and pit values.
-theta_hat    <- IG_mlefunc(obs = y, w = covariates)
-score.matrix <- IG_scorefunc(obs = y, mle = theta_hat, w = covariates)
-pit.values   <- IG_pitfunc(obs = y , mle = theta_hat)
+theta_hat    <- inversegaussianMLE(obs = y, w = covariates)
+score.matrix <- inversegaussianScore(obs = y, w = covariates, mle = theta_hat)
+pit.values   <- inversegaussianPIT(obs = y , w = covariates, mle = theta_hat)
 
 # Apply the goodness-of-fit test.
 testYourModel(x = y, pit = pit.values, score = score.matrix)
@@ -383,10 +383,10 @@ testYourModel(x = y, pit = pit.values, score = score.matrix)
 
     ## $Statistic
     ## Cramer-von-Mises Statistic 
-    ##                  0.1402415 
+    ##                 0.08382993 
     ## 
     ## $pvalue
-    ## [1] 0.05200096
+    ## [1] 0.2552943
 
 ### References
 
@@ -397,3 +397,6 @@ Vol. 69, 730-737.
 \[2\] Stephens, M.A. (1976). \[Asymptotic results for goodness-of-fit
 statistics with unknown parameters.\] *Annals of Statistics*, Vol. 4,
 357-369.
+
+\[3\] Imhof, J.P. (1961). \[Computing the Distribution of Quadratic
+Forms in Normal Variables\] *Biometrika*, Vol. 48, 419-426.

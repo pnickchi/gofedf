@@ -7,9 +7,9 @@
 testGLMGamma(
   x,
   y,
+  fit = NULL,
   l = "log",
   hessian = FALSE,
-  fit = NULL,
   start.value = NULL,
   control = NULL,
   method = "cvm"
@@ -21,6 +21,13 @@ presents covariats.}
 
 \item{y}{is a vector of numeric values with the same number of observations or number of rows as x.}
 
+\item{fit}{is an object of class \code{glm} and its default value is NULL. If a fit of class \code{glm} is provided,
+the arguments \code{x}, \code{y}, and \code{l} will be ignored. We recommend using \code{\link{glm2}} function from
+\code{\link{glm2}} package since it provides better convergence while optimizing the likelihood to estimate
+coefficients of the model by IWLS method. It is required to return design matrix by \code{x} = \code{TRUE} in
+\code{\link{glm}} or \code{\link{glm2}} function. For more information on how to do this, refer to the help
+documentation for the \code{\link{glm}} or \code{\link{glm2}} function.}
+
 \item{l}{a character vector indicating the link function that should be used for Gamma family. Some common
 link functions for Gamma family are 'log' and 'inverse'. For more details see \code{\link{make.link}} from stats
 package in R.}
@@ -28,13 +35,6 @@ package in R.}
 \item{hessian}{logical. If \code{TRUE} the Fisher information matrix is estimated by the observed Hessian Matrix based on
 the sample. If \code{FALSE} (the default value) the Fisher information matrix is estimated by the variance of the
 observed score matrix.}
-
-\item{fit}{is an object of class \code{glm} and its default value is NULL. If a fit of class \code{glm} is provided,
-the arguments \code{x}, \code{y}, and \code{l} will be ignored. We recommend using \code{\link{glm2}} function from
-\code{\link{glm2}} package since it provides better convergence while optimizing the likelihood to estimate
-coefficients of the model by IWLS method. It is required to return design matrix by \code{x} = \code{TRUE} in
-\code{\link{glm}} or \code{\link{glm2}} function. For more information on how to do this, refer to the help
-documentation for the \code{\link{glm}} or \code{\link{glm2}} function.}
 
 \item{start.value}{a numeric value or vector. This is the same as \code{start} argument in \code{\link{glm}} or
 \code{\link{glm2}}. The value is a starting point in iteratively reweighted least squares (IRLS) algorithm for

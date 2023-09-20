@@ -1,6 +1,7 @@
 #' Compute score function for Gamma distribution.
 #'
 #' @param x a numeric vector of length n
+#'
 #' @param theta a numeric vector of length two, containing MLE of parameters in Gamma dist.
 #'
 #' @return Score matrix with n rows and two columns.
@@ -104,7 +105,6 @@ gammaPIT = function(x, theta){
 #'
 #' @return Fisher information matrix for Gamma distribution
 #'
-#' @noRd
 gammaFisherByHessian = function(theta){
 
   # Extract MLE of shape and scale from theta argument
