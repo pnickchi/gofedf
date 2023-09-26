@@ -1,6 +1,6 @@
 README
 ================
-2023-09-19
+2023-09-25
 
 # gofedf
 
@@ -24,12 +24,13 @@ The package offers functions and routines to test the hypothesis that a
 univariate sample follows a distribution based on the empirical
 distribution function. The theory is founded on reducing the problem to
 a stochastic process and computing its covariance function. An
-approximate p-value is computed using the Imhof method based on the
-limiting distribution of the statistic. Users can run the test by
-calculating either the Cramer-von Mises or Anderson-Darling statistic.
-The covariance function of the stochastic process relies on specific
-characteristics of the assumed model. Notably, knowledge of the Fisher
-information matrix and the partial derivatives of the cumulative
+approximate p-value is computed using the `Imhof` or `Farebrother`
+method based on the limiting distribution of the statistic (see note
+section for more details about choice of method). Users can run the test
+by calculating either the Cramer-von Mises or Anderson-Darling
+statistic. The covariance function of the stochastic process relies on
+specific characteristics of the assumed model. Notably, knowledge of the
+Fisher information matrix and the partial derivatives of the cumulative
 distribution function is crucial for computing the covariance function.
 However, obtaining these quantities can be computationally intensive or
 challenging in general likelihood models. To overcome this limitation,
@@ -114,7 +115,7 @@ testNormal(x = x, method = 'cvm')
     ## [1] 0.03781322
     ## 
     ## $pvalue
-    ## [1] 0.7068748
+    ## [1] 0.6766974
 
 ``` r
 # Test if the data follows a Normal distribution by calculating the Anderson-Darling statistic and approximate p-value of the test.
@@ -125,7 +126,7 @@ testNormal(x = x, method = 'ad')
     ## [1] 0.2179704
     ## 
     ## $pvalue
-    ## [1] 0.8205091
+    ## [1] 0.9426823
 
 ``` r
 # Generate some random sample from a non Normal distribution.
@@ -137,7 +138,7 @@ testNormal(x = x, method = 'cvm')
     ## [1] 0.2141872
     ## 
     ## $pvalue
-    ## [1] 0.004121803
+    ## [1] 0.004302717
 
 ### 2. Bivariate Gamma distribution
 
@@ -161,7 +162,7 @@ testGamma(x = x, method = 'cvm')
     ## [1] 0.0549759
     ## 
     ## $pvalue
-    ## [1] 0.3714256
+    ## [1] 0.3553938
 
 ``` r
 # Generate some random sample from a distribution that is not Gamma
@@ -173,7 +174,7 @@ testNormal(x = x, method = 'cvm')
     ## [1] 0.07085577
     ## 
     ## $pvalue
-    ## [1] 0.176295
+    ## [1] 0.1730288
 
 ### 3. Linear model with Normal error terms
 
@@ -220,7 +221,7 @@ testLMNormal(x = X, y)
     ## [1] 0.02285164
     ## 
     ## $pvalue
-    ## [1] 0.9208541
+    ## [1] 0.9089065
 
 ``` r
 # Or alternatively just pass 'lm.fit' object directly instead:
@@ -232,7 +233,7 @@ testLMNormal(fit = lm.fit)
     ## [1] 0.02285164
     ## 
     ## $pvalue
-    ## [1] 0.9208541
+    ## [1] 0.9089065
 
 ### 4. Gamma GLM with any link function
 
@@ -288,7 +289,7 @@ testGLMGamma(x=X, y, l = 'log', method = 'cvm')
     ## [1] 0.0870493
     ## 
     ## $pvalue
-    ## [1] 0.1874801
+    ## [1] 0.1896532
     ## 
     ## $converged
     ## [1] TRUE
@@ -303,7 +304,7 @@ testGLMGamma(fit = glm.fit, l = 'log')
     ## [1] 0.0870493
     ## 
     ## $pvalue
-    ## [1] 0.1874801
+    ## [1] 0.1896532
     ## 
     ## $converged
     ## [1] TRUE
@@ -334,11 +335,12 @@ computed as
 $S(X_{i};\theta) = \frac{\partial}{\partial \theta} \log(f(X_{i};\theta))$
 where $f(X_{i};\theta)$ is the probability density function. For sure,
 if $\theta$ is not known, this means you need to compute the MLE of
-$\theta$ to obtain item (ii) and if needed item (iii). The main function
-to apply the GOF test in this case is `testYourModel`. The `precision`
-argument sets the precision needed to check if the col sums of score
-matrix are close enough to zero. The other arguments of the function
-remain consistent with previous examples.
+$\theta$ to obtain item 1 and if needed the score function. The main
+function to apply the GOF test in this case is `testYourModel`. The
+`precision` argument sets the precision needed to check if the col sums
+of score matrix are close enough to zero (log-likelihood is zero at
+MLE). The other arguments of the function remain consistent with
+previous examples.
 
 In the following example, we demonstrate how to apply the
 goodness-of-fit test to check if a sample follows an Inverse Gaussian
@@ -346,12 +348,12 @@ distribution, where the shape parameter depends on some weights. First,
 we generate data from an Inverse Gaussian distribution. For illustrative
 purposes, we include functions to compute the Maximum Likelihood
 Estimation (MLE) and score function for the sample. In the following
-chunck of code, `IG_scorefunc` is a function that returns the score for
-each observation, and `IG_pitfunc` is a function that provides a vector
-of Probability Inverse Transformed (PIT) values. Additionally,
-`IG_mlefunc` calculates the MLE of the mean and shape parameter. Second
-we calculate score, PIT and MLE of parameters. Finally we call
-`testYourModel` function to apply the test.
+chunck of code, `inversegaussianScore` is a function that returns the
+score for each observation, and `inversegaussianPIT` is a function that
+provides a vector of Probability Inverse Transformed (PIT) values.
+Additionally, `inversegaussianMLE` calculates the MLE of the mean and
+shape parameter. Second we calculate score, PIT and MLE of parameters.
+Finally we call `testYourModel` function to apply the test.
 
 ``` r
 # Example: Inverse Gaussian (IG) distribution with weights
@@ -363,19 +365,20 @@ set.seed(123)
 n <- 50
 
 # Assign weights
-covariates <- rep(1.5,n)
+weights <- runif(n, min = 5, max = 6)
+weights <- weights / sum(weights)
 
 # Set mean and shape parameters for IG distribution.
 mio        <- 2
 lambda     <- 2
 
 # Generate a random sample from IG distribution with weighted shape.
-y <- statmod::rinvgauss(n, mean = mio, shape = lambda * covariates)
+y <- statmod::rinvgauss(n, mean = mio, shape = lambda * weights)
 
 # Compute MLE of parameters, score matrix, and pit values.
-theta_hat    <- inversegaussianMLE(obs = y, w = covariates)
-score.matrix <- inversegaussianScore(obs = y, w = covariates, mle = theta_hat)
-pit.values   <- inversegaussianPIT(obs = y , w = covariates, mle = theta_hat)
+theta_hat    <- inversegaussianMLE(obs = y,   w = weights)
+score.matrix <- inversegaussianScore(obs = y, w = weights, mle = theta_hat)
+pit.values   <- inversegaussianPIT(obs = y ,  w = weights, mle = theta_hat)
 
 # Apply the goodness-of-fit test.
 testYourModel(x = y, pit = pit.values, score = score.matrix)
@@ -383,10 +386,51 @@ testYourModel(x = y, pit = pit.values, score = score.matrix)
 
     ## $Statistic
     ## Cramer-von-Mises Statistic 
-    ##                 0.08382993 
+    ##                 0.03292151 
     ## 
     ## $pvalue
-    ## [1] 0.2552943
+    ## [1] 0.8436222
+
+### Note
+
+The calculation of the p-value for the goodness-of-fit test based on the
+empirical distribution function relies on computing the tail probability
+of a sum of chi-squared random variables. Specifically, after finding
+the eigenvalues $\lambda_{1}, \lambda_{2}, \ldots, \lambda_{n}$, we need
+to compute the p-value as follows:
+$p-value = Pr\left(\sum_{i=1}^{n} \lambda_{i}Z_{i}^{2} \geq x\right)$,
+where $Z_{i}^{2}$ is a random variable following $\chi^{2}_{(1)}$
+distribution and $x$ represents the statistic (cvm or ad). The
+`CompQuadForm` package is being used for this purpose as it contains
+different methods for computing this tail probability. We were
+particularly interested in the `Farebrother` and `Imhof` methods.
+However, both the `Imhof` and `Farebrother` functions from the package
+encounter difficulties when computing the p-value if the statistic is in
+the very tail of the distribution or if some of the $\lambda_{i}$ values
+are very small. They may produce negative p-values or p-values that are
+not accurate.
+
+Through numerical experimentation in the GLM-Gamma case and comparison
+between p-values generated by `Imhof` and `Farebrother`, we discovered a
+way to solve this problem. After computing the eigenvalues, we remove
+values that are extremely small (e.g., $1 \times 10^{-15}$). Then, we
+divide the remaining eigenvalues into two sets: one set contains values
+greater than $\frac{\lambda_{1}}{2000}$, and the other set contains
+values less than $\frac{\lambda_{1}}{2000}$. We then compute the sum of
+the eigenvalues in the second set and use this sum to compensate for the
+deleted eigenvalues, thereby correcting the cvm or ad statistic. The
+values of set one is used for p-value computation.
+
+During the computation of the p-value, we theoretically obtain both a
+lower bound (LB) and an upper bound (UB) for the p-value. If the LB is
+greater than 1e-7, we compute the p-value using the `Imhof` method and
+ensure that the computed p-value falls within the range between LB and
+UB. If it doesn’t, we calculate the p-value using the `Farebrother`
+method. If the LB falls between 1e-10 and 1e-7, we compute the p-value
+using the `Farebrother` method. Finally, if the LB is less than 1e-10,
+we first attempt to calculate the p-value using the `Farebrother`
+method. If this attempt fails, we return both the LB and UB along with a
+warning that `CompQuadForm` failed to generate a valid p-value.
 
 ### References
 
@@ -400,3 +444,7 @@ statistics with unknown parameters.\] *Annals of Statistics*, Vol. 4,
 
 \[3\] Imhof, J.P. (1961). \[Computing the Distribution of Quadratic
 Forms in Normal Variables\] *Biometrika*, Vol. 48, 419-426.
+
+\[4\] Farebrother R.W. (1984). \[Algorithm AS 204: The distribution of a
+Positive Linear Combination of chi-squared random variables\] *Journal
+of the Royal Statistical Society* Vol. 33, No. 3, 332-339.

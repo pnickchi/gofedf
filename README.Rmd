@@ -24,7 +24,7 @@ Authors:
 *   [Payman Nickchi](https://github.com/pnickchi),
     <pnickchi@sfu.ca> (Maintainer)
 
-The `gofedf` package provides computational tools to apply goodness-of-fit tests based on empirical distribution function theory. The package offers functions and routines to test the hypothesis that a univariate sample follows a distribution based on the empirical distribution function. The theory is founded on reducing the problem to a stochastic process and computing its covariance function. An approximate p-value is computed using the Imhof method based on the limiting distribution of the statistic. Users can run the test by calculating either the Cramer-von Mises or Anderson-Darling statistic. The covariance function of the stochastic process relies on specific characteristics of the assumed model. Notably, knowledge of the Fisher information matrix and the partial derivatives of the cumulative distribution function is crucial for computing the covariance function. However, obtaining these quantities can be computationally intensive or challenging in general likelihood models. To overcome this limitation, we propose an alternative method for estimating the covariance function of the stochastic process directly from the sample data. The package provides tools for this estimation and for testing if a sample comes from any general likelihood model. In summary, the package can be used to apply a goodness-of-fit test in any of the following settings:
+The `gofedf` package provides computational tools to apply goodness-of-fit tests based on empirical distribution function theory. The package offers functions and routines to test the hypothesis that a univariate sample follows a distribution based on the empirical distribution function. The theory is founded on reducing the problem to a stochastic process and computing its covariance function. An approximate p-value is computed using the `Imhof` or `Farebrother` method based on the limiting distribution of the statistic (see note section for more details about choice of method). Users can run the test by calculating either the Cramer-von Mises or Anderson-Darling statistic. The covariance function of the stochastic process relies on specific characteristics of the assumed model. Notably, knowledge of the Fisher information matrix and the partial derivatives of the cumulative distribution function is crucial for computing the covariance function. However, obtaining these quantities can be computationally intensive or challenging in general likelihood models. To overcome this limitation, we propose an alternative method for estimating the covariance function of the stochastic process directly from the sample data. The package provides tools for this estimation and for testing if a sample comes from any general likelihood model. In summary, the package can be used to apply a goodness-of-fit test in any of the following settings:
 
 - Validate if the assumptions about the response variable in a generalized linear model (with any link function) are satisfied. The current version only checks for the Gamma distribution.
 
@@ -204,9 +204,9 @@ One of the most important features of the package is to provide computational to
 
 (ii) The probability inverse transformed or PIT values of the sample which ought to be a numeric vector with the same size as `x` and with elements $F^{-1}(X_{i};\theta)$.
 
-If $\theta$ is unknown, you also need to provide score function. This needs to be a matrix with $n$ rows and $p$ columns where each row measures the score of each observation. Note that the values are computed as $S(X_{i};\theta) = \frac{\partial}{\partial \theta} \log(f(X_{i};\theta))$ where $f(X_{i};\theta)$ is the probability density function. For sure, if $\theta$ is not known, this means you need to compute the MLE of $\theta$ to obtain item (ii) and if needed item (iii). The main function to apply the GOF test in this case is `testYourModel`. The `precision` argument sets the precision needed to check if the col sums of score matrix are close enough to zero. The other arguments of the function remain consistent with previous examples.
+If $\theta$ is unknown, you also need to provide score function. This needs to be a matrix with $n$ rows and $p$ columns where each row measures the score of each observation. Note that the values are computed as $S(X_{i};\theta) = \frac{\partial}{\partial \theta} \log(f(X_{i};\theta))$ where $f(X_{i};\theta)$ is the probability density function. For sure, if $\theta$ is not known, this means you need to compute the MLE of $\theta$ to obtain item 1 and if needed the score function. The main function to apply the GOF test in this case is `testYourModel`. The `precision` argument sets the precision needed to check if the col sums of score matrix are close enough to zero (log-likelihood is zero at MLE). The other arguments of the function remain consistent with previous examples.
 
-In the following example, we demonstrate how to apply the goodness-of-fit test to check if a sample follows an Inverse Gaussian distribution, where the shape parameter depends on some weights. First, we generate data from an Inverse Gaussian distribution. For illustrative purposes, we include functions to compute the Maximum Likelihood Estimation (MLE) and score function for the sample. In the following chunck of code, `IG_scorefunc` is a function that returns the score for each observation, and `IG_pitfunc` is a function that provides a vector of Probability Inverse Transformed (PIT) values. Additionally, `IG_mlefunc` calculates the MLE of the mean and shape parameter. Second we calculate score, PIT and MLE of parameters. Finally we call `testYourModel` function to apply the test.
+In the following example, we demonstrate how to apply the goodness-of-fit test to check if a sample follows an Inverse Gaussian distribution, where the shape parameter depends on some weights. First, we generate data from an Inverse Gaussian distribution. For illustrative purposes, we include functions to compute the Maximum Likelihood Estimation (MLE) and score function for the sample. In the following chunck of code, `inversegaussianScore` is a function that returns the score for each observation, and `inversegaussianPIT` is a function that provides a vector of Probability Inverse Transformed (PIT) values. Additionally, `inversegaussianMLE` calculates the MLE of the mean and shape parameter. Second we calculate score, PIT and MLE of parameters. Finally we call `testYourModel` function to apply the test.
 
 ```{r}
 # Example: Inverse Gaussian (IG) distribution with weights
@@ -218,23 +218,35 @@ set.seed(123)
 n <- 50
 
 # Assign weights
-covariates <- rep(1.5,n)
+weights <- runif(n, min = 5, max = 6)
+weights <- weights / sum(weights)
 
 # Set mean and shape parameters for IG distribution.
 mio        <- 2
 lambda     <- 2
 
 # Generate a random sample from IG distribution with weighted shape.
-y <- statmod::rinvgauss(n, mean = mio, shape = lambda * covariates)
+y <- statmod::rinvgauss(n, mean = mio, shape = lambda * weights)
 
 # Compute MLE of parameters, score matrix, and pit values.
-theta_hat    <- inversegaussianMLE(obs = y, w = covariates)
-score.matrix <- inversegaussianScore(obs = y, w = covariates, mle = theta_hat)
-pit.values   <- inversegaussianPIT(obs = y , w = covariates, mle = theta_hat)
+theta_hat    <- inversegaussianMLE(obs = y,   w = weights)
+score.matrix <- inversegaussianScore(obs = y, w = weights, mle = theta_hat)
+pit.values   <- inversegaussianPIT(obs = y ,  w = weights, mle = theta_hat)
 
 # Apply the goodness-of-fit test.
 testYourModel(x = y, pit = pit.values, score = score.matrix)
 ```
+
+
+### Note
+
+The calculation of the p-value for the goodness-of-fit test based on the empirical distribution function relies on computing the tail probability of a sum of chi-squared random variables. Specifically, after finding the eigenvalues $\lambda_{1}, \lambda_{2}, \ldots, \lambda_{n}$, we need to compute the p-value as follows: $p-value = Pr\left(\sum_{i=1}^{n} \lambda_{i}Z_{i}^{2} \geq x\right)$, where $Z_{i}^{2}$ is a random variable following $\chi^{2}_{(1)}$ distribution and $x$ represents the statistic (cvm or ad). The `CompQuadForm` package is being used for this purpose as it contains different methods for computing this tail probability. We were particularly interested in the `Farebrother` and `Imhof` methods. However, both the `Imhof` and `Farebrother` functions from the package encounter difficulties when computing the p-value if the statistic is in the very tail of the distribution or if some of the $\lambda_{i}$ values are very small. They may produce negative p-values or p-values that are not accurate.
+
+Through numerical experimentation in the GLM-Gamma case and comparison between p-values generated by `Imhof` and `Farebrother`, we discovered a way to solve this problem. After computing the eigenvalues, we remove values that are extremely small (e.g., $1 \times 10^{-15}$). Then, we divide the remaining eigenvalues into two sets: one set contains values greater than $\frac{\lambda_{1}}{2000}$, and the other set contains values less than $\frac{\lambda_{1}}{2000}$. We then compute the sum of the eigenvalues in the second set and use this sum to compensate for the deleted eigenvalues, thereby correcting the cvm or ad statistic. The values of set one is used for p-value computation.
+
+During the computation of the p-value, we theoretically obtain both a lower bound (LB) and an upper bound (UB) for the p-value. If the LB is greater than 1e-7, we compute the p-value using the `Imhof` method and ensure that the computed p-value falls within the range between LB and UB. If it doesn't, we calculate the p-value using the `Farebrother` method. If the LB falls between 1e-10 and 1e-7, we compute the p-value using the `Farebrother` method. Finally, if the LB is less than 1e-10, we first attempt to calculate the p-value using the `Farebrother` method. If this attempt fails, we return both the LB and UB along with a warning that `CompQuadForm` failed to generate a valid p-value.
+
+
 
 
 ### References
@@ -244,3 +256,5 @@ testYourModel(x = y, pit = pit.values, score = score.matrix)
 [2] Stephens, M.A. (1976). [Asymptotic results for goodness-of-fit statistics with unknown parameters.] *Annals of Statistics*, Vol. 4, 357-369.
 
 [3] Imhof, J.P. (1961). [Computing the Distribution of Quadratic Forms in Normal Variables] *Biometrika*, Vol. 48, 419-426.
+
+[4] Farebrother R.W. (1984). [Algorithm AS 204: The distribution of a Positive Linear Combination of chi-squared random variables] *Journal of the Royal Statistical Society* Vol. 33, No. 3, 332-339.

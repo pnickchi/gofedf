@@ -17,7 +17,6 @@ calculateWnuhat = function(S, FI, pit){
 
   # Estimate the Psi vector by covariance of indicator and score
   Psi_hat <- ( (n-1) * cov(ind, S) ) / n
-  #Psi_hat <- cov(ind, S)
 
   # Compute the covariance function over the grid (pit)
   Mat     <- ( ind - S %*% solve( FI ) %*% t(Psi_hat) )
@@ -55,7 +54,6 @@ calculateWnuhat_manualGrid = function(S, FI, pit, M){
 
   # Estimate the Psi vector by covariance of indicator and score
   Psi_hat <- ( (n-1) * cov(ind, S) ) / n
-  #Psi_hat <- cov(ind, S)
 
   # Compute the estimate of W_{n}(u) process over the grid (pit)
   Mat     <- ( ind - S %*% solve( FI ) %*% t(Psi_hat) )
@@ -93,16 +91,51 @@ getEigenValues = function(S, FI, pit, me){
   #W       <- ( (n-1) * W ) / (n)
   W       <- ( (n-1) * W ) / (n-p-1)
 
+
+  # Compute b vector to adjust W matrix
+  pit <- sort(pit)
+  l   <- length(pit)
+  b   <- numeric()
+  for( j in 1:l ){
+
+    if( j == 1){
+      b[j] <- pit[2]
+    }
+
+    if( j == 2){
+      b[j] <- pit[3] - pit[1]
+    }
+
+    if( (j>2) & (j<=(n-1)) ){
+      b[j] <- pit[j+1] - pit[j-1]
+    }
+
+    if( j == n){
+      b[j] <- 1 - pit[n-1]
+    }
+
+  }
+  b   <- b / 2
+  b   <- b / sum(b)
+
+  # Create diagonal matrix with b vector elements
+  Q <- diag( sqrt(b) )
+
+  W <- Q %*% W %*% Q
+
+
   # Compute the Eigenvalues of the covariance matrix depending on the goodness-of-fit statistic
   if( me == 'cvm' ){
-    ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / length(pit)
+    #ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / length(pit)
+    ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values
     return(ev)
   }
 
   if( me == 'ad'){
     adj.value <- sqrt( outer( pit * (1- pit), pit * (1- pit) ) )
     W       <- W / adj.value
-    ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / length(pit)
+    #ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / length(pit)
+    ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values
     return(ev)
   }
 
@@ -136,9 +169,41 @@ getEigenValues_manualGrid = function(S, FI, pit, M, me){
   #W       <- ( (n-1) * W ) / (n)
   W       <- ( (n-1) * W ) / (n-p-1)
 
+
+  # Compute b vector to adjust W matrix
+  pit <- sort(pit)
+  l   <- length(pit)
+  b   <- numeric()
+  for( j in 1:l ){
+
+    if( j == 1){
+      b[j] <- pit[2]
+    }
+
+    if( j == 2){
+      b[j] <- pit[3] - pit[1]
+    }
+
+    if( (j>2) & (j<=(n-1)) ){
+      b[j] <- pit[j+1] - pit[j-1]
+    }
+
+    if( j == n){
+      b[j] <- 1 - pit[n-1]
+    }
+
+  }
+  b   <- b / 2
+  b   <- b / sum(b)
+
+  # Create diagonal matrix with b vector elements
+  Q <- diag( sqrt(b) )
+
+  W <- Q %*% W %*% Q
+
   # Compute the Eigenvalues of the covariance matrix depending on the goodness-of-fit statistic
   if( me == 'cvm' ){
-    ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / M
+    ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values
     return(ev)
   }
 
@@ -147,7 +212,7 @@ getEigenValues_manualGrid = function(S, FI, pit, M, me){
     s <- s / (M + 1)
     adj.value <- sqrt( outer( s*(1-s) , s*(1-s) ) )
     W <- W / adj.value
-    ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / M
+    ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values
     return(ev)
   }
 
@@ -206,14 +271,43 @@ getADStatistic = function(x){
 #' @noRd
 getpvalue = function(u, eigen){
 
+  # set_1 is from i=1 to J1
+  eigen <- eigen[eigen >= 1e-15]
+  indx  <- which( eigen >= eigen / 2000)
+  set_1 <- eigen[indx]
+
+  # set_2 is from i=J1+1 to J1+J2
+  uc      <- eigen[1] / 2000
+  indx    <- which( (eigen >= 1e-15) & (eigen <= uc) )
+  set_2   <- eigen[indx]
+
   # Compute the lower bound for the probability of Pr(Q > u)
   LB <- getLowerBoundForpvalue(statistic = u, lambda = eigen)
 
   # Compute the upper bound for the probability of Pr(Q > u)
   UB <- getUpperBoundForpvalue(statistic = u, lambda = eigen)
 
-  # Compute p-value by imhof method
-  pvalue <- CompQuadForm::imhof(q = u, lambda = eigen)$Qq
+  if( LB >= 1e-7){
+    # Compute p-value by imhof method
+    pvalue <- CompQuadForm::imhof(q = u - sum(set_2), lambda = set_1)$Qq
+
+    if( (pvalue < LB) & (pvalue > UB) ){
+       # Compute p-value by farebrother method
+       pvalue <- CompQuadForm::farebrother(q = u - sum(set_2), lambda = set_1)$Qq
+    }
+  }
+
+
+  if( (1e-10 <= LB) & (LB < 1e-7) ){
+    # Compute p-value by farebrother method
+    pvalue <- CompQuadForm::farebrother(q = u - sum(set_2), lambda = set_1)$Qq
+  }
+
+
+  if( LB < 1e-10 ){
+    # Compute p-value by farebrother method
+    pvalue <- CompQuadForm::farebrother(q = u - sum(set_2), lambda = set_1)$Qq
+  }
 
   # Check if the computed p-value by CompQuadForm package falls between lower and upper bound.
   if( (pvalue >= LB) & (pvalue <= UB) ){
