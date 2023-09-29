@@ -287,9 +287,3 @@ testYourModel = function(x, pit, score = NULL, ngrid = length(x), gridpit = TRUE
   }
 
 }
-
-
-
-
-
-

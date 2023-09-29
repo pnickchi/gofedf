@@ -1,28 +1,25 @@
 ---
-title: "README"
-output: github_document
-date: "`r Sys.Date()`"
+title: "Vignette for R package `gofedf`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{gofedf-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
 ```
 
-# gofedf
-
-<!-- badges: start -->
-[![CRANstatus](https://www.r-pkg.org/badges/version/gofedf)](https://cran.r-project.org/package=gofedf)
-[![GitHubRelease](https://img.shields.io/github/release/pnickchi/gofedf?style=flat)](https://github.com/pnickchi/gofedf/releases)
-[![Github All Releases](https://img.shields.io/github/downloads/pnickchi/gofedf/total.svg?style=flat)](https://github.com/pnickchi/gofedf)
-<!-- badges: end -->
+```{r setup, echo=FALSE}
+library(gofedf)
+```
 
 
-Authors:
-
-*   [Richard Lockhart](http://www.sfu.ca/~lockhart/),
-    <lockhart@sfu.ca>
-*   [Payman Nickchi](https://github.com/pnickchi),
-    <pnickchi@sfu.ca> (Maintainer)
+# Introduction
 
 The `gofedf` package provides computational tools to apply goodness-of-fit tests based on empirical distribution function theory. The package offers functions and routines to test the hypothesis that a univariate sample follows a distribution based on the empirical distribution function. The theory is founded on reducing the problem to a stochastic process and computing its covariance function. An approximate p-value is computed using the `Imhof` or `Farebrother` method based on the limiting distribution of the statistic (see note section for more details about choice of method). Users can run the test by calculating either the Cramer-von Mises or Anderson-Darling statistic. The covariance function of the stochastic process relies on specific characteristics of the assumed model. Notably, knowledge of the Fisher information matrix and the partial derivatives of the cumulative distribution function is crucial for computing the covariance function. However, obtaining these quantities can be computationally intensive or challenging in general likelihood models. To overcome this limitation, we propose an alternative method for estimating the covariance function of the stochastic process directly from the sample data. The package provides tools for this estimation and for testing if a sample comes from any general likelihood model. In summary, the package can be used to apply a goodness-of-fit test in any of the following settings:
 
@@ -33,6 +30,13 @@ The `gofedf` package provides computational tools to apply goodness-of-fit tests
 - Apply a goodness-of-fit test to examine if a set of bivariate samples follows a Normal, Gamma, or Exponential distribution.
 
 - Formal model evaluation in a general likelihood model. In this case, probability inverse transformed (PIT) values of the sample and the score function (if any parameter estimation is involved) are required. See the example for more details.
+
+
+Authors:
+
+*   [Richard Lockhart](http://www.sfu.ca/~lockhart/), <lockhart@sfu.ca>
+*   [Payman Nickchi](https://github.com/pnickchi), <pnickchi@sfu.ca> (Maintainer)
+
 
 ## Installation
 
@@ -51,11 +55,6 @@ devtools::install_github('pnickchi/gofedf')
 ```
 
 
-```{r, echo = FALSE}
-library(gofedf)
-```
-
-
 ## Examples
 
 In this section, we will review the package's primary functions and provide illustrative examples to demonstrate their usage. The first two examples relate to applying the goodness-of-fit (GOF) test for i.i.d. samples, while the last two focus on linear models and generalized linear models. The final example showcases the most important feature of the package, allowing you to apply goodness-of-fit tests based on empirical distribution function EDF for a general likelihood model.
@@ -66,6 +65,8 @@ In this section, we will review the package's primary functions and provide illu
 The first example illustrates the GOF test for an i.i.d. sample from a Normal distribution. The main function is `testNormal`. At the minimum, it requires a numeric vector as input. By default, it uses probability inverse-transformed values to compute the stochastic process and its covariance function later. You can change this behavior by setting `gridpit = FALSE` and assigning a positive value for `ngrid`. The default value for `ngrid` is the same as the number of observations, `n`. This means the (0,1) interval is divided into `n` equally spaced data points to compute the stochastic process and the covariance function. Additionally, the Fisher information matrix, by default, is estimated by the variance of the score function. To change this, you can set `hessian=TRUE` to estimate the Fisher information matrix using the Hessian instead. Finally, method is a string that defines the statistic to compute. Possible values are `cvm` for Cramer-von-Mises, `ad` for Anderson-Darling, and both to compute both.
 
 ```{r}
+library(gofedf)
+
 # Reproducible example
 set.seed(123)
 

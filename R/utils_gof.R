@@ -166,7 +166,6 @@ getEigenValues_manualGrid = function(S, FI, pit, M, me){
 
   # Compute the covariance of the estimate of W_{n}(u) process and adjust for the sample size.
   W       <- var(Mat)
-  #W       <- ( (n-1) * W ) / (n)
   W       <- ( (n-1) * W ) / (n-p-1)
 
 
@@ -292,7 +291,7 @@ getpvalue = function(u, eigen){
     pvalue <- CompQuadForm::imhof(q = u - sum(set_2), lambda = set_1)$Qq
 
     if( (pvalue < LB) & (pvalue > UB) ){
-       # Compute p-value by farebrother method
+       # Imhof method failed to produce a valid pvalue. Compute p-value by farebrother method instead
        pvalue <- CompQuadForm::farebrother(q = u - sum(set_2), lambda = set_1)$Qq
     }
   }
@@ -313,7 +312,7 @@ getpvalue = function(u, eigen){
   if( (pvalue >= LB) & (pvalue <= UB) ){
     return(pvalue)
   }else{
-    warning(paste0('CompQuadForm failed to generate a valid p-value. The p-value lies between ', LB, ' and ', UB))
+    message(paste0('CompQuadForm failed to generate a valid p-value. The p-value lies between ', LB, ' and ', UB))
     return(pvalue)
   }
 
@@ -376,7 +375,7 @@ getUpperBoundForpvalue = function(statistic, lambda, tol = 1e-10, max.iter = 50)
     # Check if the maximum iteration reached
     if (m > max.iter) {
       # maybe we should return CompQuadForm value if the maximum reached? Check with Richard
-      warning('maximum iteration reached.')
+      message('maximum iteration reached.')
       warning(paste0('last root was:', root, ' and upper boud of ', fval))
       break
     }

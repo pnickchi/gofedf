@@ -38,16 +38,23 @@
 #' testGamma(x = sim_data)
 testGamma = function(x, ngrid = length(x), gridpit = FALSE, hessian = FALSE, rate = TRUE, method = 'cvm'){
 
+  # Make sure all observations are positive
   if( any(x < 0) ){
     stop('x values must be positive for Gamma distribution')
   }
 
+  # Get sample size
   n      <- length(x)
+
+  # Apply Gamma distribution
   temp   <- applyGamma(x, use.rate = rate)
+
+  # Extract score function, pit values, and MLE
   Score  <- temp$Score
   pit    <- temp$pit
   par    <- temp$par
 
+  # Compute Fisher information matrix
   if( hessian ){
     fisher <- gammaFisherByHessian(par)
   }else{
@@ -57,31 +64,39 @@ testGamma = function(x, ngrid = length(x), gridpit = FALSE, hessian = FALSE, rat
 
   if( method == 'cvm'){
 
+    # Compute Eigen values
     if( gridpit ){
       ev    <- getEigenValues(S = Score, FI = fisher, pit, me = 'cvm')
     }else{
       ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = 'cvm')
     }
 
+    # Compute Cramer-von-Mises statistic
     cvm     <- getCvMStatistic(pit)
-    pvalue  <- getpvalue(u = cvm, eigen = ev)
-    res     <- list(Statistic = cvm, pvalue = pvalue)
 
+    # Compute pvalue
+    pvalue  <- getpvalue(u = cvm, eigen = ev)
+
+    res     <- list(Statistic = cvm, pvalue = pvalue)
     return(res)
 
   } else if ( method == 'ad') {
 
 
+    # Compute Eigen values
     if( gridpit ){
       ev    <- getEigenValues(S = Score, FI = fisher, pit, me = 'ad')
     }else{
       ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = 'ad')
     }
 
+    # Compute Anderson-Darling statistic
     AD      <- getADStatistic(pit)
-    pvalue  <- getpvalue(u = AD, eigen = ev)
-    res     <- list(Statistic = AD, pvalue = pvalue)
 
+    # Compute pvalue
+    pvalue  <- getpvalue(u = AD, eigen = ev)
+
+    res     <- list(Statistic = AD, pvalue = pvalue)
     return(res)
 
   } else {
@@ -119,12 +134,10 @@ testGamma = function(x, ngrid = length(x), gridpit = FALSE, hessian = FALSE, rat
     ad.pvalue  <- getpvalue(u = ad, eigen = ev)
     names(ad.pvalue) <- 'Anderson-Darling test'
 
-
     # Prepare a list to return both statistics and their approximate pvalue
     res     <- list(Statistics = c(cvm, ad), pvalue = c(cvm.pvalue, ad.pvalue) )
     return(res)
 
   }
-
 
 }

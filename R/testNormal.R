@@ -64,12 +64,18 @@ testNormal = function(x, ngrid = length(x), gridpit = TRUE, hessian = FALSE, met
      stop('method must be either cvm, ad, or both.')
   }
 
+  # Get the sample size
   n       <- length(x)
+
+  # Apply Normal distribution
   temp    <- applyNormal(x)
+
+  # Compute score function, pit values, and MLE
   Score   <- temp$Score
   pit     <- temp$pit
   par     <- temp$par
 
+  # Compute Fisher information matrix
   if( hessian ){
     fisher <- normalFisherByHessian(par)
   }else{
@@ -79,14 +85,17 @@ testNormal = function(x, ngrid = length(x), gridpit = TRUE, hessian = FALSE, met
 
   if( method == 'cvm'){
 
+    # Compute Cramer-von-Mises statistic
     cvm      <- getCvMStatistic(pit)
 
+    # Compute Eigen values
     if( gridpit ){
       ev    <- getEigenValues(S = Score, FI = fisher, pit, me = 'cvm')
     }else{
       ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = 'cvm')
     }
 
+    # Compute pvalue
     pvalue  <- getpvalue(u = cvm, eigen = ev)
     res     <- list(Statistic = cvm, pvalue = pvalue)
 
@@ -94,17 +103,20 @@ testNormal = function(x, ngrid = length(x), gridpit = TRUE, hessian = FALSE, met
 
   } else if ( method == 'ad') {
 
+    # Compute Anderson-Darling statistic
     AD      <- getADStatistic(pit)
 
+    # Compute Eigen values
     if( gridpit ){
       ev    <- getEigenValues(S = Score, FI = fisher, pit, me = 'ad')
     }else{
       ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = 'ad')
     }
 
+    # Compute pvalue
     pvalue  <- getpvalue(u = AD, eigen = ev)
-    res     <- list(Statistic = AD, pvalue = pvalue)
 
+    res     <- list(Statistic = AD, pvalue = pvalue)
     return(res)
 
   }else{
@@ -141,7 +153,6 @@ testNormal = function(x, ngrid = length(x), gridpit = TRUE, hessian = FALSE, met
     # Calculate pvalue
     ad.pvalue  <- getpvalue(u = ad, eigen = ev)
     names(ad.pvalue) <- 'Anderson-Darling test'
-
 
     # Prepare a list to return both statistics and their approximate pvalue
     res     <- list(Statistics = c(cvm, ad), pvalue = c(cvm.pvalue, ad.pvalue) )

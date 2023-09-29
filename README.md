@@ -1,6 +1,6 @@
 README
 ================
-2023-09-25
+2023-09-29
 
 # gofedf
 
@@ -434,17 +434,26 @@ warning that `CompQuadForm` failed to generate a valid p-value.
 
 ### References
 
-\[1\] Stephens, M.A. (1974). \[EDF Statistics for Goodness of Fit and
+\[1\] Imhof, J.P. (1961). \[Computing the Distribution of Quadratic
+Forms in Normal Variables\] *Biometrika*, Vol. 48, 419-426.
+
+\[2\] Farebrother R.W. (1984). \[Algorithm AS 204: The distribution of a
+Positive Linear Combination of chi-squared random variables\] *Journal
+of the Royal Statistical Society*, Vol. 33, No. 3, 332-339.
+
+\[3\] Giner G. and Smyth G. K. (2016). \[statmod: Probability
+calculations for the inverse Gaussian distribution\] *R Journal*, Vol.
+8, No 3, 339-351.
+
+\[4\] Stephens, M.A. (1974). \[EDF Statistics for Goodness of Fit and
 Some Comparisons.\] *Journal of the American Statistical Association*,
 Vol. 69, 730-737.
 
-\[2\] Stephens, M.A. (1976). \[Asymptotic results for goodness-of-fit
+\[5\] Stephens, M.A. (1976). \[Asymptotic results for goodness-of-fit
 statistics with unknown parameters.\] *Annals of Statistics*, Vol. 4,
 357-369.
 
-\[3\] Imhof, J.P. (1961). \[Computing the Distribution of Quadratic
-Forms in Normal Variables\] *Biometrika*, Vol. 48, 419-426.
-
-\[4\] Farebrother R.W. (1984). \[Algorithm AS 204: The distribution of a
-Positive Linear Combination of chi-squared random variables\] *Journal
-of the Royal Statistical Society* Vol. 33, No. 3, 332-339.
+\[6\] Duchesne, P. and Lafaye De Micheaux, P. (2010). \[Computing the
+distribution of quadratic forms: Further comparisons between the
+Liu-Tang-Zhang approximation and exact methods\] *Computational
+Statistics and Data Analysis*, Vol. 54, 858-862.

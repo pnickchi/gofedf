@@ -63,15 +63,17 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', hessian = FALSE, start.valu
        stop('The link for Gamma must be inverse, identity, or log.')
      }
 
+     # Assign control vector for glm2 function
      if( is.null(control) ){
        ctl <- glm.control(epsilon = 1e-8, maxit = 100, trace = F)
      }else{
        ctl <- control
      }
 
-     # Fit a GLM to the data and check for starting value to compute maximum likelihood estimation of coefficients
+     # Check if the starting value is provided
      if( is.null(start.value) ){
 
+       # Fit a GLM-Gamma to the data to compute maximum likelihood estimation of coefficients
        fitobj <- glm2::glm2(formula = y ~ x, family = Gamma(link = l), x = TRUE, y = TRUE, control = ctl, na.action = na.omit)
 
      }else{
@@ -80,6 +82,7 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', hessian = FALSE, start.valu
          stop('The lenght of starting.value does not match the number of columns in x.')
        }
 
+       # Fit a GLM-Gamma to the data to compute maximum likelihood estimation of coefficients
        fitobj <- glm2::glm2(formula = y ~ x, family = Gamma(link = l), x = TRUE, y = TRUE, control = ctl, na.action = na.omit, start = start.value)
      }
 
@@ -122,6 +125,11 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', hessian = FALSE, start.valu
    # Boolean to check if the IWLS algorithm have converged
    converged <- temp$converged
 
+   if( !converged ){
+     message('The IWLS iterative algorithm did not converge.')
+   }
+
+   # Compute Fisher information matrix
    if(hessian){
      fisher  <- glmgammaFisherByHessian(fit = fitobj, mle_shape = par['shape'])
    }else{

@@ -63,34 +63,37 @@ testLMNormal = function(x, y, fit = NULL, ngrid = length(y), gridpit = FALSE, he
     }
 
     if( is.matrix(x) ){
-      n <- nrow(x)
-      int         <- rep(1, n)
-      x           <- cbind(int,x)
+      n    <- nrow(x)
+      int  <- rep(1, n)
+      x    <- cbind(int,x)
     }
 
+    # Apply linear model with normal assumption
     temp   <- applyLMNormal(x = x, y = y)
+
+    # Extract score function, pit values, and MLE
     Score  <- temp$Score
     pit    <- temp$pit
     par    <- temp$par
 
-    # Get Fisher information matrix
+    # Compute Fisher information matrix
     if( hessian ){
       fisher <- lmFisherByHessian(x = x, y = y, theta = par)
     }else{
       fisher <- (n-1)*var(Score)/n
     }
 
-    # Get Eigen values
+    # Compute Eigen values
     if( gridpit ){
       ev    <- getEigenValues(S = Score, FI = fisher, pit, me = method)
     }else{
       ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = method)
     }
 
-    # Get C-v-M statistic
+    # Compute Cramer-von-Mises statistic
     cvm      <- getCvMStatistic(pit)
 
-    # Get pvalue
+    # Compute pvalue
     pvalue  <- getpvalue(u = cvm, eigen = ev)
     res     <- list(Statistic = cvm, pvalue = pvalue)
 
@@ -113,12 +116,15 @@ testLMNormal = function(x, y, fit = NULL, ngrid = length(y), gridpit = FALSE, he
     x <- fit$x
     y <- fit$y
 
+    # Apply linear model with normal assumption
     temp   <- applyLMNormal(x = x, y = y)
+
+    # Extract score function, pit values, and MLE
     Score  <- temp$Score
     pit    <- temp$pit
     par    <- temp$par
 
-    # Get Fisher information matrix
+    # Compute Fisher information matrix
     if( hessian ){
       fisher <- lmFisherByHessian(x = x, y = y, theta = par)
     }else{
@@ -128,17 +134,17 @@ testLMNormal = function(x, y, fit = NULL, ngrid = length(y), gridpit = FALSE, he
 
     if( method == 'cvm'){
 
-      # Get Eigen values
+      # Compute Eigen values
       if( gridpit ){
         ev    <- getEigenValues(S = Score, FI = fisher, pit, me = 'cvm')
       }else{
         ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = 'cvm')
       }
 
-      # Get C-v-M statistic
+      # Compute C-v-M statistic
       cvm      <- getCvMStatistic(pit)
 
-      # Get pvalue
+      # Compute pvalue
       pvalue  <- getpvalue(u = cvm, eigen = ev)
 
       res     <- list(Statistic = cvm, pvalue = pvalue)
@@ -147,17 +153,17 @@ testLMNormal = function(x, y, fit = NULL, ngrid = length(y), gridpit = FALSE, he
 
     } else if ( method == 'ad') {
 
-      # Get Eigen values
+      # Compute Eigen values
       if( gridpit ){
         ev    <- getEigenValues(S = Score, FI = fisher, pit, me = 'ad')
       }else{
         ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = 'ad')
       }
 
-      # Get C-v-M statistic
+      # Compute C-v-M statistic
       AD      <- getCvMStatistic(pit)
 
-      # Get pvalue
+      # Compute pvalue
       pvalue  <- getpvalue(u = AD, eigen = ev)
 
       res     <- list(Statistic = AD, pvalue = pvalue)
@@ -173,14 +179,14 @@ testLMNormal = function(x, y, fit = NULL, ngrid = length(y), gridpit = FALSE, he
       cvm        <- getCvMStatistic(pit)
       names(cvm) <- 'Cramer-von-Mises Statistic'
 
-      # Get Eigen values
+      # Compute Eigen values
       if( gridpit ){
         ev    <- getEigenValues(S = Score, FI = fisher, pit = pit, me = 'cvm')
       }else{
         ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit = pit, M = ngrid, me = 'cvm')
       }
 
-      # Calculate pvalue
+      # Compute pvalue
       cvm.pvalue  <- getpvalue(u = cvm, eigen = ev)
       names(cvm.pvalue) <- 'pvalue for Cramer-von-Mises test'
 
@@ -189,7 +195,7 @@ testLMNormal = function(x, y, fit = NULL, ngrid = length(y), gridpit = FALSE, he
       AD      <- getADStatistic(pit)
       names(AD) <- 'Anderson-Darling Statistic'
 
-      # Get Eigen values
+      # Compute Eigen values
       if( gridpit ){
         ev    <- getEigenValues(S = Score, FI = fisher, pit = pit, me = 'ad')
       }else{
