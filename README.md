@@ -1,6 +1,6 @@
 README
 ================
-2023-09-29
+2023-10-02
 
 # gofedf
 
@@ -8,8 +8,8 @@ README
 
 [![CRANstatus](https://www.r-pkg.org/badges/version/gofedf)](https://cran.r-project.org/package=gofedf)
 [![GitHubRelease](https://img.shields.io/github/release/pnickchi/gofedf?style=flat)](https://github.com/pnickchi/gofedf/releases)
-[![Github All
-Releases](https://img.shields.io/github/downloads/pnickchi/gofedf/total.svg?style=flat)](https://github.com/pnickchi/gofedf)
+[![Github
+AllReleases](https://cranlogs.r-pkg.org/badges/gofedf)](https://github.com/pnickchi/gofedf)
 <!-- badges: end -->
 
 Authors:
