@@ -122,6 +122,9 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', hessian = FALSE, start.valu
    pit     <- temp$pit
    par     <- temp$par
 
+   # Get the sample
+   n <- nrow(Score)
+
    # Boolean to check if the IWLS algorithm have converged
    converged <- temp$converged
 
