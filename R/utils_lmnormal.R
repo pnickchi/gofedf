@@ -8,6 +8,8 @@
 #'
 #' @return Score matrix with n rows and (p+1) columns.
 #'
+#' @noRd
+#'
 lmScore = function(x, y, theta){
 
   # Extract the MLE of coefficients in the linear model
@@ -43,6 +45,8 @@ lmScore = function(x, y, theta){
 #'
 #' @return a numeric vector of estimates.
 #'
+#' @noRd
+#'
 lmMLE = function(x, y){
 
   # Get sample size
@@ -70,6 +74,8 @@ lmMLE = function(x, y){
 #'
 #' @return a vector of length n containing the probability inverse transformed (PIT) values
 #'
+#' @noRd
+#'
 lmPIT = function(x, y, theta){
 
   # Compute PIT values with pnorm function
@@ -92,6 +98,7 @@ lmPIT = function(x, y, theta){
 #'
 #' @return Fisher information matrix for linear models.
 #'
+#' @noRd
 lmFisherByHessian = function(x, y, theta){
 
   sigma2   <- theta$sigma2

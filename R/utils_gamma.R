@@ -6,6 +6,8 @@
 #'
 #' @return Score matrix with n rows and two columns.
 #'
+#' @noRd
+#'
 gammaScore = function(x, theta){
 
   # Extract MLE of shape and scale from theta argument
@@ -34,6 +36,8 @@ gammaScore = function(x, theta){
 #' @param ur logical. If \code{TRUE} the rate parameter is returned. Otherwise the scale is returned.
 #'
 #' @return a vector of length two with shape and scale/rate.
+#'
+#' @noRd
 #'
 gammaMLE = function(x, ur){
 
@@ -86,6 +90,8 @@ gammaMLE = function(x, ur){
 #'
 #' @return a vector of length n containing the probability inverse transformed (PIT) values
 #'
+#' @noRd
+#'
 gammaPIT = function(x, theta){
 
   # Extract MLE of shape and scale from theta argument
@@ -104,6 +110,8 @@ gammaPIT = function(x, theta){
 #' @param theta a numeric vector of length two, containing MLE of parameters in Gamma dist
 #'
 #' @return Fisher information matrix for Gamma distribution
+#'
+#' @noRd
 #'
 gammaFisherByHessian = function(theta){
 

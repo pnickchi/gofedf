@@ -225,6 +225,7 @@ getEigenValues_manualGrid = function(S, FI, pit, M, me){
 #' @return a numeric value, CvM statistics
 #'
 #' @noRd
+#'
 getCvMStatistic = function(x){
 
   n   <- length(x)
@@ -244,6 +245,7 @@ getCvMStatistic = function(x){
 #' @return a numeric value, AD statistics
 #'
 #' @noRd
+#'
 getADStatistic = function(x){
 
   n   <- length(x)
@@ -268,6 +270,7 @@ getADStatistic = function(x){
 #' @return p-value
 #'
 #' @noRd
+#'
 getpvalue = function(u, eigen){
 
   # set_1 is from i=1 to J1

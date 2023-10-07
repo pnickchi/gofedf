@@ -6,6 +6,8 @@
 #'
 #' @return Score matrix with n rows and (p+2) columns.
 #'
+#' @noRd
+#'
 glmScorePIT = function(fit, theta){
 
   # MLE of shape parameter
@@ -53,6 +55,8 @@ glmScorePIT = function(fit, theta){
 #' documentation for the \code{\link{glm}} or \code{\link{glm2}} function.
 #'
 #' @return a numeric vector of estimates.
+#'
+#' @noRd
 #'
 glmMLE = function(fit){
 

@@ -7,6 +7,8 @@
 #'
 #' @return a list with three elements.
 #'
+#' @noRd
+#'
 applyLMNormal = function(x, y){
 
   # Compute MLE of parameters

@@ -8,6 +8,7 @@
 #' @return a list with three elements.
 #'
 #' @noRd
+#'
 applyExponential = function(x){
 
   # Calculate MLE of parameter for Exponential distribution
