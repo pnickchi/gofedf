@@ -21,7 +21,7 @@
 #' @param ngrid the number of equally spaced points to discretize the (0,1) interval for computing the covariance function.
 #'
 #' @param gridpit logical. If \code{TRUE} (the default value), the parameter ngrid is ignored and (0,1) interval is divided
-#' based on probability inverse transformed values obtained from the sample. If \code{FALSE}, the interval is divided into ngrid
+#' based on probability integral transformed values obtained from the sample. If \code{FALSE}, the interval is divided into ngrid
 #' equally spaced points for computing the covariance function.
 #'
 #' @param precision The theory behind goodness-of-fit test based on empirical distribution function (edf) works well
@@ -73,7 +73,7 @@
 #'
 testYourModel = function(x, pit, score = NULL, ngrid = length(x), gridpit = TRUE, precision = 1e-9, method = 'cvm'){
 
-  if( !is.double(x) ){
+  if( !is.numeric(x) ){
     stop('x values must be numeric.')
   }
 

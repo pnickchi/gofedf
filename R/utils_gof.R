@@ -169,26 +169,28 @@ getEigenValues_manualGrid = function(S, FI, pit, M, me){
   W       <- ( (n-1) * W ) / (n-p-1)
 
 
+  epsilon <- 1e-5
+  gridpts <- seq(0 + epsilon, 1 - epsilon, length = M)
+
   # Compute b vector to adjust W matrix
-  pit <- sort(pit)
-  l   <- length(pit)
+  l   <- length(gridpts)
   b   <- numeric()
   for( j in 1:l ){
 
     if( j == 1){
-      b[j] <- pit[2]
+      b[j] <- gridpts[2]
     }
 
     if( j == 2){
-      b[j] <- pit[3] - pit[1]
+      b[j] <- gridpts[3] - gridpts[1]
     }
 
     if( (j>2) & (j<=(n-1)) ){
-      b[j] <- pit[j+1] - pit[j-1]
+      b[j] <- gridpts[j+1] - gridpts[j-1]
     }
 
     if( j == n){
-      b[j] <- 1 - pit[n-1]
+      b[j] <- 1 - gridpts[n-1]
     }
 
   }

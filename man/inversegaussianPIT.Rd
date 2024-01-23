@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils_testYourModel.R
 \name{inversegaussianPIT}
 \alias{inversegaussianPIT}
-\title{Compute the probability transformed values for a sample from Inverse Gaussian distribution.}
+\title{Compute the probability integral transformed values for a sample from Inverse Gaussian distribution.}
 \usage{
 inversegaussianPIT(obs, ...)
 }
@@ -12,7 +12,7 @@ inversegaussianPIT(obs, ...)
 \item{...}{A list of additional parameters to define the likelihood.}
 }
 \value{
-A numeric vector of probability transformed values of sample observations.
+A numeric vector of probability integral transformed values of sample observations.
 }
 \description{
 This function is used in \code{\link{testYourModel}} function for example purposes.

@@ -6,7 +6,7 @@
 #'
 #' @param theta a numeric vector of length (p+1), containing MLE of parameters in a linear model.
 #'
-#' @return Score matrix with n rows and (p+1) columns.
+#' @return Score matrix with n rows and (p+1) columns. The first p columns are the partial derivatives of the log-likelihood w.r.t parameters in the model and the last column is the partial derivative w.r.t standard deviation of error terms in the model.
 #'
 #' @noRd
 #'
@@ -64,7 +64,7 @@ lmMLE = function(x, y){
 }
 
 
-#' Compute probability inverse transform values for linear models.
+#' Compute probability integral transformed values for linear models.
 #'
 #' @param x a matrix with n rows and p columns containing the explanatory variables.
 #'
@@ -72,7 +72,7 @@ lmMLE = function(x, y){
 #'
 #' @param theta a numeric vector of length (p+1), containing MLE of parameters in a linear model.
 #'
-#' @return a vector of length n containing the probability inverse transformed (PIT) values
+#' @return a vector of length n containing the probability integral transformed (PIT) values
 #'
 #' @noRd
 #'

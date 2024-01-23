@@ -3,10 +3,10 @@
 #' @description \code{testLMNormal} is used to check the normality assumption of residuals in a linear model. This function
 #' can take the response variable and design matrix, fit a linear model, and apply the goodness-of-fit test. Conveniently,
 #' it can take an object of class "lm" and directly applies the goodness-of-fit test. The function returns a goodness-of-fit
-#' statistic along with an approximate pvalue.
+#' statistic along with an approximate p-value.
 #'
 #' @param x is either a numeric vector or a design matrix. In the design matrix, rows indicate observations and columns
-#' presents covariats.
+#' presents covariates.
 #'
 #' @param y is a vector of numeric values with the same number of observations or number of rows as x.
 #'
@@ -19,7 +19,7 @@
 #' @param ngrid the number of equally spaced points to discretize the (0,1) interval for computing the covariance function.
 #'
 #' @param gridpit logical. If \code{TRUE} (the default value), the parameter ngrid is ignored and (0,1) interval is divided
-#' based on probability inverse transformed values obtained from the sample. If \code{FALSE}, the interval is divided into ngrid
+#' based on probability integral transformed values obtained from the sample. If \code{FALSE}, the interval is divided into ngrid
 #' equally spaced points for computing the covariance function.
 #'
 #' @param hessian logical. If \code{TRUE} the Fisher information matrix is estimated by the observed Hessian Matrix based on
@@ -54,6 +54,30 @@ testLMNormal = function(x, y, fit = NULL, ngrid = length(y), gridpit = FALSE, he
 
 
   if( is.null(fit) ){
+
+    if( !(ngrid > 0) ){
+      stop('ngrid must be a positive number.')
+    }
+
+    if( !(ngrid %% 1 == 0) ){
+      stop('ngrid must be an integer number.')
+    }
+
+    if( !is.logical(gridpit) ){
+      stop('gridpit must be either TRUE or FALSE.')
+    }
+
+    if( !is.logical(hessian) ){
+      stop('hessian must be either TRUE or FALSE.')
+    }
+
+    if( !is.vector(method) | length(method) > 1){
+      stop('method must be a character string with length one.')
+    }
+
+    if( !(method %in% c('cvm','ad','both')) ){
+      stop('Method must be either cvm, ad, or both.')
+    }
 
     if( is.vector(x) ){
       n           <- length(x)

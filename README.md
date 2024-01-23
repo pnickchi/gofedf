@@ -1,6 +1,6 @@
 README
 ================
-2023-10-02
+2024-01-23
 
 # gofedf
 
@@ -162,7 +162,7 @@ testGamma(x = x, method = 'cvm')
     ## [1] 0.0549759
     ## 
     ## $pvalue
-    ## [1] 0.3553938
+    ## [1] 0.3847217
 
 ``` r
 # Generate some random sample from a distribution that is not Gamma
@@ -221,7 +221,7 @@ testLMNormal(x = X, y)
     ## [1] 0.02285164
     ## 
     ## $pvalue
-    ## [1] 0.9089065
+    ## [1] 0.9265785
 
 ``` r
 # Or alternatively just pass 'lm.fit' object directly instead:
@@ -233,7 +233,7 @@ testLMNormal(fit = lm.fit)
     ## [1] 0.02285164
     ## 
     ## $pvalue
-    ## [1] 0.9089065
+    ## [1] 0.9265785
 
 ### 4. Gamma GLM with any link function
 

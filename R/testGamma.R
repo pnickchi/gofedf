@@ -8,7 +8,7 @@
 #' @param ngrid the number of equally spaced points to discretize the (0,1) interval for computing the covariance function.
 #'
 #' @param gridpit logical. If \code{TRUE} (the default value), the parameter ngrid is ignored and (0,1) interval is divided
-#' based on probability inverse transformed values obtained from the sample. If \code{FALSE}, the interval is divided into ngrid
+#' based on probability integral transformed values obtained from the sample. If \code{FALSE}, the interval is divided into ngrid
 #' equally spaced points for computing the covariance function.
 #'
 #' @param hessian logical. If \code{TRUE} the Fisher information matrix is estimated by the observed Hessian Matrix based on
@@ -38,9 +38,38 @@
 #' testGamma(x = sim_data)
 testGamma = function(x, ngrid = length(x), gridpit = FALSE, hessian = FALSE, rate = TRUE, method = 'cvm'){
 
+
+  if( !is.numeric(x) | !is.vector(x) ){
+    stop('x must be a numeric vector.')
+  }
+
   # Make sure all observations are positive
   if( any(x < 0) ){
     stop('x values must be positive for Gamma distribution')
+  }
+
+  if( !(ngrid > 0) ){
+    stop('ngrid must be a positive number.')
+  }
+
+  if( !(ngrid %% 1 == 0) ){
+    stop('ngrid must be an integer number.')
+  }
+
+  if( !is.logical(gridpit) ){
+    stop('gridpit must be either TRUE or FALSE.')
+  }
+
+  if( !is.logical(hessian) ){
+    stop('hessian must be either TRUE or FALSE.')
+  }
+
+  if( !is.vector(method) | length(method) > 1){
+    stop('method must be a character string with length one.')
+  }
+
+  if( !(method %in% c('cvm','ad','both')) ){
+    stop('ethod must be either cvm, ad, or both.')
   }
 
   # Get sample size

@@ -1,7 +1,6 @@
 #' Apply Exponential distribution to sample and compute required components for the test.
 #'
-#' @description Compute Maximum likelihood estimates of the parameters in Exponential distribution, Score function evaluated at the sample,
-#' and probability inverse transformed (PIT) values of sample.
+#' @description Compute Maximum likelihood estimates of the parameters in Exponential distribution, score function evaluated at the sample and probability integral transformed (PIT) values of sample.
 #'
 #' @param x a numeric vector.
 #'
@@ -18,7 +17,7 @@ applyExponential = function(x){
   S1 <- expScore(x, theta = par)
   S  <- cbind(S1)
 
-  # Calculate the probability inverse transform of sample
+  # Calculate the probability integral transformed values of sample
   pit <- expPIT(x, theta = par)
 
   # Define the list to return

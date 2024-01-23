@@ -61,7 +61,7 @@ testNormal = function(x, ngrid = length(x), gridpit = TRUE, hessian = FALSE, met
   }
 
   if( !(method %in% c('cvm','ad','both')) ){
-     stop('method must be either cvm, ad, or both.')
+     stop('ethod must be either cvm, ad, or both.')
   }
 
   # Get the sample size

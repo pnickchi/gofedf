@@ -71,7 +71,7 @@ inversegaussianScore = function(obs, ...){
 
 
 
-#' Compute the probability transformed values for a sample from Inverse Gaussian distribution.
+#' Compute the probability integral transformed values for a sample from Inverse Gaussian distribution.
 #'
 #' @param obs A numeric vector of sample observations.
 #' @param ... A list of additional parameters to define the likelihood.
@@ -82,7 +82,7 @@ inversegaussianScore = function(obs, ...){
 #'
 #' @import statmod
 #'
-#' @return A numeric vector of probability transformed values of sample observations.
+#' @return A numeric vector of probability integral transformed values of sample observations.
 inversegaussianPIT = function(obs, ...){
 
   # Extract the MLE and weights
