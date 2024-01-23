@@ -168,43 +168,9 @@ getEigenValues_manualGrid = function(S, FI, pit, M, me){
   W       <- var(Mat)
   W       <- ( (n-1) * W ) / (n-p-1)
 
-
-  epsilon <- 1e-5
-  gridpts <- seq(0 + epsilon, 1 - epsilon, length = M)
-
-  # Compute b vector to adjust W matrix
-  l   <- length(gridpts)
-  b   <- numeric()
-  for( j in 1:l ){
-
-    if( j == 1){
-      b[j] <- gridpts[2]
-    }
-
-    if( j == 2){
-      b[j] <- gridpts[3] - gridpts[1]
-    }
-
-    if( (j>2) & (j<=(n-1)) ){
-      b[j] <- gridpts[j+1] - gridpts[j-1]
-    }
-
-    if( j == n){
-      b[j] <- 1 - gridpts[n-1]
-    }
-
-  }
-  b   <- b / 2
-  b   <- b / sum(b)
-
-  # Create diagonal matrix with b vector elements
-  Q <- diag( sqrt(b) )
-
-  W <- Q %*% W %*% Q
-
   # Compute the Eigenvalues of the covariance matrix depending on the goodness-of-fit statistic
   if( me == 'cvm' ){
-    ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values
+    ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / M
     return(ev)
   }
 
@@ -213,7 +179,7 @@ getEigenValues_manualGrid = function(S, FI, pit, M, me){
     s <- s / (M + 1)
     adj.value <- sqrt( outer( s*(1-s) , s*(1-s) ) )
     W <- W / adj.value
-    ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values
+    ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / M
     return(ev)
   }
 
