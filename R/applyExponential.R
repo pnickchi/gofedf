@@ -24,3 +24,5 @@ applyExponential = function(x){
   res <- list(Score = S, pit = pit, par = par)
   return(res)
 }
+
+# tests
