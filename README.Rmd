@@ -78,11 +78,6 @@ testNormal(x = x, method = 'cvm')
 ```
 
 
-```{r}
-# Test if the data follows a Normal distribution by calculating the Anderson-Darling statistic and approximate p-value of the test.
-testNormal(x = x, method = 'ad')
-```
-
 
 ```{r}
 # Generate some random sample from a non Normal distribution.
@@ -101,16 +96,10 @@ set.seed(123)
 
 # Randomly generate some data
 n <- 50
-x <- rgamma(n, shape = 3)
+x <- rgamma(n, shape = 1)
 
 # Test if the data follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate p-value
 testGamma(x = x, method = 'cvm')
-```
-
-```{r}
-# Generate some random sample from a distribution that is not Gamma
-x <- runif(n)
-testNormal(x = x, method = 'cvm')
 ```
 
 
@@ -206,7 +195,7 @@ One of the most important features of the package is to provide computational to
 
 If $\theta$ is unknown, you also need to provide score function. This needs to be a matrix with $n$ rows and $p$ columns where each row measures the score of each observation. Note that the values are computed as $S(X_{i};\theta) = \frac{\partial}{\partial \theta} \log(f(X_{i};\theta))$ where $f(X_{i};\theta)$ is the probability density function. For sure, if $\theta$ is not known, this means you need to compute the MLE of $\theta$ to obtain item 1 and if needed the score function. The main function to apply the GOF test in this case is `testYourModel`. The `precision` argument sets the precision needed to check if the col sums of score matrix are close enough to zero (log-likelihood is zero at MLE). The other arguments of the function remain consistent with previous examples.
 
-In the following example, we demonstrate how to apply the goodness-of-fit test to check if a sample follows an Inverse Gaussian distribution, where the shape parameter depends on some weights. First, we generate data from an Inverse Gaussian distribution. For illustrative purposes, we include functions to compute the Maximum Likelihood Estimation (MLE) and score function for the sample. In the following chunck of code, `inversegaussianScore` is a function that returns the score for each observation, and `inversegaussianPIT` is a function that provides a vector of Probability Inverse Transformed (PIT) values. Additionally, `inversegaussianMLE` calculates the MLE of the mean and shape parameter. Second we calculate score, PIT and MLE of parameters. Finally we call `testYourModel` function to apply the test.
+In the following example, we demonstrate how to apply the goodness-of-fit test to check if a sample follows an Inverse Gaussian distribution, where the shape parameter depends on some weights. First, we generate data from an Inverse Gaussian distribution. For illustrative purposes, we include functions to compute the Maximum Likelihood Estimation (MLE) and score function for the sample. In the following chunck of code, `IGScore` is a function that returns the score for each observation, and `IGPIT` is a function that provides a vector of Probability Inverse Transformed (PIT) values. Additionally, `IGMLE` calculates the MLE of the mean and shape parameter. Second we calculate score, PIT and MLE of parameters. Finally we call `testYourModel` function to apply the test.
 
 ```{r}
 # Example: Inverse Gaussian (IG) distribution with weights
@@ -229,12 +218,12 @@ lambda     <- 2
 y <- statmod::rinvgauss(n, mean = mio, shape = lambda * weights)
 
 # Compute MLE of parameters, score matrix, and pit values.
-theta_hat    <- inversegaussianMLE(obs = y,   w = weights)
-score.matrix <- inversegaussianScore(obs = y, w = weights, mle = theta_hat)
-pit.values   <- inversegaussianPIT(obs = y ,  w = weights, mle = theta_hat)
+theta_hat    <- IGMLE(obs = y,   w = weights)
+score.matrix <- IGScore(obs = y, w = weights, mle = theta_hat)
+pit.values   <- IGPIT(obs = y ,  w = weights, mle = theta_hat)
 
 # Apply the goodness-of-fit test.
-testYourModel(x = y, pit = pit.values, score = score.matrix)
+testYourModel(pit = pit.values, score = score.matrix)
 ```
 
 

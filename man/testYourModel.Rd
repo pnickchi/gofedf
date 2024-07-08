@@ -5,30 +5,33 @@
 \title{Apply the Goodness of Fit Test Based on Empirical Distribution Function to Any Likelihood Model.}
 \usage{
 testYourModel(
-  x,
   pit,
   score = NULL,
-  ngrid = length(x),
+  discretize = FALSE,
+  ngrid = length(pit),
   gridpit = TRUE,
   precision = 1e-09,
   method = "cvm"
 )
 }
 \arguments{
-\item{x}{a non-empty numeric vector of sample data.}
-
-\item{pit}{The probability transformed (or pit) values of the sample which ought to be a numeric vector with
-the same size as x.}
+\item{pit}{The probability transformed (or pit) values of the sample which ought to be a numeric vector.}
 
 \item{score}{The default value is null and refers to no parameter estimation case. If there is parameter estimation,
-the score matrix must be a matrix with n rows and p columns, where n is the sample size and p is the number of
+the score must be a matrix with n rows and p columns, where n is the sample size and p is the number of
 estimated parameters.}
 
-\item{ngrid}{the number of equally spaced points to discretize the (0,1) interval for computing the covariance function.}
+\item{discretize}{If \code{TRUE}, the covariance function of W_{n}(u) process is evaluated at some data points
+(see \code{ngrid} and \code{gridpit}), and the integral equation is replaced by a matrix equation.
+If \code{FALSE} (the default value), the covariance function is first estimated, and then the integral equation is solved
+to find the eigenvalues. The results of our simulations recommend using the estimated covariance for solving the integral
+equation. The parameters \code{ngrid}, \code{gridpit}, and \code{hessian} are only relevant when \code{discretize = TRUE}.}
+
+\item{ngrid}{The number of equally spaced points to discretize the (0,1)interval for computing the covariance function.}
 
 \item{gridpit}{logical. If \code{TRUE} (the default value), the parameter ngrid is ignored and (0,1) interval is divided
-based on probability integral transformed values obtained from the sample. If \code{FALSE}, the interval is divided into ngrid
-equally spaced points for computing the covariance function.}
+based on probability integral transformed values obtained from the sample. If \code{FALSE}, the interval is divided into
+\code{ngrid} equally spaced points for computing the covariance function.}
 
 \item{precision}{The theory behind goodness-of-fit test based on empirical distribution function (edf) works well
 if the MLE is indeed the root of derivative of log likelihood function. A precision of 1e-9 (default value) is used
@@ -42,7 +45,7 @@ to compute both cvm and ad.}
 A list of two containing the following components:
 \itemize{
 \item Statistic: the value of goodness-of-fit statistic.
-\item p-value: the approximate p-value for the goodness-of-fit test based on empirical distribution function.
+\item p-value: the approximate p-value for the goodness-of-fit test.
 if method = 'cvm' or method = 'ad', it returns a numeric value for the statistic and p-value. If method = 'both', it
 returns a numeric vector with two elements and one for each statistic.
 }
@@ -50,12 +53,11 @@ returns a numeric vector with two elements and one for each statistic.
 \description{
 This function applies the goodness-of-fit test based on empirical distribution function.
 It requires certain inputs depending on whether the model involves parameter estimation or not.
-If the model is known and there is no parameter estimation, the function requires the sample as a vector and
-the probability transformed (or pit) values of the sample. This ought to be a vector as well. If there is
-parameter estimation in the model, the function additionally requires the score as a matrix with n
-rows and p columns, where n is the sample size and p is the number of estimated parameters.
-The function checks if the score is zero at the estimated parameter (which is assumed to be the maximum
-likelihood estimate).
+If the model is known and there is no parameter estimation, the function requires the probability transformed
+(or pit) values of the sample. This ought to be a numeric vector. If there is parameter estimation in the model,
+the function additionally requires the score as a matrix with n rows and p columns, where n is the sample size
+and p is the number of estimated parameters. The function checks if the sum of columns in score is near zero at
+the estimated parameter (which is assumed to be the maximum likelihood estimate).
 }
 \examples{
 # Example: Inverse Gaussian (IG) distribution with weights
@@ -77,11 +79,11 @@ lambda     <- 2
 sim_data <- statmod::rinvgauss(n, mean = mio, shape = lambda * weights)
 
 # Compute MLE of parameters, score matrix, and pit values.
-theta_hat    <- inversegaussianMLE(obs = sim_data,   w = weights)
-ScoreMatrix  <- inversegaussianScore(obs = sim_data, w = weights, mle = theta_hat)
-pitvalues    <- inversegaussianPIT(obs = sim_data ,  w = weights, mle = theta_hat)
+theta_hat    <- IGMLE(obs = sim_data,   w = weights)
+ScoreMatrix  <- IGScore(obs = sim_data, w = weights, mle = theta_hat)
+pitvalues    <- IGPIT(obs = sim_data ,  w = weights, mle = theta_hat)
 
 # Apply the goodness-of-fit test.
-testYourModel(x = sim_data, pit = pitvalues, score = ScoreMatrix)
+testYourModel(pit = pitvalues, score = ScoreMatrix)
 
 }

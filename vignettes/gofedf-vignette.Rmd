@@ -57,12 +57,18 @@ devtools::install_github('pnickchi/gofedf')
 
 ## Examples
 
-In this section, we will review the package's primary functions and provide illustrative examples to demonstrate their usage. The first two examples relate to applying the goodness-of-fit (GOF) test for i.i.d. samples, while the last two focus on linear models and generalized linear models. The final example showcases the most important feature of the package, allowing you to apply goodness-of-fit tests based on empirical distribution function EDF for a general likelihood model.
+In this section, we will review the package's primary functions and provide illustrative examples to demonstrate their usage. The first two examples relate to applying the goodness-of-fit (GOF) test for i.i.d. samples, while the last two focus on linear models and generalized linear models. The final example showcases the most important feature of the package, allowing you to apply goodness-of-fit tests based on empirical distribution function EDF to evaluate model assumptions in a general likelihood model.
 
 
 ### 1. Bivariate Normal distribution
 
-The first example illustrates the GOF test for an i.i.d. sample from a Normal distribution. The main function is `testNormal`. At the minimum, it requires a numeric vector as input. By default, it uses probability inverse-transformed values to compute the stochastic process and its covariance function later. You can change this behavior by setting `gridpit = FALSE` and assigning a positive value for `ngrid`. The default value for `ngrid` is the same as the number of observations, `n`. This means the (0,1) interval is divided into `n` equally spaced data points to compute the stochastic process and the covariance function. Additionally, the Fisher information matrix, by default, is estimated by the variance of the score function. To change this, you can set `hessian=TRUE` to estimate the Fisher information matrix using the Hessian instead. Finally, method is a string that defines the statistic to compute. Possible values are `cvm` for Cramer-von-Mises, `ad` for Anderson-Darling, and both to compute both.
+The first example illustrates the GOF test for an i.i.d. sample from a Normal distribution. The main function is `testNormal`. At a minimum, it requires a numeric vector as input. The eigenvalues are computed by replacing the estimated covariance function in the integral equation to solve for eigenvalues. We recommend this method for all tested functions in our package as it best controls the type-one error rate. This can be controlled by setting `discretize=FALSE` in the function (this is the default value).
+
+Alternatively, you can compute the eigenvalues by converting the integral equation into a matrix equation and evaluating the values at a grid over (0,1). By default, the package uses probability inverse-transformed values as a grid. You can change this behavior by setting `gridpit=FALSE` and assigning a positive value for `ngrid`. The default value for `ngrid` is the same as the number of observations, `n`. This means the (0,1) interval is divided into `n` equally spaced data points to compute the stochastic process and the covariance function.
+
+Additionally, the Fisher information matrix, by default, is estimated by the variance of the score function. To change this, you can set `hessian=TRUE` to estimate the Fisher information matrix using the Hessian instead.
+
+Finally, `method` is a string that defines the statistic to compute. Possible values are `cvm` for Cramer-von-Mises, `ad` for Anderson-Darling, and `both` to compute both.
 
 ```{r}
 library(gofedf)
@@ -78,11 +84,6 @@ x <- rnorm(n)
 testNormal(x = x, method = 'cvm')
 ```
 
-
-```{r}
-# Test if the data follows a Normal distribution by calculating the Anderson-Darling statistic and approximate p-value of the test.
-testNormal(x = x, method = 'ad')
-```
 
 
 ```{r}
@@ -102,16 +103,10 @@ set.seed(123)
 
 # Randomly generate some data
 n <- 50
-x <- rgamma(n, shape = 3)
+x <- rgamma(n, shape = 1)
 
 # Test if the data follows a Gamma distribution, calculate Cramer-von Mises statistic and approximate p-value
 testGamma(x = x, method = 'cvm')
-```
-
-```{r}
-# Generate some random sample from a distribution that is not Gamma
-x <- runif(n)
-testNormal(x = x, method = 'cvm')
 ```
 
 
@@ -201,13 +196,11 @@ testGLMGamma(fit = glm.fit, l = 'log')
 
 One of the most important features of the package is to provide computational tools to apply the goodness-of-fit test based on empirical distribution functions for any general likelihood model. We provided tools to apply the test for Normal, Gamma, verify the assumptions in a linear model and generalized linear model. But this additional feature allows you to test if the sample come from any general likelihood model. For example, consider you have a sample of size $n$, such as $X_1, X_2, \ldots, X_n$, from a model with CDF of $F(X;\theta)$ where $\theta$ contains $p$ parameters. Before running the test, at the minimum you need the followings: 
 
-(i) A numeric vector of observations, `x`.
-
-(ii) The probability inverse transformed or PIT values of the sample which ought to be a numeric vector with the same size as `x` and with elements $F^{-1}(X_{i};\theta)$.
+(i) The probability inverse transformed or PIT values of the sample which ought to be a numeric vector with the same size as sample and with elements $F^{-1}(X_{i};\theta)$.
 
 If $\theta$ is unknown, you also need to provide score function. This needs to be a matrix with $n$ rows and $p$ columns where each row measures the score of each observation. Note that the values are computed as $S(X_{i};\theta) = \frac{\partial}{\partial \theta} \log(f(X_{i};\theta))$ where $f(X_{i};\theta)$ is the probability density function. For sure, if $\theta$ is not known, this means you need to compute the MLE of $\theta$ to obtain item 1 and if needed the score function. The main function to apply the GOF test in this case is `testYourModel`. The `precision` argument sets the precision needed to check if the col sums of score matrix are close enough to zero (log-likelihood is zero at MLE). The other arguments of the function remain consistent with previous examples.
 
-In the following example, we demonstrate how to apply the goodness-of-fit test to check if a sample follows an Inverse Gaussian distribution, where the shape parameter depends on some weights. First, we generate data from an Inverse Gaussian distribution. For illustrative purposes, we include functions to compute the Maximum Likelihood Estimation (MLE) and score function for the sample. In the following chunck of code, `inversegaussianScore` is a function that returns the score for each observation, and `inversegaussianPIT` is a function that provides a vector of Probability Inverse Transformed (PIT) values. Additionally, `inversegaussianMLE` calculates the MLE of the mean and shape parameter. Second we calculate score, PIT and MLE of parameters. Finally we call `testYourModel` function to apply the test.
+In the following example, we demonstrate how to apply the goodness-of-fit test to check if a sample follows an Inverse Gaussian distribution, where the shape parameter depends on some weights. First, we generate data from an Inverse Gaussian distribution. For illustrative purposes, we include functions to compute the Maximum Likelihood Estimation (MLE) and score function for the sample. In the following chunk of code, `IGScore` is a function that returns the score for each observation, and `IGPIT` is a function that provides a vector of Probability Inverse Transformed (PIT) values. Additionally, `IGMLE` calculates the MLE of the mean and shape parameter. Second we calculate score, PIT and MLE of parameters. Finally we call `testYourModel` function to apply the test.
 
 ```{r}
 # Example: Inverse Gaussian (IG) distribution with weights
@@ -230,12 +223,12 @@ lambda     <- 2
 y <- statmod::rinvgauss(n, mean = mio, shape = lambda * weights)
 
 # Compute MLE of parameters, score matrix, and pit values.
-theta_hat    <- inversegaussianMLE(obs = y,   w = weights)
-score.matrix <- inversegaussianScore(obs = y, w = weights, mle = theta_hat)
-pit.values   <- inversegaussianPIT(obs = y ,  w = weights, mle = theta_hat)
+theta_hat    <- IGMLE(obs = y,   w = weights)
+score.matrix <- IGScore(obs = y, w = weights, mle = theta_hat)
+pit.values   <- IGPIT(obs = y ,  w = weights, mle = theta_hat)
 
 # Apply the goodness-of-fit test.
-testYourModel(x = y, pit = pit.values, score = score.matrix)
+testYourModel(pit = pit.values, score = score.matrix)
 ```
 
 

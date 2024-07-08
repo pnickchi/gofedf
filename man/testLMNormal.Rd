@@ -8,8 +8,9 @@ testLMNormal(
   x,
   y,
   fit = NULL,
+  discretize = FALSE,
   ngrid = length(y),
-  gridpit = FALSE,
+  gridpit = TRUE,
   hessian = FALSE,
   method = "cvm"
 )
@@ -25,6 +26,12 @@ fit is NULL. If any object is provided, \code{x} and \code{y} will be ignored an
 an object to \code{fit} make sure to return the design matrix by setting \code{x} = \code{TRUE} and the response variable by
 setting in \code{y} = \code{TRUE} in \code{\link{lm}} function. To read more about this see the help documentation for
 \code{\link{lm}} function or see the example below.}
+
+\item{discretize}{If \code{TRUE}, the covariance function of W_{n}(u) process is evaluated at some data points
+(see \code{ngrid} and \code{gridpit}), and the integral equation is replaced by a matrix equation.
+If \code{FALSE} (the default value), the covariance function is first estimated, and then the integral equation is solved
+to find the eigenvalues. The results of our simulations recommend using the estimated covariance for solving the integral
+equation. The parameters \code{ngrid}, \code{gridpit}, and \code{hessian} are only relevant when \code{discretize = TRUE}.}
 
 \item{ngrid}{the number of equally spaced points to discretize the (0,1) interval for computing the covariance function.}
 
@@ -44,7 +51,7 @@ to compute both cvm and ad.}
 A list of two containing the following components:
 \itemize{
 \item Statistic: the value of goodness-of-fit statistic.
-\item p-value: the approximate p-value for the goodness-of-fit test based on empirical distribution function.
+\item p-value: the approximate p-value for the goodness-of-fit test.
 if method = 'cvm' or method = 'ad', it returns a numeric value for the statistic and p-value. If method = 'both', it
 returns a numeric vector with two elements and one for each statistic.
 }

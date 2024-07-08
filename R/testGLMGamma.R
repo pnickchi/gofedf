@@ -15,9 +15,21 @@
 #' \code{\link{glm}} or \code{\link{glm2}} function. For more information on how to do this, refer to the help
 #' documentation for the \code{\link{glm}} or \code{\link{glm2}} function.
 #'
-#' @param l a character vector indicating the link function that should be used for Gamma family. Some common
-#' link functions for Gamma family are 'log' and 'inverse'. For more details see \code{\link{make.link}} from stats
-#' package in R.
+#' @param l a character vector indicating the link function that should be used for Gamma family. Acceptable
+#' link functions for Gamma family are inverse, identity and log. For more details see \code{\link{Gamma}} from stats
+#' package.
+#'
+#' @param discretize If \code{TRUE}, the covariance function of W_{n}(u) process is evaluated at some data points
+#' (see \code{ngrid} and \code{gridpit}), and the integral equation is replaced by a matrix equation.
+#' If \code{FALSE} (the default value), the covariance function is first estimated, and then the integral equation is solved
+#' to find the eigenvalues. The results of our simulations recommend using the estimated covariance for solving the integral
+#' equation. The parameters \code{ngrid}, \code{gridpit}, and \code{hessian} are only relevant when \code{discretize = TRUE}.
+#'
+#' @param ngrid the number of equally spaced points to discretize the (0,1) interval for computing the covariance function.
+#'
+#' @param gridpit logical. If \code{TRUE} (the default value), the parameter ngrid is ignored and (0,1) interval is divided
+#' based on probability integral transformed values obtained from the sample. If \code{FALSE}, the interval is divided into ngrid
+#' equally spaced points for computing the covariance function.
 #'
 #' @param hessian logical. If \code{TRUE} the Fisher information matrix is estimated by the observed Hessian Matrix based on
 #' the sample. If \code{FALSE} (the default value) the Fisher information matrix is estimated by the variance of the
@@ -34,9 +46,9 @@
 #' 'cvm' for the Cramer-von-Mises statistic. Other options include 'ad' for the Anderson-Darling statistic, and 'both'
 #' to compute both cvm and ad.
 #'
-#' @return A list of three containing the following components:
+#' @return A list of two containing the following components:
 #' - Statistic: the value of goodness-of-fit statistic.
-#' - p-value: the approximate p-value for the goodness-of-fit test based on empirical distribution function.
+#' - p-value: the approximate p-value for the goodness-of-fit test.
 #' if method = 'cvm' or method = 'ad', it returns a numeric value for the statistic and p-value. If method = 'both', it
 #' returns a numeric vector with two elements and one for each statistic.
 #' - converged: logical to indicate if the IWLS algorithm have converged or not.
@@ -54,13 +66,14 @@
 #' testGLMGamma(x, y, l = 'log')
 #' myfit <- glm(y ~ x, family = Gamma('log'), x = TRUE, y = TRUE)
 #' testGLMGamma(fit = myfit)
-testGLMGamma = function(x, y, fit = NULL, l = 'log', hessian = FALSE, start.value = NULL, control = NULL, method = 'cvm'){
+testGLMGamma = function(x, y, fit = NULL, l = 'log', discretize = FALSE, ngrid = length(y), gridpit = TRUE, hessian = FALSE, start.value = NULL, control = NULL, method = 'cvm'){
+
 
    if( is.null(fit) ){
 
      # Check if the link is valid
      if( !(l %in% c('inverse','identity','log')) ){
-       stop('The link for Gamma must be inverse, identity, or log.')
+       stop('The link for Gamma must be either inverse, identity, or log.')
      }
 
      # Assign control vector for glm2 function
@@ -85,9 +98,6 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', hessian = FALSE, start.valu
        # Fit a GLM-Gamma to the data to compute maximum likelihood estimation of coefficients
        fitobj <- glm2::glm2(formula = y ~ x, family = Gamma(link = l), x = TRUE, y = TRUE, control = ctl, na.action = na.omit, start = start.value)
      }
-
-     # Get the sample size
-     n       <- length(fitobj$y)
 
    }
 
@@ -122,15 +132,105 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', hessian = FALSE, start.valu
    pit     <- temp$pit
    par     <- temp$par
 
-   # Get the sample
+   # Get the sample size
    n <- nrow(Score)
 
    # Boolean to check if the IWLS algorithm have converged
    converged <- temp$converged
 
    if( !converged ){
-     message('The IWLS iterative algorithm did not converge.')
+     message('The IWLS iterative algorithm did not converge. \n Consider increasing maxit or decreasing epsilon in glm.control() function.')
    }
+
+   # Use the estimated covariance function when solving the integral equation
+   if(!discretize){
+
+     # Find the rank of sorted pits
+     sort_indx <- order(pit)
+
+     # Reorder the rows of score matrix according to the ranks in pit
+     Score     <- Score[sort_indx,]
+
+     if( method == 'cvm' | method == 'ad' ){
+
+       # Compute P matrix
+       P <- computeMatrix(n, Score, method = method)
+
+       # Adjust for the number of estimated parameters
+       P <- P / (n-ncol(Score)-1)
+
+       # Compute eigenvalues
+       ev <- eigen(P, only.values = TRUE, symmetric = TRUE)$values
+
+     }
+
+     if( method == 'both' ){
+
+       # Compute P matrix, adjust for number of estimated parameters, and compute eigenvalues for the case of cvm
+       P_cvm  <- computeMatrix(n, Score, method = 'cvm')
+       P_cvm  <- P_cvm/(n-ncol(Score)-1)
+       ev_cvm <- eigen(P_cvm, only.values = TRUE, symmetric = TRUE)$values
+
+       # Compute P matrix, adjust for number of estimated parameters, and compute eigenvalues for the case of ad
+       P_ad  <- computeMatrix(n, Score, method = 'ad')
+       P_ad  <- P_ad/(n-ncol(Score)-1)
+       ev_ad <- eigen(P_ad, only.values = TRUE, symmetric = TRUE)$values
+
+     }
+
+
+     # Compute gof statistics and pvalue according to the requested method
+     if( method == 'cvm' ){
+
+       # Compute CvM statistics
+       cvm <- getCvMStatistic(pit)
+       names(cvm) <- 'Cramer-von-Mises Statistic'
+
+       # Calculate pvalue
+       pvalue  <- getpvalue(u = cvm, eigen = ev)
+
+       # Prepare a list to return statistic and pvalue
+       res     <- list(Statistic = cvm, pvalue = pvalue)
+
+       return(res)
+
+     } else if ( method == 'ad' ){
+
+       AD <- getADStatistic(pit)
+       names(AD) <- 'Anderson-Darling Statistic'
+
+       # Calculate pvalue
+       pvalue  <- getpvalue(u = AD, eigen = ev)
+
+       # Prepare a list to return statistic and pvalue
+       res     <- list(Statistic = AD, pvalue = pvalue)
+
+       return(res)
+
+     }else{
+
+       # Fix this oart needs to have two diff sets of ev
+       cvm <- getCvMStatistic(pit)
+       cvm.pvalue  <- getpvalue(u = cvm, eigen = ev_cvm)
+
+       AD  <- getADStatistic(pit)
+       ad.pvalue  <- getpvalue(u = AD, eigen = ev_ad)
+
+       gof.stat        <- c(cvm, AD)
+       names(gof.stat) <- c('Cramer-von-Mises Statistic','Anderson-Darling Statistic')
+
+       # Prepare a list to return statistic and pvalue
+       res     <- list(Statistics = gof.stat, pvalue = c(cvm.pvalue, ad.pvalue) )
+
+       return(res)
+
+     }
+
+   }
+
+
+
+   # Lines below here are used when there is discritization to compute the covariance of W_{n}(u) process.
 
    # Compute Fisher information matrix
    if(hessian){
@@ -139,10 +239,15 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', hessian = FALSE, start.valu
      fisher  <- (n-1)*var(Score)/n
    }
 
-   if( method == 'cvm'){
+   # Compute Eigen values
+   if( gridpit ){
+     ev    <- getEigenValues(S = Score, FI = fisher, pit, me = method)
+   }else{
+     ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = method)
+   }
 
-     # Compute Eigen values
-     ev      <- getEigenValues(S = Score, FI = fisher, pit, me = 'cvm')
+
+   if( method == 'cvm'){
 
      # Compute cvm statistic
      cvm     <- getCvMStatistic(pit)
@@ -154,9 +259,6 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', hessian = FALSE, start.valu
      return(res)
 
     } else if ( method == 'ad') {
-
-     # Compute Eigen values
-     ev      <- getEigenValues(S = Score, FI = fisher, pit, me = 'ad')
 
      # Compute ad statistics
      ad      <- getADStatistic(pit)
@@ -175,9 +277,6 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', hessian = FALSE, start.valu
       cvm        <- getCvMStatistic(pit)
       names(cvm) <- 'Cramer-von-Mises Statistic'
 
-      # Compute Eigen values
-      ev    <- getEigenValues(S = Score, FI = fisher, pit = pit, me = 'cvm')
-
       # Compute p-value
       cvm.pvalue  <- getpvalue(u = cvm, eigen = ev)
       names(cvm.pvalue) <- 'pvalue for Cramer-von-Mises test'
@@ -186,9 +285,6 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', hessian = FALSE, start.valu
       # 2. Compute ad calculations
       ad      <- getADStatistic(pit)
       names(ad) <- 'Anderson-Darling Statistic'
-
-      # Compute Eigen values
-      ev    <- getEigenValues(S = Score, FI = fisher, pit = pit, me = 'ad')
 
       # Compute p-value
       ad.pvalue  <- getpvalue(u = ad, eigen = ev)

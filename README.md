@@ -1,6 +1,6 @@
 README
 ================
-2024-01-23
+2024-06-25
 
 # gofedf
 
@@ -112,21 +112,11 @@ testNormal(x = x, method = 'cvm')
 ```
 
     ## $Statistic
-    ## [1] 0.03781322
+    ## Cramer-von-Mises Statistic 
+    ##                 0.03781322 
     ## 
     ## $pvalue
-    ## [1] 0.6766974
-
-``` r
-# Test if the data follows a Normal distribution by calculating the Anderson-Darling statistic and approximate p-value of the test.
-testNormal(x = x, method = 'ad')
-```
-
-    ## $Statistic
-    ## [1] 0.2179704
-    ## 
-    ## $pvalue
-    ## [1] 0.9426823
+    ## [1] 0.7068748
 
 ``` r
 # Generate some random sample from a non Normal distribution.
@@ -135,10 +125,11 @@ testNormal(x = x, method = 'cvm')
 ```
 
     ## $Statistic
-    ## [1] 0.2141872
+    ## Cramer-von-Mises Statistic 
+    ##                  0.2141872 
     ## 
     ## $pvalue
-    ## [1] 0.004302717
+    ## [1] 0.004121803
 
 ### 2. Bivariate Gamma distribution
 
@@ -159,22 +150,11 @@ testGamma(x = x, method = 'cvm')
 ```
 
     ## $Statistic
-    ## [1] 0.0549759
+    ## Cramer-von-Mises Statistic 
+    ##                  0.0549759 
     ## 
     ## $pvalue
-    ## [1] 0.3714929
-
-``` r
-# Generate some random sample from a distribution that is not Gamma
-x <- runif(n)
-testNormal(x = x, method = 'cvm')
-```
-
-    ## $Statistic
-    ## [1] 0.07085577
-    ## 
-    ## $pvalue
-    ## [1] 0.1730288
+    ## [1] 0.4236757
 
 ### 3. Linear model with Normal error terms
 
@@ -218,10 +198,11 @@ testLMNormal(x = X, y)
 ```
 
     ## $Statistic
-    ## [1] 0.02285164
+    ## Cramer-von-Mises Statistic 
+    ##                 0.02285164 
     ## 
     ## $pvalue
-    ## [1] 0.9209706
+    ## [1] 0.939902
 
 ``` r
 # Or alternatively just pass 'lm.fit' object directly instead:
@@ -230,10 +211,11 @@ testLMNormal(fit = lm.fit)
 ```
 
     ## $Statistic
-    ## [1] 0.02285164
+    ## Cramer-von-Mises Statistic 
+    ##                 0.02285164 
     ## 
     ## $pvalue
-    ## [1] 0.9209706
+    ## [1] 0.939902
 
 ### 4. Gamma GLM with any link function
 
@@ -286,13 +268,11 @@ testGLMGamma(x=X, y, l = 'log', method = 'cvm')
 ```
 
     ## $Statistic
-    ## [1] 0.0870493
+    ## Cramer-von-Mises Statistic 
+    ##                  0.0870493 
     ## 
     ## $pvalue
-    ## [1] 0.1896532
-    ## 
-    ## $converged
-    ## [1] TRUE
+    ## [1] 0.1874801
 
 ``` r
 # Or alternatively just pass 'glm.fit' object directly instead:
@@ -301,13 +281,11 @@ testGLMGamma(fit = glm.fit, l = 'log')
 ```
 
     ## $Statistic
-    ## [1] 0.0870493
+    ## Cramer-von-Mises Statistic 
+    ##                  0.0870493 
     ## 
     ## $pvalue
-    ## [1] 0.1896532
-    ## 
-    ## $converged
-    ## [1] TRUE
+    ## [1] 0.1874801
 
 ### 5. General likelihood model
 
@@ -348,12 +326,12 @@ distribution, where the shape parameter depends on some weights. First,
 we generate data from an Inverse Gaussian distribution. For illustrative
 purposes, we include functions to compute the Maximum Likelihood
 Estimation (MLE) and score function for the sample. In the following
-chunck of code, `inversegaussianScore` is a function that returns the
-score for each observation, and `inversegaussianPIT` is a function that
-provides a vector of Probability Inverse Transformed (PIT) values.
-Additionally, `inversegaussianMLE` calculates the MLE of the mean and
-shape parameter. Second we calculate score, PIT and MLE of parameters.
-Finally we call `testYourModel` function to apply the test.
+chunck of code, `IGScore` is a function that returns the score for each
+observation, and `IGPIT` is a function that provides a vector of
+Probability Inverse Transformed (PIT) values. Additionally, `IGMLE`
+calculates the MLE of the mean and shape parameter. Second we calculate
+score, PIT and MLE of parameters. Finally we call `testYourModel`
+function to apply the test.
 
 ``` r
 # Example: Inverse Gaussian (IG) distribution with weights
@@ -376,12 +354,12 @@ lambda     <- 2
 y <- statmod::rinvgauss(n, mean = mio, shape = lambda * weights)
 
 # Compute MLE of parameters, score matrix, and pit values.
-theta_hat    <- inversegaussianMLE(obs = y,   w = weights)
-score.matrix <- inversegaussianScore(obs = y, w = weights, mle = theta_hat)
-pit.values   <- inversegaussianPIT(obs = y ,  w = weights, mle = theta_hat)
+theta_hat    <- IGMLE(obs = y,   w = weights)
+score.matrix <- IGScore(obs = y, w = weights, mle = theta_hat)
+pit.values   <- IGPIT(obs = y ,  w = weights, mle = theta_hat)
 
 # Apply the goodness-of-fit test.
-testYourModel(x = y, pit = pit.values, score = score.matrix)
+testYourModel(pit = pit.values, score = score.matrix)
 ```
 
     ## $Statistic
@@ -389,7 +367,7 @@ testYourModel(x = y, pit = pit.values, score = score.matrix)
     ##                 0.03292151 
     ## 
     ## $pvalue
-    ## [1] 0.8436222
+    ## [1] 0.8616661
 
 ### Note
 

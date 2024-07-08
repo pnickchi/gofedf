@@ -10,7 +10,7 @@
 #' @return The function compute the MLE of parameters in Inverse Gaussian distribution and returns a vector of
 #' estimates. The first and second elements of the vector are MLE of the mean and shape, respectively.
 #'
-inversegaussianMLE = function(obs, ...){
+IGMLE = function(obs, ...){
 
   args <- list(...)
   w    <- args$w
@@ -41,7 +41,7 @@ inversegaussianMLE = function(obs, ...){
 #' @export
 #'
 #' @return The score matrix with n rows (number of sample observations) and 2 columns (mean and shape).
-inversegaussianScore = function(obs, ...){
+IGScore = function(obs, ...){
 
   args <- list(...)
   mle <- args$mle
@@ -83,7 +83,7 @@ inversegaussianScore = function(obs, ...){
 #' @import statmod
 #'
 #' @return A numeric vector of probability integral transformed values of sample observations.
-inversegaussianPIT = function(obs, ...){
+IGPIT = function(obs, ...){
 
   # Extract the MLE and weights
   args <- list(...)
