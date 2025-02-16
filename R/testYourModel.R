@@ -1,44 +1,62 @@
-#' Apply the Goodness of Fit Test Based on Empirical Distribution Function to Any Likelihood Model.
+#' Apply the Goodness of Fit Test Based on Empirical Distribution Function to
+#' Any Likelihood Model.
 #'
-#' @description This function applies the goodness-of-fit test based on empirical distribution function.
-#' It requires certain inputs depending on whether the model involves parameter estimation or not.
-#' If the model is known and there is no parameter estimation, the function requires the probability transformed
-#' (or pit) values of the sample. This ought to be a numeric vector. If there is parameter estimation in the model,
-#' the function additionally requires the score as a matrix with n rows and p columns, where n is the sample size
-#' and p is the number of estimated parameters. The function checks if the sum of columns in score is near zero at
-#' the estimated parameter (which is assumed to be the maximum likelihood estimate).
+#' @description This function applies the goodness-of-fit test based on
+#'   empirical distribution function. It requires certain inputs depending on
+#'   whether the model involves parameter estimation or not. If the model is
+#'   known and there is no parameter estimation, the function requires the
+#'   probability transformed (or pit) values of the sample. This ought to be a
+#'   numeric vector. If there is parameter estimation in the model, the function
+#'   additionally requires the score as a matrix with n rows and p columns,
+#'   where n is the sample size and p is the number of estimated parameters. The
+#'   function checks if the sum of columns in score is near zero at the
+#'   estimated parameter (which is assumed to be the maximum likelihood
+#'   estimate).
 #'
-#' @param pit The probability transformed (or pit) values of the sample which ought to be a numeric vector.
+#' @param pit The probability transformed (or pit) values of the sample which
+#'   ought to be a numeric vector.
 #'
-#' @param score The default value is null and refers to no parameter estimation case. If there is parameter estimation,
-#' the score must be a matrix with n rows and p columns, where n is the sample size and p is the number of
-#' estimated parameters.
+#' @param score The default value is null and refers to no parameter estimation
+#'   case. If there is parameter estimation, the score must be a matrix with n
+#'   rows and p columns, where n is the sample size and p is the number of
+#'   estimated parameters.
 #'
-#' @param discretize If \code{TRUE}, the covariance function of W_{n}(u) process is evaluated at some data points
-#' (see \code{ngrid} and \code{gridpit}), and the integral equation is replaced by a matrix equation.
-#' If \code{FALSE} (the default value), the covariance function is first estimated, and then the integral equation is solved
-#' to find the eigenvalues. The results of our simulations recommend using the estimated covariance for solving the integral
-#' equation. The parameters \code{ngrid}, \code{gridpit}, and \code{hessian} are only relevant when \code{discretize = TRUE}.
+#' @param discretize If \code{TRUE}, the covariance function of \eqn{W_{n}(u)}
+#'   process is evaluated at some data points (see \code{ngrid} and
+#'   \code{gridpit}), and the integral equation is replaced by a matrix
+#'   equation. If \code{FALSE} (the default value), the covariance function is
+#'   first estimated, and then the integral equation is solved to find the
+#'   eigenvalues. The results of our simulations recommend using the estimated
+#'   covariance for solving the integral equation. The parameters \code{ngrid},
+#'   \code{gridpit}, and \code{hessian} are only relevant when \code{discretize
+#'   = TRUE}.
 #'
-#' @param ngrid The number of equally spaced points to discretize the (0,1)interval for computing the covariance function.
+#' @param ngrid The number of equally spaced points to discretize the
+#'   (0,1)interval for computing the covariance function.
 #'
-#' @param gridpit logical. If \code{TRUE} (the default value), the parameter ngrid is ignored and (0,1) interval is divided
-#' based on probability integral transformed values obtained from the sample. If \code{FALSE}, the interval is divided into
-#' \code{ngrid} equally spaced points for computing the covariance function.
+#' @param gridpit logical. If \code{TRUE} (the default value), the parameter
+#'   ngrid is ignored and (0,1) interval is divided based on probability
+#'   integral transformed values obtained from the sample. If \code{FALSE}, the
+#'   interval is divided into \code{ngrid} equally spaced points for computing
+#'   the covariance function.
 #'
-#' @param precision The theory behind goodness-of-fit test based on empirical distribution function (edf) works well
-#' if the MLE is indeed the root of derivative of log likelihood function. A precision of 1e-9 (default value) is used
-#' to check this. A warning message is generated if the score evaluated at MLE is not close enough to zero.
+#' @param precision The theory behind goodness-of-fit test based on empirical
+#'   distribution function (edf) works well if the MLE is indeed the root of
+#'   derivative of log likelihood function. A precision of 1e-9 (default value)
+#'   is used to check this. A warning message is generated if the score
+#'   evaluated at MLE is not close enough to zero.
 #'
-#' @param method a character string indicating which goodness-of-fit statistic is to be computed. The default value is
-#' 'cvm' for the Cramer-von-Mises statistic. Other options include 'ad' for the Anderson-Darling statistic, and 'both'
-#' to compute both cvm and ad.
+#' @param method a character string indicating which goodness-of-fit statistic
+#'   is to be computed. The default value is 'cvm' for the Cramer-von-Mises
+#'   statistic. Other options include 'ad' for the Anderson-Darling statistic,
+#'   and 'both' to compute both cvm and ad.
 #'
 #' @return A list of two containing the following components:
 #' - Statistic: the value of goodness-of-fit statistic.
 #' - p-value: the approximate p-value for the goodness-of-fit test.
-#' if method = 'cvm' or method = 'ad', it returns a numeric value for the statistic and p-value. If method = 'both', it
-#' returns a numeric vector with two elements and one for each statistic.
+#'   if method = 'cvm' or method = 'ad', it returns a numeric value for the
+#'   statistic and p-value. If method = 'both', it returns a numeric vector with
+#'   two elements and one for each statistic.
 #'
 #' @export
 #'

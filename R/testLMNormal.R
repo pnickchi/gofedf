@@ -1,46 +1,62 @@
 #' Apply Goodness of Fit Test to Residuals of a Linear Model
 #'
-#' @description \code{testLMNormal} is used to check the normality assumption of residuals in a linear model. This function
-#' can take the response variable and design matrix, fit a linear model, and apply the goodness-of-fit test. Conveniently,
-#' it can take an object of class "lm" and directly applies the goodness-of-fit test. The function returns a goodness-of-fit
-#' statistic along with an approximate p-value.
+#' @description \code{testLMNormal} is used to check the normality assumption of
+#'   residuals in a linear model. This function can take the response variable
+#'   and design matrix, fit a linear model, and apply the goodness-of-fit test.
+#'   Conveniently, it can take an object of class "lm" and directly applies the
+#'   goodness-of-fit test. The function returns a goodness-of-fit statistic
+#'   along with an approximate p-value.
 #'
-#' @param x is either a numeric vector or a design matrix. In the design matrix, rows indicate observations and columns
-#' presents covariates.
+#' @param x is either a numeric vector or a design matrix. In the design matrix,
+#'   rows indicate observations and columns presents covariates.
 #'
-#' @param y is a vector of numeric values with the same number of observations or number of rows as x.
+#' @param y is a vector of numeric values with the same number of observations
+#'   or number of rows as x.
 #'
-#' @param fit an object of class "lm" returned by  \code{\link{lm}} function in \code{\link{stats}} package. The default value of
-#' fit is NULL. If any object is provided, \code{x} and \code{y} will be ignored and the class of object is checked. If you pass
-#' an object to \code{fit} make sure to return the design matrix by setting \code{x} = \code{TRUE} and the response variable by
-#' setting in \code{y} = \code{TRUE} in \code{\link{lm}} function. To read more about this see the help documentation for
-#' \code{\link{lm}} function or see the example below.
+#' @param fit an object of class "lm" returned by  \code{\link{lm}} function in
+#'   \code{\link{stats}} package. The default value of fit is NULL. If any
+#'   object is provided, \code{x} and \code{y} will be ignored and the class of
+#'   object is checked. If you pass an object to \code{fit} make sure to return
+#'   the design matrix by setting \code{x} = \code{TRUE} and the response
+#'   variable by setting in \code{y} = \code{TRUE} in \code{\link{lm}} function.
+#'   To read more about this see the help documentation for \code{\link{lm}}
+#'   function or see the example below.
 #'
-#' @param discretize If \code{TRUE}, the covariance function of W_{n}(u) process is evaluated at some data points
-#' (see \code{ngrid} and \code{gridpit}), and the integral equation is replaced by a matrix equation.
-#' If \code{FALSE} (the default value), the covariance function is first estimated, and then the integral equation is solved
-#' to find the eigenvalues. The results of our simulations recommend using the estimated covariance for solving the integral
-#' equation. The parameters \code{ngrid}, \code{gridpit}, and \code{hessian} are only relevant when \code{discretize = TRUE}.
+#' @param discretize If \code{TRUE}, the covariance function of \eqn{W_{n}(u)}
+#'   process is evaluated at some data points (see \code{ngrid} and
+#'   \code{gridpit}), and the integral equation is replaced by a matrix
+#'   equation. If \code{FALSE} (the default value), the covariance function is
+#'   first estimated, and then the integral equation is solved to find the
+#'   eigenvalues. The results of our simulations recommend using the estimated
+#'   covariance for solving the integral equation. The parameters \code{ngrid},
+#'   \code{gridpit}, and \code{hessian} are only relevant when \code{discretize
+#'   = TRUE}.
 #'
-#' @param ngrid the number of equally spaced points to discretize the (0,1) interval for computing the covariance function.
+#' @param ngrid the number of equally spaced points to discretize the (0,1)
+#'   interval for computing the covariance function.
 #'
-#' @param gridpit logical. If \code{TRUE} (the default value), the parameter ngrid is ignored and (0,1) interval is divided
-#' based on probability integral transformed values obtained from the sample. If \code{FALSE}, the interval is divided into ngrid
-#' equally spaced points for computing the covariance function.
+#' @param gridpit logical. If \code{TRUE} (the default value), the parameter
+#'   ngrid is ignored and (0,1) interval is divided based on probability
+#'   integral transformed values obtained from the sample. If \code{FALSE}, the
+#'   interval is divided into ngrid equally spaced points for computing the
+#'   covariance function.
 #'
-#' @param hessian logical. If \code{TRUE} the Fisher information matrix is estimated by the observed Hessian Matrix based on
-#' the sample. If \code{FALSE} (the default value) the Fisher information matrix is estimated by the variance of the
-#' observed score matrix.
+#' @param hessian logical. If \code{TRUE} the Fisher information matrix is
+#'   estimated by the observed Hessian Matrix based on the sample. If
+#'   \code{FALSE} (the default value) the Fisher information matrix is estimated
+#'   by the variance of the observed score matrix.
 #'
-#' @param method a character string indicating which goodness-of-fit statistic is to be computed. The default value is
-#' 'cvm' for the Cramer-von-Mises statistic. Other options include 'ad' for the Anderson-Darling statistic, and 'both'
-#' to compute both cvm and ad.
+#' @param method a character string indicating which goodness-of-fit statistic
+#'   is to be computed. The default value is 'cvm' for the Cramer-von-Mises
+#'   statistic. Other options include 'ad' for the Anderson-Darling statistic,
+#'   and 'both' to compute both cvm and ad.
 #'
 #' @return A list of two containing the following components:
 #' - Statistic: the value of goodness-of-fit statistic.
 #' - p-value: the approximate p-value for the goodness-of-fit test.
-#' if method = 'cvm' or method = 'ad', it returns a numeric value for the statistic and p-value. If method = 'both', it
-#' returns a numeric vector with two elements and one for each statistic.
+#'   if method = 'cvm' or method = 'ad', it returns a numeric value for the
+#'   statistic and p-value. If method = 'both', it returns a numeric vector with
+#'   two elements and one for each statistic.
 #'
 #' @export
 #'

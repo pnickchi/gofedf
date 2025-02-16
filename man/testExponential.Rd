@@ -16,38 +16,49 @@ testExponential(
 \arguments{
 \item{x}{a non-empty numeric vector of sample data.}
 
-\item{discretize}{If \code{TRUE}, the covariance function of W_{n}(u) process is evaluated at some data points
-(see \code{ngrid} and \code{gridpit}), and the integral equation is replaced by a matrix equation.
-If \code{FALSE} (the default value), the covariance function is first estimated, and then the integral equation is solved
-to find the eigenvalues. The results of our simulations recommend using the estimated covariance for solving the integral
-equation. The parameters \code{ngrid}, \code{gridpit}, and \code{hessian} are only relevant when \code{discretize = TRUE}.}
+\item{discretize}{If \code{TRUE}, the covariance function of \eqn{W_{n}(u)}
+process is evaluated at some data points (see \code{ngrid} and
+\code{gridpit}), and the integral equation is replaced by a matrix
+equation. If \code{FALSE} (the default value), the covariance function is
+first estimated, and then the integral equation is solved to find the
+eigenvalues. The results of our simulations recommend using the estimated
+covariance for solving the integral equation. The parameters \code{ngrid},
+\code{gridpit}, and \code{hessian} are only relevant when \code{discretize
+  = TRUE}.}
 
-\item{ngrid}{the number of equally spaced points to discretize the (0,1) interval for computing the covariance function.}
+\item{ngrid}{the number of equally spaced points to discretize the (0,1)
+interval for computing the covariance function.}
 
-\item{gridpit}{logical. If \code{TRUE} (the default value), the parameter ngrid is ignored and (0,1) interval is divided
-based on probability integral transformed values obtained from the sample. If \code{FALSE}, the interval is divided into ngrid
-equally spaced points for computing the covariance function.}
+\item{gridpit}{logical. If \code{TRUE} (the default value), the parameter
+ngrid is ignored and (0,1) interval is divided based on probability
+integral transformed values obtained from the sample. If \code{FALSE}, the
+interval is divided into ngrid equally spaced points for computing the
+covariance function.}
 
-\item{hessian}{logical. If \code{TRUE} the Fisher information matrix is estimated by the observed Hessian Matrix based on
-the sample. If \code{FALSE} (the default value) the Fisher information matrix is estimated by the variance of the
-observed score matrix.}
+\item{hessian}{logical. If \code{TRUE} the Fisher information matrix is
+estimated by the observed Hessian Matrix based on the sample. If
+\code{FALSE} (the default value) the Fisher information matrix is estimated
+by the variance of the observed score matrix.}
 
-\item{method}{a character string indicating which goodness-of-fit statistic is to be computed. The default value is
-'cvm' for the Cramer-von-Mises statistic. Other options include 'ad' for the Anderson-Darling statistic, and 'both'
-to compute both cvm and ad.}
+\item{method}{a character string indicating which goodness-of-fit statistic
+is to be computed. The default value is 'cvm' for the Cramer-von-Mises
+statistic. Other options include 'ad' for the Anderson-Darling statistic,
+and 'both' to compute both cvm and ad.}
 }
 \value{
 A list of two containing the following components:
 \itemize{
 \item Statistic: the value of goodness-of-fit statistic.
 \item p-value: the approximate p-value for the goodness-of-fit test.
-if method = 'cvm' or method = 'ad', it returns a numeric value for the statistic and p-value. If method = 'both', it
-returns a numeric vector with two elements and one for each statistic.
+if method = 'cvm' or method = 'ad', it returns a numeric value for the
+statistic and p-value. If method = 'both', it returns a numeric vector with
+two elements and one for each statistic.
 }
 }
 \description{
-Performs the goodness-of-fit test based on empirical distribution function to check if an i.i.d sample
-follows an Exponential distribution.
+Performs the goodness-of-fit test based on empirical
+distribution function to check if an i.i.d sample follows an Exponential
+distribution.
 }
 \examples{
 set.seed(123)
