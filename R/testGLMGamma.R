@@ -89,6 +89,11 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', discretize = FALSE, ngrid =
 
    if( is.null(fit) ){
 
+     # Make sure all observations in response are positive
+     if( any(y <= 0) ){
+       stop('y values must be positive for Gamma distribution')
+     }
+
      # Check if the link is valid
      if( !(l %in% c('inverse','identity','log')) ){
        stop('The link for Gamma must be either inverse, identity, or log.')
