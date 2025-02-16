@@ -63,7 +63,7 @@ testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, 
   }
 
   # Make sure all observations are positive
-  if( any(x < 0) ){
+  if( any(x <= 0) ){
     stop('x values must be positive for Gamma distribution')
   }
 
