@@ -117,6 +117,7 @@ testLMNormal = function(x, y, fit = NULL, discretize = FALSE, ngrid = length(y),
 
     x <- fit$x
     y <- fit$y
+    n <- length(y)
 
   }
 
