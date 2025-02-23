@@ -303,6 +303,7 @@ getpvalue = function(u, eigen){
     if( (pvalue < LB) & (pvalue > UB) ){
        # Imhof method failed to produce a valid pvalue. Compute p-value by farebrother method instead
        pvalue <- CompQuadForm::farebrother(q = u - sum(set_2), lambda = set_1)$Qq
+       return(pvalue)
     }
   }
 
@@ -310,6 +311,7 @@ getpvalue = function(u, eigen){
   if( (1e-10 <= LB) & (LB < 1e-7) ){
     # Compute p-value by farebrother method
     pvalue <- CompQuadForm::farebrother(q = u - sum(set_2), lambda = set_1)$Qq
+    return(pvalue)
   }
 
 
