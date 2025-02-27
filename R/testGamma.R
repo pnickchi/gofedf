@@ -87,8 +87,12 @@ testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, 
     stop('method must be a character string with length one.')
   }
 
+  if( !is.logical(rate) ){
+    stop('rate must be either TRUE or FALSE.')
+  }
+
   if( !(method %in% c('cvm','ad','both')) ){
-    stop('ethod must be either cvm, ad, or both.')
+    stop('method must be either cvm, ad, or both.')
   }
 
   # Get sample size
