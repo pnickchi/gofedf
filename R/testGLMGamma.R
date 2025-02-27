@@ -91,12 +91,35 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', discretize = FALSE, ngrid =
 
      # Make sure all observations in response are positive
      if( any(y <= 0) ){
-       stop('y values must be positive for Gamma distribution')
+       stop('y values must be positive for Gamma distribution.')
      }
 
      # Check if the link is valid
      if( !(l %in% c('inverse','identity','log')) ){
        stop('The link for Gamma must be either inverse, identity, or log.')
+     }
+
+     # Make sure discretize is logical type
+     if( !is.logical(discretize) ){
+       stop('discretize must be either TRUE or FALSE.')
+     }
+
+     # Make sure ngrid is integer type
+     if( !(ngrid %% 1 == 0) ){
+       stop('ngrid must be an integer number.')
+     }
+
+     # Make sure discretize and hessian are logical type
+     if( !is.logical(gridpit) ){
+       stop('gridpit must be either TRUE or FALSE.')
+     }
+
+     if( !is.logical(hessian) ){
+       stop('hessian must be either TRUE or FALSE.')
+     }
+
+     if( !(method %in% c('cvm','ad','both')) ){
+       stop('method must be either cvm, ad, or both.')
      }
 
      # Assign control vector for glm2 function
@@ -122,12 +145,22 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', discretize = FALSE, ngrid =
        fitobj <- glm2::glm2(formula = y ~ x, family = Gamma(link = l), x = TRUE, y = TRUE, control = ctl, na.action = na.omit, start = start.value)
      }
 
+     mu <- fitobj$family$linkfun(fitobj$linear.predictors)
+
+     if( any(mu) < 0 ){
+       stop('The fitted mean response is negative.')
+     }
+
    }
 
    if( !is.null(fit) ){
 
      if (!inherits(fit, 'glm')){
-       stop('The fit must be \'glm\' object returned by either glm or glm2 function.')
+       stop('The fit must be \'glm\' object returned by either glm function (from stats package) or glm2 function (from glm2 package).')
+     }
+
+     if( !(method %in% c('cvm','ad','both')) ){
+       stop('method must be either cvm, ad, or both.')
      }
 
      if( fit$family$family != 'Gamma' ){
@@ -138,15 +171,18 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', discretize = FALSE, ngrid =
        stop('The link for Gamma must be inverse, identity, or log.')
      }
 
-     if( !is.matrix(fit$x) ){
-       stop('fit must contain the design matrix. Consider setting x = TRUE in glm or glm2 function to return x matrix.')
-     }
-
-     if( !is.vector(fit$y) ){
-       stop('fit must contain the response variable. Consider setting y = TRUE in glm or glm2 function to return response variable.')
+     if( !is.matrix(fit$x) | !is.vector(fit$y) ){
+       stop('fit must contain the design matrix and the response variable.  \n Consider setting x = TRUE and y = TRUE in glm or glm2 function to return both.')
      }
 
      fitobj <- fit
+
+     mu <- fitobj$family$linkfun(fitobj$linear.predictors)
+
+     if( any(mu) < 0 ){
+       stop('The fitted mean response is negative.')
+     }
+
    }
 
    # Apply GLM Gamma to compute score, MLE of parameters, and pit values
@@ -165,7 +201,10 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', discretize = FALSE, ngrid =
      message('The IWLS iterative algorithm did not converge. \n Consider increasing maxit or decreasing epsilon in glm.control() function.')
    }
 
-   # Use the estimated covariance function when solving the integral equation
+
+   #
+   # Use the estimated covariance function and solving the integral equation analytically
+   #
    if(!discretize){
 
      # Find the rank of sorted pits
@@ -252,8 +291,9 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', discretize = FALSE, ngrid =
    }
 
 
-
-   # Lines below here are used when there is discritization to compute the covariance of W_{n}(u) process.
+   #
+   # Use the estimated covariance function and turning integral equation into a matrix equation
+   #
 
    # Compute Fisher information matrix
    if(hessian){
