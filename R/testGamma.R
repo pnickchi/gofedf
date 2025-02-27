@@ -79,6 +79,10 @@ testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, 
     stop('gridpit must be either TRUE or FALSE.')
   }
 
+  if( !is.logical(discretize) ){
+    stop('discretize must be either TRUE or FALSE.')
+  }
+
   if( !is.logical(hessian) ){
     stop('hessian must be either TRUE or FALSE.')
   }
@@ -107,7 +111,9 @@ testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, 
   par    <- temp$par
 
 
-  # Use the estimated covariance function when solving the integral equation
+  #
+  # Use the estimated covariance function and solving the integral equation analytically
+  #
   if(!discretize){
 
     # Find the rank of sorted pits
@@ -116,6 +122,8 @@ testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, 
     # Reorder the rows of score matrix according to the ranks in pit
     Score     <- Score[sort_indx,]
 
+
+    # Compute eigenvalues for the case of cvm or ad
     if( method == 'cvm' | method == 'ad' ){
 
       # Compute P matrix
@@ -129,6 +137,7 @@ testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, 
 
     }
 
+    # Compute eigenvalues for both cvm and ad
     if( method == 'both' ){
 
       # Compute P matrix, adjust for number of estimated parameters, and compute eigenvalues for the case of cvm
@@ -194,10 +203,11 @@ testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, 
   }
 
 
-  # Lines below here are used when there is discritization to compute the covariance of W_{n}(u) process.
+  #
+  # Use the estimated covariance function and turning integral equation into a matrix equation
+  #
 
-
-  # Compute Fisher information matrix
+  # Calculate Fisher information matrix by computing the variance of score from the sample or Hessian matrix
   if( hessian ){
     fisher <- gammaFisherByHessian(par)
   }else{
