@@ -112,6 +112,10 @@ testYourModel = function(pit, score = NULL, discretize = FALSE, ngrid = length(p
     stop('gridpit must be either TRUE or FALSE.')
   }
 
+  if( !is.logical(discretize) ){
+    stop('discretize must be either TRUE or FALSE.')
+  }
+
   if( !is.vector(method) | length(method) > 1){
     stop('method must be a character string with length one.')
   }
@@ -187,6 +191,7 @@ testYourModel = function(pit, score = NULL, discretize = FALSE, ngrid = length(p
       names(cvm) <- 'Cramer-von-Mises Statistic'
 
       # Calculate pvalue
+      ev <- 1 / ( pi^2 * j^2 )
       cvm.pvalue  <- getpvalue(u = cvm, eigen = ev)
       names(cvm.pvalue) <- 'pvalue for Cramer-von-Mises test'
 
@@ -195,6 +200,7 @@ testYourModel = function(pit, score = NULL, discretize = FALSE, ngrid = length(p
       names(ad) <- 'Anderson-Darling Statistic'
 
       # Calculate pvalue
+      ev <- 1 / ( j * (j+1) )
       ad.pvalue  <- getpvalue(u = ad, eigen = ev)
       names(ad.pvalue) <- 'Anderson-Darling test'
 
@@ -229,10 +235,12 @@ testYourModel = function(pit, score = NULL, discretize = FALSE, ngrid = length(p
 
     # Check if score is zero at MLE
     if( any(colSums(score) > precision) ){
-      warning( paste0('Score is not zero at MLE. precision of ', precision, ' was used. \n The asymptotic assumptions may not be accurate.') )
+      warning( paste0('Score is not zero at the MLE that you used. \n precision of ', precision, ' was used. \n The asymptotic assumptions may not be accurate.') )
     }
 
-    # Use the estimated covariance function when solving the integral equation
+    #
+    # Use the estimated covariance function and solving the integral equation analytically
+    #
     if(!discretize){
 
       # Find the rank of sorted pits
@@ -319,8 +327,9 @@ testYourModel = function(pit, score = NULL, discretize = FALSE, ngrid = length(p
     }
 
 
-
-    # Lines below here are used when there is discritization to compute the covariance of W_{n}(u) process.
+    #
+    # Use the estimated covariance function and turning integral equation into a matrix equation
+    #
 
     # Calculate Fisher information matrix by computing the variance of score from the sample.
     fisher  <- (n-1)*var(score)/n
