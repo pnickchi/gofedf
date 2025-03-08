@@ -147,7 +147,7 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', discretize = FALSE, ngrid =
 
      mu <- fitobj$family$linkfun(fitobj$linear.predictors)
 
-     if( any(mu) < 0 ){
+     if( any(mu < 0) ){
        stop('The fitted mean response is negative.')
      }
 
@@ -179,7 +179,7 @@ testGLMGamma = function(x, y, fit = NULL, l = 'log', discretize = FALSE, ngrid =
 
      mu <- fitobj$family$linkfun(fitobj$linear.predictors)
 
-     if( any(mu) < 0 ){
+     if( any(mu < 0) ){
        stop('The fitted mean response is negative.')
      }
 
