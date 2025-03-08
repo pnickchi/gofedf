@@ -81,7 +81,7 @@ testNormal(x = x, method = 'cvm')
 
 ```{r}
 # Generate some random sample from a non Normal distribution.
-x <- rgamma(n, shape = 3)
+x <- rexp(n)
 testNormal(x = x, method = 'cvm')
 ```
 
