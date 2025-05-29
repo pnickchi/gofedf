@@ -29,7 +29,8 @@ calculateWnuhat = function(S, FI, pit){
 }
 
 
-#' Calculate the estimate of W_{n}(u) process on a grid of equally spaced values over (0,1) interval
+#' Calculate the estimate of W_{n}(u) process on a grid of equally spaced values
+#' over (0,1) interval
 #'
 #' @param S score matrix with n rows and p columns.
 #' @param FI Fisher information matrix with p rows and p columns.
@@ -44,8 +45,9 @@ calculateWnuhat_manualGrid = function(S, FI, pit, M){
   # Find the number of observations
   n       <- nrow(S)
 
-  # Create a grid points over (0,1) interval. Note that we need to add a small number to the edges of interval.
-  # The covariance function does not define on the edges. We used 1e-5 for the epsilon.
+  # Create a grid points over (0,1) interval. Note that we need to add a small
+  # number to the edges of interval. The covariance function does not define on
+  # the edges. We used 1e-5 for the epsilon.
   epsilon <- 1e-5
   gridpts <- seq(0 + epsilon, 1 - epsilon, length = M)
 
@@ -70,7 +72,8 @@ calculateWnuhat_manualGrid = function(S, FI, pit, M){
 #' @param S score matrix with n rows and p columns.
 #' @param FI Fisher information matrix with p rows and p columns.
 #' @param pit a numeric vector of PIT values.
-#' @param me the goodness-of-fit statistic, Cramer-von-Mises or Anderson-Darling.
+#' @param me the goodness-of-fit statistic, Cramer-von-Mises or
+#'   Anderson-Darling.
 #'
 #' @return a numeric vector of Eigenvalues.
 #'
@@ -86,13 +89,15 @@ getEigenValues = function(S, FI, pit, me){
   # Compute the estimate of W_{n}(u) process over a grid of pit values.
   Mat     <- calculateWnuhat(S, FI, pit)
 
-  # Compute the covariance of the estimate of W_{n}(u) process and adjust for the sample size.
+  # Compute the covariance of the estimate of W_{n}(u) process and adjust for
+  # the sample size.
   W       <- var(Mat)
   #W       <- ( (n-1) * W ) / (n)
   W       <- ( (n-1) * W ) / (n-p-1)
 
 
-  # Compute the Eigenvalues of the covariance matrix depending on the goodness-of-fit statistic
+  # Compute the Eigenvalues of the covariance matrix depending on the
+  # goodness-of-fit statistic
   if( me == 'cvm' ){
 
     # Compute b vector to adjust W matrix
@@ -126,50 +131,13 @@ getEigenValues = function(S, FI, pit, me){
 
     W <- Q %*% W %*% Q
 
-    #ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / length(pit)
+    #ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values /
+    #length(pit)
     ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values
     return(ev)
   }
 
   if( me == 'ad'){
-
-
-#     # Compute b vector to adjust W matrix
-#     pit <- sort(pit)
-#     l   <- length(pit)
-#     b   <- numeric()
-#     for( j in 1:l ){
-#
-#       if( j == 1){
-#         b[j] <- pit[2]
-#       }
-#
-#       if( j == 2){
-#         b[j] <- pit[3] - pit[1]
-#       }
-#
-#       if( (j>2) & (j<=(n-1)) ){
-#         b[j] <- pit[j+1] - pit[j-1]
-#       }
-#
-#       if( j == n){
-#         b[j] <- 1 - pit[n-1]
-#       }
-#
-#     }
-# #    b   <- b / 2
-#     b   <- b / sum(b)
-#
-#     # Create diagonal matrix with b vector elements
-#     Q <- diag( sqrt(b) )
-#
-#     W <- Q %*% W %*% Q
-#
-#     adj.value <- sqrt( outer( pit * (1- pit), pit * (1- pit) ) )
-#     W       <- W / adj.value
-#     ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values
-
-
     adj.value <- sqrt( outer( pit * (1- pit), pit * (1- pit) ) )
     W       <- W / adj.value
     ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / length(pit)

@@ -22,7 +22,7 @@ Authors:
 *   [Richard Lockhart](http://www.sfu.ca/~lockhart/),
     <lockhart@sfu.ca>
 *   [Payman Nickchi](https://github.com/pnickchi),
-    <pnickchi@sfu.ca> (Maintainer)
+    <payman.nickchi@gmail.com> (Maintainer)
 
 The `gofedf` package provides computational tools to apply goodness-of-fit tests based on empirical distribution function theory. The package offers functions and routines to test the hypothesis that a univariate sample follows a distribution based on the empirical distribution function. The theory is founded on reducing the problem to a stochastic process and computing its covariance function. An approximate p-value is computed using the `Imhof` or `Farebrother` method based on the limiting distribution of the statistic (see note section for more details about choice of method). Users can run the test by calculating either the Cramer-von Mises or Anderson-Darling statistic. The covariance function of the stochastic process relies on specific characteristics of the assumed model. Notably, knowledge of the Fisher information matrix and the partial derivatives of the cumulative distribution function is crucial for computing the covariance function. However, obtaining these quantities can be computationally intensive or challenging in general likelihood models. To overcome this limitation, we propose an alternative method for estimating the covariance function of the stochastic process directly from the sample data. The package provides tools for this estimation and for testing if a sample comes from any general likelihood model. In summary, the package can be used to apply a goodness-of-fit test in any of the following settings:
 
@@ -43,7 +43,7 @@ install.packages('gofedf')
 ```
 
 
-or the development version from [GitHub](https://github.com/pnickchi) page with:
+or the latest version from [GitHub](https://github.com/pnickchi/gofedf) page with:
 
 ```{r, eval=FALSE}
 # install.packages("devtools")
@@ -61,9 +61,18 @@ library(gofedf)
 In this section, we will review the package's primary functions and provide illustrative examples to demonstrate their usage. The first two examples relate to applying the goodness-of-fit (GOF) test for i.i.d. samples, while the last two focus on linear models and generalized linear models. The final example showcases the most important feature of the package, allowing you to apply goodness-of-fit tests based on empirical distribution function EDF for a general likelihood model.
 
 
-### 1. Bivariate Normal distribution
+### 1. Normal distribution
 
-The first example illustrates the GOF test for an i.i.d. sample from a Normal distribution. The main function is `testNormal`. At the minimum, it requires a numeric vector as input. By default, it uses probability inverse-transformed values to compute the stochastic process and its covariance function later. You can change this behavior by setting `gridpit = FALSE` and assigning a positive value for `ngrid`. The default value for `ngrid` is the same as the number of observations, `n`. This means the (0,1) interval is divided into `n` equally spaced data points to compute the stochastic process and the covariance function. Additionally, the Fisher information matrix, by default, is estimated by the variance of the score function. To change this, you can set `hessian=TRUE` to estimate the Fisher information matrix using the Hessian instead. Finally, method is a string that defines the statistic to compute. Possible values are `cvm` for Cramer-von-Mises, `ad` for Anderson-Darling, and both to compute both.
+The first example illustrates the GOF test for an i.i.d. sample from a Normal distribution. The main function is `testNormal`. At the minimum, it requires a numeric vector as input and it runs by default values for arguments. Here we describe the parameters of this function. Note that some of them are the same and will show up later in other function. By default, the value of `discretize` is set to FALSE, meaning that an estimated integral equation is being solved to compute eigenvalues. If set to TRUE, the integral equation problem is replaced by a matrix equation problem and the eigenvalues of this matrix are computed instead. 
+
+A common approach to solve for eigenvalues ($\lambda$) numerically is to discretize the integral over the interval [0,1]. For any given covariance function, such as $\hat \rho(s,t)$ in our case, the eigenvalues can be approximated by solving the following system of equations:
+
+$$\sum_{j=1}^{m} w_{j} \rho(s_i,s_j)f(s_j) = \lambda_i f(s_i) \quad \quad i=1,2,3,\ldots,m$$
+
+where $m$ is the number of knots $s_j$ being used to discretize the integral over [0,1] and $w_j$ are quadrature weights. The parameters \code{ngrid}, \code{gridpit}, and \code{hessian} which will follow are only relevant when \code{discretize = TRUE}.
+
+
+By default, the package uses probability integral transform values or PITs to compute the stochastic process and its covariance function later. You can change this behavior by setting `gridpit = FALSE` and assigning a positive value for `ngrid`. The default value for `ngrid` is the same as the number of observations, `n`. This means the (0,1) interval is divided into `n` equally spaced data points to compute the stochastic process and the covariance function (the values for $s_i$ in the integral equation). Additionally, the Fisher information matrix, by default, is estimated by the variance of the score function. To change this, you can set `hessian=TRUE` to estimate the Fisher information matrix using the Hessian instead. Finally, method is a string that defines the statistic to compute. Possible values are `cvm` for Cramer-von-Mises, `ad` for Anderson-Darling, and both to compute both.
 
 ```{r}
 # Reproducible example
@@ -86,7 +95,7 @@ testNormal(x = x, method = 'cvm')
 ```
 
 
-### 2. Bivariate Gamma distribution
+### 2. Gamma distribution
 
 The second example illustrates the GOF test for an i.i.d. sample from a Gamma distribution. The main function is `testGamma` and the arguments remain the same as Normal case. 
 
@@ -103,7 +112,7 @@ testGamma(x = x, method = 'cvm')
 ```
 
 
-### 3. Linear model with Normal error terms
+### 3. Linear Model with Normal Error Terms
 
 In this example, we illustrate how to apply GOF test to verify the assumptions of a linear model. The main function is `testLMNormal`. At the minimum, a numeric vector of response variable, `y`, and a vector/ matrix of explanatory variables, `x`, are required. Conveniently, the function can take an object of class "lm" and directly applies the goodness-of-fit test. In this case, there is no need to pass `x` and `y`. Note that if you decide to use this feature, you need to explicitly  ask `lm` function to return the design matrix and response variable by passing `x=TRUE` and `y=TRUE` (as shown in the example below). The other arguments of the function are the same as previous examples. 
 
@@ -137,7 +146,8 @@ testLMNormal(x = X, y)
 
 
 ```{r}
-# Or alternatively just pass 'lm.fit' object directly instead:
+# Or alternatively just directly pass 'lm.fit' which is returned from lm() function. 
+# Note that in this case you need to set x = TRUE and y = TRUE.
 lm.fit <- lm(y ~ X, x = TRUE, y = TRUE)
 testLMNormal(fit = lm.fit)
 ```
@@ -146,7 +156,7 @@ testLMNormal(fit = lm.fit)
 
 ### 4. Gamma GLM with any link function
 
-In this example, we illustrate how to apply the GOF test to verify if the response variable in a generalized linear model with any link function follows a Gamma distribution. The main function for this is `testGLMGamma`. At the minimum, you need a numeric vector of the response variable, `y`, a vector/matrix of explanatory variables, `x`, and a link function for the Gamma family. Conveniently, the function can take an object of class `glm` and directly apply the goodness-of-fit test. You can use `glm` or `glm2` function from `glm2` pacakge. We recommend using the `glm2` function from the `glm2` package as it provides better estimates for the coefficients and avoids convergence issues in the optimization process. In either of these cases, there is no need to pass `x` and `y`. However, if you decide to use this feature, you must explicitly ask the `glm` or `glm2` function to return the design matrix and response variable by passing `x=TRUE` and `y=TRUE` (as shown in the example below). Additionally, you can pass a starting value, `start.value`, to be used as the initial value for MLE estimation of the coefficients. The function also offers a list of parameters to control the fitting process in `glm` or `glm2` functions. The other arguments of the function remain consistent with previous examples.
+In this example, we illustrate how to apply the GOF test to verify if the response variable in a generalized linear model with any link function follows a Gamma distribution. The main function for this is `testGLMGamma`. At the minimum, you need a numeric vector of the response variable, `y`, a vector/matrix of explanatory variables, `x`, and a link function for the Gamma family. Conveniently, the function can take an object of class `glm` and directly apply the goodness-of-fit test. You can use `glm` or `glm2` function from `glm2` pacakge. We recommend using the `glm2` function from the `glm2` package as it provides better estimates for the coefficients and avoids convergence issues in the optimization process while calculating MLE of coefficients. In either of these cases, there is no need to pass `x` and `y`. However, if you decide to use this feature (passing object from `glm` or `glm2` function), you must explicitly ask the `glm` or `glm2` function to return the design matrix by passing `x = TRUE` (as shown in the example below). Additionally, you can pass a starting value, `start.value`, to be used as the initial value for MLE estimation of the coefficients. The function also offers a list of parameters to control the fitting process in `glm` or `glm2` functions. The other arguments of the function remain consistent with previous examples.
 
 
 ```{r}

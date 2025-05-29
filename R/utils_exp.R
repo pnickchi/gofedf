@@ -26,7 +26,7 @@ expScore = function(x, theta){
 #'
 #' @param x a numeric vector of length n
 #'
-#' @return Numeric
+#' @return numeric value for the MLE of rate
 #'
 #' @noRd
 #'

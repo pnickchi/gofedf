@@ -36,9 +36,9 @@
 #'
 #' @param gridpit logical. If \code{TRUE} (the default value), the parameter
 #'   ngrid is ignored and (0,1) interval is divided based on probability
-#'   integral transformed values obtained from the sample. If \code{FALSE}, the
-#'   interval is divided into \code{ngrid} equally spaced points for computing
-#'   the covariance function.
+#'   integral transforms or PITs obtained from the sample. If \code{FALSE}, the
+#'   interval is divided into ngrid equally spaced points for computing the
+#'   covariance function.
 #'
 #' @param precision The theory behind goodness-of-fit test based on empirical
 #'   distribution function (edf) works well if the MLE is indeed the root of
@@ -215,8 +215,8 @@ testYourModel = function(pit, score = NULL, discretize = FALSE, ngrid = length(p
   # Case 2: if score is not null then it means there is parameter estimation in the model.
   # The score should be a matrix with n rows (number of observations in x) and p columns
   # (the number of estimated parameters in the model).
-  # The covariance function of the stochastic process, $\hat W_{n}(u)$, needs to be calculated
-  # based on the GoF based on EDF.
+  # The covariance function of the stochastic process, $\hat W_{n}(u)$, needs to be calculated.
+  # We estimate this covariance function.
   #
   if( !is.null(score) ){
 
@@ -239,7 +239,7 @@ testYourModel = function(pit, score = NULL, discretize = FALSE, ngrid = length(p
     }
 
     #
-    # Use the estimated covariance function and solving the integral equation analytically
+    # Use the estimated covariance function and use the analytical solution of integral equation to find eigen values.
     #
     if(!discretize){
 
@@ -328,7 +328,8 @@ testYourModel = function(pit, score = NULL, discretize = FALSE, ngrid = length(p
 
 
     #
-    # Use the estimated covariance function and turning integral equation into a matrix equation
+    # Use the estimated covariance function and turning integral equation into a matrix equation.
+    # This is where discrritize = TRUE is applied
     #
 
     # Calculate Fisher information matrix by computing the variance of score from the sample.

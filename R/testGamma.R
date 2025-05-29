@@ -21,7 +21,7 @@
 #'
 #' @param gridpit logical. If \code{TRUE} (the default value), the parameter
 #'   ngrid is ignored and (0,1) interval is divided based on probability
-#'   integral transformed values obtained from the sample. If \code{FALSE}, the
+#'   integral transforms or PITs obtained from the sample. If \code{FALSE}, the
 #'   interval is divided into ngrid equally spaced points for computing the
 #'   covariance function.
 #'
