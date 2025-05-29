@@ -69,7 +69,7 @@ A common approach to solve for eigenvalues ($\lambda$) numerically is to discret
 
 $$\sum_{j=1}^{m} w_{j} \rho(s_i,s_j)f(s_j) = \lambda_i f(s_i) \quad \quad i=1,2,3,\ldots,m$$
 
-where $m$ is the number of knots $s_j$ being used to discretize the integral over [0,1] and $w_j$ are quadrature weights. The parameters \code{ngrid}, \code{gridpit}, and \code{hessian} which will follow are only relevant when \code{discretize = TRUE}.
+where $m$ is the number of knots $s_j$ being used to discretize the integral over [0,1] and $w_j$ are quadrature weights. The parameters `ngrid`, `gridpit`, and `hessian` which will follow are only relevant when you set `discretize = TRUE`.
 
 
 By default, the package uses probability integral transform values or PITs to compute the stochastic process and its covariance function later. You can change this behavior by setting `gridpit = FALSE` and assigning a positive value for `ngrid`. The default value for `ngrid` is the same as the number of observations, `n`. This means the (0,1) interval is divided into `n` equally spaced data points to compute the stochastic process and the covariance function (the values for $s_i$ in the integral equation). Additionally, the Fisher information matrix, by default, is estimated by the variance of the score function. To change this, you can set `hessian=TRUE` to estimate the Fisher information matrix using the Hessian instead. Finally, method is a string that defines the statistic to compute. Possible values are `cvm` for Cramer-von-Mises, `ad` for Anderson-Darling, and both to compute both.

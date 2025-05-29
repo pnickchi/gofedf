@@ -106,7 +106,8 @@ equations:
 
 where $`m`$ is the number of knots $`s_j`$ being used to discretize the
 integral over \[0,1\] and $`w_j`$ are quadrature weights. The parameters
-, , and which will follow are only relevant when .
+`ngrid`, `gridpit`, and `hessian` which will follow are only relevant
+when you set `discretize = TRUE`.
 
 By default, the package uses probability integral transform values or
 PITs to compute the stochastic process and its covariance function
