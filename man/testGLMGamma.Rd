@@ -28,13 +28,13 @@ number of rows as x.}
 
 \item{fit}{is an object of class \code{glm} and its default value is NULL. If
 a fit of class \code{glm} is provided, the arguments \code{x}, \code{y}, and
-\code{l} will be ignored. We recommend using \code{\link{glm2}} function
-from \code{\link{glm2}} package since it provides better convergence while
+\code{l} will be ignored. We recommend using \code{\link[glm2]{glm2}} function
+from \code{\link[glm2]{glm2}} package since it provides better convergence while
 optimizing the likelihood to estimate coefficients of the model by IWLS
 method. It is required to return design matrix by \code{x} = \code{TRUE} in
-\code{\link{glm}} or \code{\link{glm2}} function. For more information on
+\code{\link{glm}} or \code{\link[glm2]{glm2}} function. For more information on
 how to do this, refer to the help documentation for the \code{\link{glm}} or
-\code{\link{glm2}} function.}
+\code{\link[glm2]{glm2}} function.}
 
 \item{l}{a character vector indicating the link function that should be used
 for Gamma family. Acceptable link functions for Gamma family are inverse,
@@ -65,7 +65,7 @@ estimated by the observed Hessian Matrix based on the sample. If
 by the variance of the observed score matrix.}
 
 \item{start.value}{a numeric value or vector. This is the same as \code{start}
-argument in \code{\link{glm}} or \code{\link{glm2}}. The value is a starting
+argument in \code{\link{glm}} or \code{\link[glm2]{glm2}}. The value is a starting
 point in iteratively reweighted least squares (IRLS) algorithm for
 estimating the MLE of coefficients in the model.}
 
