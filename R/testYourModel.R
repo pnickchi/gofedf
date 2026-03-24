@@ -213,7 +213,7 @@ testYourModel = function(pit, score = NULL, discretize = FALSE, ngrid = length(p
       res     <- list(Statistic = AD, pvalue = pvalue)
       return(res)
 
-    }else{
+    }else if ( method == 'both'){
 
       # Calculate both cvm and ad statisitcs
       # 1. Do cvm calculation
@@ -237,7 +237,59 @@ testYourModel = function(pit, score = NULL, discretize = FALSE, ngrid = length(p
       # Prepare a list to return both statistics and their approximate pvalue
       res     <- list(Statistics = c(cvm, ad), pvalue = c(cvm.pvalue, ad.pvalue) )
       return(res)
+
+    }else{
+
+      # Get the sample size
+      n <- length(pit)
+
+      # Define the identity matrix
+      I <- diag( rep(1,n) )
+
+      # Define matrix J
+      J <- matrix(1/n, nrow = n, ncol = n)
+
+      # Set the upper bound for integration - it is always constant
+      UB <- n / (n + 1)
+
+      # Create Q matrix
+      Q <- matrix(0, n, n)
+
+      # Loop over elements to fill Qij entry - use symmetry property
+      for (i in 1:n){
+        for (j in i:n){
+
+          # Set the lower bound for this i and j
+          LB <- max(i, j) / (n + 1)
+
+          # Integrate
+          Q[i, j] <- integrate(f = function(u) weight_function(u)^2, lower = LB, upper = UB, rel.tol = .Machine$double.eps^0.25)$value
+
+          # Fill in the lower triangle
+          Q[j, i] <- Q[i, j]
+        }
+      }
+
+      # Define P matrix as P = (I - J) Q (I - J)
+      P <- (I - J) %*% Q %*% (I - J)
+
+      # Compute Eigen values
+      ev      <- eigen(P, symmetric = TRUE, only.values = TRUE)$values
+
+      # Compute weighted CvM statistics
+      wcvm <- getWeightedStatistic(x = pit, w_function = weight_function)
+      names(wcvm) <- 'Weighted Cramer-von-Mises Statistic'
+
+      # Calculate pvalue
+      pvalue  <- getpvalue(u = wcvm, eigen = ev)
+
+      # Prepare a list to return statistic and pvalue
+      res     <- list(Statistic = wcvm, pvalue = pvalue)
+
+      return(res)
+
     }
+
   }
 
   #
