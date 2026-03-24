@@ -37,25 +37,49 @@
 #' @param method a character string indicating which goodness-of-fit statistic
 #'   is to be computed. The default value is 'cvm' for the Cramer-von-Mises
 #'   statistic. Other options include 'ad' for the Anderson-Darling statistic,
-#'   and 'both' to compute both cvm and ad.
+#'   'both' to compute both cvm and ad statistics, and user for custom weight
+#'   function. See weight_function for details about custom weight function.
+#'
+#' @param weight_function a function representing the weight function
+#'   \eqn{w(u)} used to compute the weighted Cramér-von Mises statistic
+#'   when \code{method = 'user'}. The function must take a numeric vector
+#'   \eqn{u \in (0,1)} as input and return a numeric vector of the same
+#'   length. The statistic is computed as
+#'   \deqn{T_n = n \int_{0}^{1} w^2(u) \left( F_n(u) - u \right)^2 du}
+#'   where \eqn{w^2(u)} is computed internally by squaring the supplied
+#'   function. The default value is \code{NULL} and when \code{method} is
+#'   \code{'cvm'}, \code{'ad'}, or \code{'both'} the weight_function is ignored.
+#'   When \code{method = 'user'}, this argument must be provided, otherwise
+#'   an error is returned.
 #'
 #' @return A list of two containing the following components:
 #' - Statistic: the value of goodness-of-fit statistic.
 #' - p-value: the approximate p-value for the goodness-of-fit test.
 #'   if method = 'cvm' or method = 'ad', it returns a numeric value for the
 #'   statistic and p-value. If method = 'both', it returns a numeric vector with
-#'   two elements and one for each statistic.
-#'
+#'   two elements and one for each statistic. If method = 'user' it returns the
+#'   weighted statistic.
 #'
 #' @export
 #'
 #' @examples
 #' set.seed(123)
 #' sim_data <- rgamma(n = 50, shape = 3)
+#' # Cramer-von-Mises
 #' testGamma(x = sim_data)
+#' # Anderson-Darling
+#' testGamma(x = sim_data, method = 'ad')
+#' # Example to show custom weight function
+#' w_cvm <- function(u) rep(1, length(u))
+#' testGamma(x = sim_data, method = 'user', weight_function = w_cvm)
+#' w_ad <- function(u) 1 / sqrt(u * (1 - u))
+#' testGamma(x = sim_data, method = 'user', weight_function = w_ad)
+#'
+#'
 #' sim_data <- runif(n = 50)
 #' testGamma(x = sim_data)
-testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, hessian = FALSE, rate = TRUE, method = 'cvm'){
+#'
+testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, hessian = FALSE, rate = TRUE, method = 'cvm', weight_function = NULL){
 
 
   if( !is.numeric(x) | !is.vector(x) ){
@@ -95,8 +119,21 @@ testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, 
     stop('rate must be either TRUE or FALSE.')
   }
 
-  if( !(method %in% c('cvm','ad','both')) ){
-    stop('method must be either cvm, ad, or both.')
+  if( !(method %in% c('cvm','ad','both','user')) ){
+    stop('method must be either cvm, ad, both, or user.')
+  }
+
+  if( method == 'user' & is.null(weight_function) ){
+    stop('method is set to user but weight_function is NULL. You have to pass a weight function if you use user method.')
+  }
+
+  if( method == 'user' & !is.function(weight_function) ){
+    stop('method is set to user but weight_function is not a valid function.')
+  }
+
+  if( anyNA(x) ){
+    x <- x[ !is.na(x) ]
+    warning('NA found in x and automatically removed.')
   }
 
   # Get sample size
@@ -152,6 +189,18 @@ testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, 
 
     }
 
+    if( method == 'user' ){
+
+      # Compute P matrix
+      P <- computeMatrix(n, Score, method = method, w_function = weight_function)
+
+      # Adjust for the number of estimated parameters
+      P <- P / (n-ncol(Score)-1)
+
+      # Compute eigenvalues
+      ev <- eigen(P, only.values = TRUE, symmetric = TRUE)$values
+
+    }
 
     # Compute gof statistics and pvalue according to the requested method
     if( method == 'cvm' ){
@@ -181,9 +230,8 @@ testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, 
 
       return(res)
 
-    }else{
+    }else if ( method == 'both' ){
 
-      # Fix this oart needs to have two diff sets of ev
       cvm <- getCvMStatistic(pit)
       cvm.pvalue  <- getpvalue(u = cvm, eigen = ev_cvm)
 
@@ -195,6 +243,20 @@ testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, 
 
       # Prepare a list to return statistic and pvalue
       res     <- list(Statistics = gof.stat, pvalue = c(cvm.pvalue, ad.pvalue) )
+
+      return(res)
+
+    }else{
+
+      # Compute weighted CvM statistics
+      wcvm <- getWeightedStatistic(x = pit, w_function = weight_function)
+      names(wcvm) <- 'Weighted Cramer-von-Mises Statistic'
+
+      # Calculate pvalue
+      pvalue  <- getpvalue(u = wcvm, eigen = ev)
+
+      # Prepare a list to return statistic and pvalue
+      res     <- list(Statistic = wcvm, pvalue = pvalue)
 
       return(res)
 
@@ -214,15 +276,15 @@ testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, 
     fisher <- (n-1)*var(Score)/n
   }
 
-  # Compute Eigen values
-  if( gridpit ){
-    ev    <- getEigenValues(S = Score, FI = fisher, pit, me = method)
-  }else{
-    ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = method)
-  }
-
 
   if( method == 'cvm'){
+
+    # Compute Eigen values
+    if( gridpit ){
+      ev    <- getEigenValues(S = Score, FI = fisher, pit, me = method)
+    }else{
+      ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = method)
+    }
 
     # Compute Cramer-von-Mises statistic
     cvm     <- getCvMStatistic(pit)
@@ -236,6 +298,12 @@ testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, 
 
   } else if ( method == 'ad') {
 
+    # Compute Eigen values
+    if( gridpit ){
+      ev    <- getEigenValues(S = Score, FI = fisher, pit, me = method)
+    }else{
+      ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = method)
+    }
 
     # Compute Anderson-Darling statistic
     AD      <- getADStatistic(pit)
@@ -247,14 +315,21 @@ testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, 
 
     return(res)
 
-  } else {
+  }else if ( method == 'both' ){
 
     # Calculate both cvm and ad statisitcs
 
     # 1. Do cvm calculation
+
+    # Compute Eigen values for cvm
+    if( gridpit ){
+      ev    <- getEigenValues(S = Score, FI = fisher, pit, me = 'cvm')
+    }else{
+      ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = 'cvm')
+    }
+
     cvm        <- getCvMStatistic(pit)
     names(cvm) <- 'Cramer-von-Mises Statistic'
-
 
     # Calculate pvalue
     cvm.pvalue  <- getpvalue(u = cvm, eigen = ev)
@@ -262,9 +337,16 @@ testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, 
 
 
     # 2. Do ad calculations
+
+    # Compute Eigen values for ad
+    if( gridpit ){
+      ev    <- getEigenValues(S = Score, FI = fisher, pit, me = 'ad')
+    }else{
+      ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = 'ad')
+    }
+
     ad      <- getADStatistic(pit)
     names(ad) <- 'Anderson-Darling Statistic'
-
 
     # Calculate pvalue
     ad.pvalue  <- getpvalue(u = ad, eigen = ev)
@@ -272,6 +354,25 @@ testGamma = function(x, discretize = FALSE, ngrid = length(x), gridpit = FALSE, 
 
     # Prepare a list to return both statistics and their approximate pvalue
     res     <- list(Statistics = c(cvm, ad), pvalue = c(cvm.pvalue, ad.pvalue) )
+    return(res)
+
+  }else{
+
+    # Compute Eigen values
+    if( gridpit ){
+      ev    <- getEigenValues(S = Score, FI = fisher, pit, me = method, w_function = weight_function)
+    }else{
+      ev    <- getEigenValues_manualGrid(S = Score, FI = fisher, pit, M = ngrid, me = method, w_function = weight_function)
+    }
+
+    # Compute Cramer-von-Mises statistic
+    wcvm      <- getWeightedStatistic(x = pit, w_function = weight_function)
+    names(wcvm) <- 'Weighted Cramer-von-Mises Statistic'
+
+    # Compute pvalue
+    pvalue  <- getpvalue(u = wcvm, eigen = ev)
+    res     <- list(Statistic = wcvm, pvalue = pvalue)
+
     return(res)
 
   }

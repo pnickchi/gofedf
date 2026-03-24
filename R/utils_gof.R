@@ -78,7 +78,7 @@ calculateWnuhat_manualGrid = function(S, FI, pit, M){
 #' @return a numeric vector of Eigenvalues.
 #'
 #' @noRd
-getEigenValues = function(S, FI, pit, me){
+getEigenValues = function(S, FI, pit, me, w_function = NULL){
 
   # Find the number of observations
   n       <- nrow(S)
@@ -146,6 +146,46 @@ getEigenValues = function(S, FI, pit, me){
     return(ev)
   }
 
+  if( me == 'user'){
+
+    pit <- sort(pit)
+    l   <- length(pit)
+
+    # Compute b vector to adjust W matrix
+    b   <- numeric()
+    for( j in 1:l ){
+
+      if( j == 1 ){
+        b[j] <- pit[2]
+      }
+
+      if( j == 2 ){
+        b[j] <- pit[3] - pit[1]
+      }
+
+      if( (j>2) & (j<=(n-1)) ){
+        b[j] <- pit[j+1] - pit[j-1]
+      }
+
+      if( j == n ){
+        b[j] <- 1 - pit[n-1]
+      }
+
+    }
+
+    b <- b / 2
+    b <- b / sum(b)
+
+    b <- b * w_function(pit)
+    Q <- diag(sqrt(b))
+    W <- Q %*% W %*% Q
+
+    ev<- eigen(W, symmetric = TRUE, only.values = TRUE)$values
+
+    return(ev)
+
+  }
+
 }
 
 
@@ -160,7 +200,7 @@ getEigenValues = function(S, FI, pit, me){
 #' @return a numeric vector of Eigenvalues.
 #'
 #' @noRd
-getEigenValues_manualGrid = function(S, FI, pit, M, me){
+getEigenValues_manualGrid = function(S, FI, pit, M, me, w_function = NULL){
 
   # Find the number of observations
   n       <- nrow(S)
@@ -187,6 +227,16 @@ getEigenValues_manualGrid = function(S, FI, pit, M, me){
     adj.value <- sqrt( outer( s*(1-s) , s*(1-s) ) )
     W <- W / adj.value
     ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / M
+    return(ev)
+  }
+
+  if( me == 'user' ){
+    s <- (1:M)
+    s <- s / (M + 1)
+    w_vals    <- w_function(s)
+    adj.value <- outer(w_vals, w_vals)
+    W  <- W / adj.value
+    ev <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / M
     return(ev)
   }
 
@@ -229,6 +279,59 @@ getADStatistic = function(x){
   a   <- (2 * a) - 1
   S   <- sum( a * ( log(Z) + log( 1 - rev(Z) ) ) )
   res <- (-S/n) - n
+  return(res)
+
+}
+
+
+#' Compute weighted statistic based on user custom weight function
+#'
+#' @param x a numeric vector of pit values
+#' @param w_function user custon weight function
+#'
+#' @returns a numeric value, weighted statistics
+#'
+#' @noRd
+#'
+getWeightedStatistic = function(x, w_function){
+
+  # Get the sample size
+  n <- length(x)
+
+  # Sort PITs
+  x_sort <- sort(x)
+
+  # Set tolerance
+  tol <- 1e-10
+
+  # Include zero + tol and one - tol in PITs
+  # tol is added/deducted to make sure the custom weight function does not
+  # return +-Inf at boundaries.
+  breakpoints    <- c(0 + tol, x_sort, 1 - tol)
+
+  # Set sum = 0 for the integrarion
+  sum <- 0
+
+  for (i in 0:n){
+
+    # Take any two consecutive sorted PITs for the boundary of integral
+    LB  <- breakpoints[i + 1]
+    UB  <- breakpoints[i + 2]
+
+    # Define Fi estimated PIT
+    Fi <- i / n
+
+    # Numerical integration of (weight function)^2 * (Fi - u)^2 from LB to UB
+    piece <- integrate(f = function(u) w_function(u)^2 * (Fi - u)^2, lower = LB, upper = UB)$value
+
+    # Recursive adding
+    sum <- sum + piece
+  }
+
+  # Calculate n * integraion
+  res <- n * sum
+
+  # Return res
   return(res)
 
 }
@@ -413,7 +516,7 @@ integrandForLowerBound = function(t, ST, EV){
 #' @return a matrix with n rows and n columns.
 #'
 #' @noRd
-computeMatrix = function(n, S, method){
+computeMatrix = function(n, S, method, w_function = NULL){
 
   if(method == 'cvm'){
 
@@ -429,11 +532,14 @@ computeMatrix = function(n, S, method){
     # Define a vector of values, 1 to n.
     u <- (1:n)
 
-    # Define an nxn matrix Q with elements q_{ij} = (-1/n) max(u_{i},u_{j})
-    Q <- (-1/n) * outer(u, u, FUN = pmax)
+    # Define an nxn matrix Q with elements q_{ij} = (-1/ (n+1)) max(u_{i},u_{j})
+    Q <- (-1/ (n+1) ) * outer(u, u, FUN = pmax)
 
     # Define P matrix as P = (I - H) Q (I - H)
     P <- (I - H) %*% Q %*% (I - H)
+
+    # Return matrix P
+    return(P)
 
   }
 
@@ -461,11 +567,50 @@ computeMatrix = function(n, S, method){
     # Define P matrix as P = (I - H) Q (I - H)
     P <- (I - H) %*% Q %*% (I - H)
 
+    # Return matrix P
+    return(P)
+
   }
 
+  if(method == 'user'){
 
-  # Return matrix P
-  return(P)
+    # Define the identity matrix
+    I <- diag( rep(1,n) )
+
+    # Add a columns of one to score matrix
+    S <- cbind(rep(1,n),S)
+
+    # Define the Hat matrix resulted from regressing columns of score on columns of indicator function.
+    H <- S %*% solve( t(S) %*% S ) %*% t(S)
+
+    # Set the upper bound for integration - it is always constant
+    UB <- n / (n + 1)
+
+    # Create Q matrix
+    Q <- matrix(0, n, n)
+
+    # Loop over elements to fill Qij entry - use symmetry property
+    for (i in 1:n){
+      for (j in i:n){
+
+        # Set the lower bound for this i and j
+        LB <- max(i, j) / (n + 1)
+
+        # Integrate
+        Q[i, j] <- integrate(f = function(u) w_function(u)^2, lower = LB, upper = UB, rel.tol = .Machine$double.eps^0.25)$value
+
+        # Fill in the lower triangle
+        Q[j, i] <- Q[i, j]
+      }
+    }
+
+    # Define P matrix as P = (I - H) Q (I - H)
+    P <- (I - H) %*% Q %*% (I - H)
+
+    # Return matrix P
+    return(P)
+
+  }
 
 }
 

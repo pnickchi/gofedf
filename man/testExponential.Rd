@@ -10,7 +10,8 @@ testExponential(
   ngrid = length(x),
   gridpit = FALSE,
   hessian = FALSE,
-  method = "cvm"
+  method = "cvm",
+  weight_function = NULL
 )
 }
 \arguments{
@@ -43,7 +44,20 @@ by the variance of the observed score matrix.}
 \item{method}{a character string indicating which goodness-of-fit statistic
 is to be computed. The default value is 'cvm' for the Cramer-von-Mises
 statistic. Other options include 'ad' for the Anderson-Darling statistic,
-and 'both' to compute both cvm and ad.}
+'both' to compute both cvm and ad statistics, and user for custom weight
+function. See weight_function for details about custom weight function.}
+
+\item{weight_function}{a function representing the weight function
+\eqn{w(u)} used to compute the weighted Cramér-von Mises statistic
+when \code{method = 'user'}. The function must take a numeric vector
+\eqn{u \in (0,1)} as input and return a numeric vector of the same
+length. The statistic is computed as
+\deqn{T_n = n \int_{0}^{1} w^2(u) \left( F_n(u) - u \right)^2 du}
+where \eqn{w^2(u)} is computed internally by squaring the supplied
+function. The default value is \code{NULL} and when \code{method} is
+\code{'cvm'}, \code{'ad'}, or \code{'both'} the weight_function is ignored.
+When \code{method = 'user'}, this argument must be provided, otherwise
+an error is returned.}
 }
 \value{
 A list of two containing the following components:
@@ -52,7 +66,8 @@ A list of two containing the following components:
 \item p-value: the approximate p-value for the goodness-of-fit test.
 if method = 'cvm' or method = 'ad', it returns a numeric value for the
 statistic and p-value. If method = 'both', it returns a numeric vector with
-two elements and one for each statistic.
+two elements and one for each statistic. If method = 'user' it returns the
+weighted statistic.
 }
 }
 \description{
@@ -65,4 +80,9 @@ set.seed(123)
 n <- 50
 sim_data <- rexp(n, rate = 2)
 testExponential(x = sim_data)
+
+# Example to show custom weight function
+w_cvm <- function(u) rep(1, length(u))
+testExponential(x = sim_data, method = 'user', weight_function = w_cvm)
+
 }
