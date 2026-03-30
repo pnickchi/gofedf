@@ -92,7 +92,6 @@ getEigenValues = function(S, FI, pit, me, w_function = NULL){
   # Compute the covariance of the estimate of W_{n}(u) process and adjust for
   # the sample size.
   W       <- var(Mat)
-  #W       <- ( (n-1) * W ) / (n)
   W       <- ( (n-1) * W ) / (n-p-1)
 
 
@@ -131,8 +130,6 @@ getEigenValues = function(S, FI, pit, me, w_function = NULL){
 
     W <- Q %*% W %*% Q
 
-    #ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values /
-    #length(pit)
     ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values
     return(ev)
   }
@@ -141,8 +138,6 @@ getEigenValues = function(S, FI, pit, me, w_function = NULL){
     adj.value <- sqrt( outer( pit * (1- pit), pit * (1- pit) ) )
     W       <- W / adj.value
     ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values / length(pit)
-
-    #ev      <- eigen(W, symmetric = TRUE, only.values = TRUE)$values
     return(ev)
   }
 
@@ -177,10 +172,10 @@ getEigenValues = function(S, FI, pit, me, w_function = NULL){
     b <- b / sum(b)
 
     b <- b * w_function(pit)
-    Q <- diag(sqrt(b))
+    Q <- diag(b)
     W <- Q %*% W %*% Q
 
-    ev<- eigen(W, symmetric = TRUE, only.values = TRUE)$values
+    ev<- eigen(W, symmetric = TRUE, only.values = TRUE)$values / length(pit)
 
     return(ev)
 
