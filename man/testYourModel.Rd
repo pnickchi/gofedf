@@ -53,7 +53,7 @@ evaluated at MLE is not close enough to zero.}
 \item{method}{a character string indicating which goodness-of-fit statistic
 is to be computed. The default value is 'cvm' for the Cramer-von-Mises
 statistic. Other options include 'ad' for the Anderson-Darling statistic,
-'both' to compute both cvm and ad statistics, and user for custom weight
+'both' to compute both cvm and ad statistics, and 'user' for custom weight
 function. See weight_function for details about custom weight function.}
 
 \item{weight_function}{a function representing the weight function
