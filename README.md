@@ -1,6 +1,6 @@
 README
 ================
-2025-05-28
+2026-04-11
 
 # gofedf
 
@@ -28,17 +28,19 @@ approximate p-value is computed using the `Imhof` or `Farebrother`
 method based on the limiting distribution of the statistic (see note
 section for more details about choice of method). Users can run the test
 by calculating either the Cramer-von Mises or Anderson-Darling
-statistic. The covariance function of the stochastic process relies on
-specific characteristics of the assumed model. Notably, knowledge of the
-Fisher information matrix and the partial derivatives of the cumulative
-distribution function is crucial for computing the covariance function.
-However, obtaining these quantities can be computationally intensive or
-challenging in general likelihood models. To overcome this limitation,
-we propose an alternative method for estimating the covariance function
-of the stochastic process directly from the sample data. The package
-provides tools for this estimation and for testing if a sample comes
-from any general likelihood model. In summary, the package can be used
-to apply a goodness-of-fit test in any of the following settings:
+statistic. Also you can pass your own weight function to run a weighted
+Cramer-von Mises test. The covariance function of the stochastic process
+relies on specific characteristics of the assumed model. Notably,
+knowledge of the Fisher information matrix and the partial derivatives
+of the cumulative distribution function is crucial for computing the
+covariance function. However, obtaining these quantities can be
+computationally intensive or challenging in general likelihood models.
+To overcome this limitation, we propose an alternative method for
+estimating the covariance function of the stochastic process directly
+from the sample data. The package provides tools for this estimation and
+for testing if a sample comes from any general likelihood model. In
+summary, the package can be used to apply a goodness-of-fit test in any
+of the following settings:
 
 - Validate if the assumptions about the response variable in a
   generalized linear model (with any link function) are satisfied. The
@@ -94,18 +96,16 @@ set to TRUE, the integral equation problem is replaced by a matrix
 equation problem and the eigenvalues of this matrix are computed
 instead.
 
-A common approach to solve for eigenvalues ($`\lambda`$) numerically is
-to discretize the integral over the interval \[0,1\]. For any given
-covariance function, such as $`\hat \rho(s,t)`$ in our case, the
+A common approach to solve for eigenvalues ($\lambda$) numerically is to
+discretize the integral over the interval \[0,1\]. For any given
+covariance function, such as $\hat \rho(s,t)$ in our case, the
 eigenvalues can be approximated by solving the following system of
 equations:
 
-``` math
-\sum_{j=1}^{m} w_{j} \rho(s_i,s_j)f(s_j) = \lambda_i f(s_i) \quad \quad i=1,2,3,\ldots,m
-```
+$$\sum_{j=1}^{m} w_{j} \rho(s_i,s_j)f(s_j) = \lambda_i f(s_i) \quad \quad i=1,2,3,\ldots,m$$
 
-where $`m`$ is the number of knots $`s_j`$ being used to discretize the
-integral over \[0,1\] and $`w_j`$ are quadrature weights. The parameters
+where $m$ is the number of knots $s_j$ being used to discretize the
+integral over \[0,1\] and $w_j$ are quadrature weights. The parameters
 `ngrid`, `gridpit`, and `hessian` which will follow are only relevant
 when you set `discretize = TRUE`.
 
@@ -115,14 +115,13 @@ later. You can change this behavior by setting `gridpit = FALSE` and
 assigning a positive value for `ngrid`. The default value for `ngrid` is
 the same as the number of observations, `n`. This means the (0,1)
 interval is divided into `n` equally spaced data points to compute the
-stochastic process and the covariance function (the values for $`s_i`$
-in the integral equation). Additionally, the Fisher information matrix,
-by default, is estimated by the variance of the score function. To
-change this, you can set `hessian=TRUE` to estimate the Fisher
-information matrix using the Hessian instead. Finally, method is a
-string that defines the statistic to compute. Possible values are `cvm`
-for Cramer-von-Mises, `ad` for Anderson-Darling, and both to compute
-both.
+stochastic process and the covariance function (the values for $s_i$ in
+the integral equation). Additionally, the Fisher information matrix, by
+default, is estimated by the variance of the score function. To change
+this, you can set `hessian=TRUE` to estimate the Fisher information
+matrix using the Hessian instead. Finally, method is a string that
+defines the statistic to compute. Possible values are `cvm` for
+Cramer-von-Mises, `ad` for Anderson-Darling, and both to compute both.
 
 ``` r
 # Reproducible example
@@ -322,25 +321,25 @@ distribution functions for any general likelihood model. We provided
 tools to apply the test for Normal, Gamma, verify the assumptions in a
 linear model and generalized linear model. But this additional feature
 allows you to test if the sample come from any general likelihood model.
-For example, consider you have a sample of size $`n`$, such as
-$`X_1, X_2, \ldots, X_n`$, from a model with CDF of $`F(X;\theta)`$
-where $`\theta`$ contains $`p`$ parameters. Before running the test, at
-the minimum you need the followings:
+For example, consider you have a sample of size $n$, such as
+$X_1, X_2, \ldots, X_n$, from a model with CDF of $F(X;\theta)$ where
+$\theta$ contains $p$ parameters. Before running the test, at the
+minimum you need the followings:
 
 1)  A numeric vector of observations, `x`.
 
 2)  The probability inverse transformed or PIT values of the sample
     which ought to be a numeric vector with the same size as `x` and
-    with elements $`F^{-1}(X_{i};\theta)`$.
+    with elements $F^{-1}(X_{i};\theta)$.
 
-If $`\theta`$ is unknown, you also need to provide score function. This
-needs to be a matrix with $`n`$ rows and $`p`$ columns where each row
+If $\theta$ is unknown, you also need to provide score function. This
+needs to be a matrix with $n$ rows and $p$ columns where each row
 measures the score of each observation. Note that the values are
 computed as
-$`S(X_{i};\theta) = \frac{\partial}{\partial \theta} \log(f(X_{i};\theta))`$
-where $`f(X_{i};\theta)`$ is the probability density function. For sure,
-if $`\theta`$ is not known, this means you need to compute the MLE of
-$`\theta`$ to obtain item 1 and if needed the score function. The main
+$S(X_{i};\theta) = \frac{\partial}{\partial \theta} \log(f(X_{i};\theta))$
+where $f(X_{i};\theta)$ is the probability density function. For sure,
+if $\theta$ is not known, this means you need to compute the MLE of
+$\theta$ to obtain item 1 and if needed the score function. The main
 function to apply the GOF test in this case is `testYourModel`. The
 `precision` argument sets the precision needed to check if the col sums
 of score matrix are close enough to zero (log-likelihood is zero at
@@ -401,29 +400,29 @@ testYourModel(pit = pit.values, score = score.matrix)
 The calculation of the p-value for the goodness-of-fit test based on the
 empirical distribution function relies on computing the tail probability
 of a sum of chi-squared random variables. Specifically, after finding
-the eigenvalues $`\lambda_{1}, \lambda_{2}, \ldots, \lambda_{n}`$, we
-need to compute the p-value as follows:
-$`p-value = Pr\left(\sum_{i=1}^{n} \lambda_{i}Z_{i}^{2} \geq x\right)`$,
-where $`Z_{i}^{2}`$ is a random variable following $`\chi^{2}_{(1)}`$
-distribution and $`x`$ represents the statistic (cvm or ad). The
+the eigenvalues $\lambda_{1}, \lambda_{2}, \ldots, \lambda_{n}$, we need
+to compute the p-value as follows:
+$p-value = Pr\left(\sum_{i=1}^{n} \lambda_{i}Z_{i}^{2} \geq x\right)$,
+where $Z_{i}^{2}$ is a random variable following $\chi^{2}_{(1)}$
+distribution and $x$ represents the statistic (cvm or ad). The
 `CompQuadForm` package is being used for this purpose as it contains
 different methods for computing this tail probability. We were
 particularly interested in the `Farebrother` and `Imhof` methods.
 However, both the `Imhof` and `Farebrother` functions from the package
 encounter difficulties when computing the p-value if the statistic is in
-the very tail of the distribution or if some of the $`\lambda_{i}`$
-values are very small. They may produce negative p-values or p-values
-that are not accurate.
+the very tail of the distribution or if some of the $\lambda_{i}$ values
+are very small. They may produce negative p-values or p-values that are
+not accurate.
 
 Through numerical experimentation in the GLM-Gamma case and comparison
 between p-values generated by `Imhof` and `Farebrother`, we discovered a
 way to solve this problem. After computing the eigenvalues, we remove
-values that are extremely small (e.g., $`1 \times 10^{-15}`$). Then, we
+values that are extremely small (e.g., $1 \times 10^{-15}$). Then, we
 divide the remaining eigenvalues into two sets: one set contains values
-greater than $`\frac{\lambda_{1}}{2000}`$, and the other set contains
-values less than $`\frac{\lambda_{1}}{2000}`$. We then compute the sum
-of the eigenvalues in the second set and use this sum to compensate for
-the deleted eigenvalues, thereby correcting the cvm or ad statistic. The
+greater than $\frac{\lambda_{1}}{2000}$, and the other set contains
+values less than $\frac{\lambda_{1}}{2000}$. We then compute the sum of
+the eigenvalues in the second set and use this sum to compensate for the
+deleted eigenvalues, thereby correcting the cvm or ad statistic. The
 values of set one is used for p-value computation.
 
 During the computation of the p-value, we theoretically obtain both a
